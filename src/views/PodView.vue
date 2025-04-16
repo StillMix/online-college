@@ -1,5 +1,5 @@
 <template>
-  <div class="HomeView">
+  <div class="PodView">
     <Header />
   </div>
 </template>
@@ -9,7 +9,7 @@ import { defineComponent } from "vue";
 import Header from "@/components/Header.vue";
 
 export default defineComponent({
-  name: "HomeView",
+  name: "PodView",
   components: {
     Header,
   },
