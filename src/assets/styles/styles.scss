@@ -5,6 +5,13 @@
   font-size: 0.729vw;
   color: #fff;
   text-decoration: none;
+  outline: none;
+  border: none;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  background: transparent;
 }
 
 :root {
@@ -37,4 +44,31 @@
 :root {
   --font-family: "Jost", sans-serif;
   --second-family: "Futura PT", sans-serif;
+}
+
+
+
+*::-webkit-scrollbar {
+  width: 0.417vw;
+  height: 0.417vw;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 0.521vw;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0.521vw;
+  transition: background 0.2s;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
 }
