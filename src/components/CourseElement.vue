@@ -1,9 +1,10 @@
 <template>
   <div
+    ref="elementRef"
     class="courseElement"
     @click="toggleExpand"
     :style="{
-      height: isExpanded ? '362px' : '87px',
+      height: isExpanded ? '18.854vw' : '4.531vw',
     }"
   >
     <div class="courseElement__header">
@@ -53,7 +54,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, PropType, ref, onMounted } from "vue";
 
 interface CourseItemCourseContent {
   id: string;
@@ -67,6 +68,9 @@ interface CourseItemCourse {
   content: CourseItemCourseContent[];
 }
 
+// Создаем глобальную переменную для хранения ID открытого элемента
+let openedElementId: string | null = null;
+
 export default defineComponent({
   name: "CourseElement",
   props: {
@@ -75,16 +79,63 @@ export default defineComponent({
       required: true,
     },
   },
-  setup() {
+  setup(props) {
     const isExpanded = ref(false);
+    const elementRef = ref<HTMLElement | null>(null);
 
-    const toggleExpand = () => {
-      isExpanded.value = !isExpanded.value;
+    const toggleExpand = (event: Event) => {
+      // Останавливаем всплытие события
+      event.stopPropagation();
+
+      // Если текущий элемент уже открыт, просто закрываем его
+      if (isExpanded.value) {
+        isExpanded.value = false;
+        openedElementId = null;
+        return;
+      }
+
+      // Если открываем новый элемент
+      // Проверяем, был ли уже открыт какой-то элемент
+      const previouslyOpened = openedElementId;
+
+      // Устанавливаем текущий элемент как открытый
+      openedElementId = props.CourseVib.id;
+      isExpanded.value = true;
+
+      // Ищем и закрываем все другие элементы
+      if (previouslyOpened && previouslyOpened !== props.CourseVib.id) {
+        const allElements = document.querySelectorAll(".courseElement");
+        allElements.forEach((element) => {
+          const courseId = element.getAttribute("data-course-id");
+          if (courseId !== props.CourseVib.id) {
+            const vm = (element as any).__vue__;
+            if (vm && typeof vm.closeElement === "function") {
+              vm.closeElement();
+            }
+          }
+        });
+      }
     };
+
+    // Метод для принудительного закрытия элемента (вызывается извне)
+    const closeElement = () => {
+      isExpanded.value = false;
+    };
+
+    // После монтирования добавляем атрибут с ID для идентификации элемента
+    onMounted(() => {
+      if (elementRef.value) {
+        elementRef.value.setAttribute("data-course-id", props.CourseVib.id);
+        // Сохраняем ссылку на методы компонента в DOM-элементе
+        (elementRef.value as any).__vue__ = { closeElement };
+      }
+    });
 
     return {
       isExpanded,
       toggleExpand,
+      elementRef,
+      closeElement,
     };
   },
   methods: {
@@ -127,14 +178,14 @@ export default defineComponent({
 .courseElement {
   display: block;
   width: 100%;
-  border-radius: 10px;
+  border-radius: 0.521vw;
   background: #363636;
   text-decoration: none;
   transition: all 0.3s ease;
   overflow: hidden;
   position: relative;
-  padding: 0 30px;
-  margin-bottom: 15px;
+  padding: 0 1.563vw;
+  margin-bottom: 0.781vw;
   cursor: pointer;
 
   &:hover {
@@ -143,24 +194,48 @@ export default defineComponent({
   }
   &__coursesscroll {
     overflow-y: auto;
-    overflow-x: none;
-    height: 245px;
+    overflow-x: hidden;
+    height: 12.76vw;
+
+    /* Явное определение стилей скроллбара для этого элемента */
+    &::-webkit-scrollbar {
+      width: 0.417vw !important;
+      height: 0.417vw !important;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05) !important;
+      border-radius: 0.521vw !important;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2) !important;
+      border-radius: 0.521vw !important;
+      transition: background 0.2s !important;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.4) !important;
+    }
+
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05) !important;
   }
   &__courses-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
-    padding-bottom: 15px;
+    gap: 0.521vw;
+    margin-top: 0.781vw;
+    padding-bottom: 0.781vw;
   }
 
   &__courses {
-    border-radius: 140px;
+    border-radius: 7.292vw;
     width: 100%;
-    height: 41px;
+    height: 2.135vw;
     background: #404040;
     display: flex;
-    padding: 0 30px;
+    padding: 0 1.563vw;
     align-items: center;
     justify-content: space-between;
     text-decoration: none;
@@ -168,18 +243,18 @@ export default defineComponent({
 
     &:hover {
       background: #4c4c4c;
-      transform: translateX(5px);
+      transform: translateX(0.26vw);
     }
 
     &__title {
       font-family: var(--font-family);
       font-weight: 400;
-      font-size: 18px;
+      font-size: 0.938vw;
       color: #fff;
     }
     &__img {
-      width: 24px;
-      height: 24px;
+      width: 1.25vw;
+      height: 1.25vw;
     }
   }
 
@@ -188,19 +263,19 @@ export default defineComponent({
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    height: 87px;
+    height: 4.531vw;
     &__info {
       &__title {
         font-family: var(--font-family);
         font-weight: 500;
-        font-size: 24px;
+        font-size: 1.25vw;
         color: #fff;
       }
 
       &__subtitle {
         font-family: var(--font-family);
         font-weight: 400;
-        font-size: 18px;
+        font-size: 0.938vw;
         line-height: 111%;
         color: #fff;
         opacity: 0.5;
@@ -210,7 +285,7 @@ export default defineComponent({
     &__progress {
       font-family: var(--font-family);
       font-weight: 500;
-      font-size: 24px;
+      font-size: 1.25vw;
       text-align: right;
       color: rgba(255, 255, 255, 0.3);
     }
@@ -220,7 +295,7 @@ export default defineComponent({
     position: absolute;
     bottom: 0;
     left: 0;
-    height: 3px;
+    height: 0.156vw;
     transition: width 0.5s ease, background-color 0.5s ease;
   }
 }

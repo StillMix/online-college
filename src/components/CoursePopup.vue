@@ -40,12 +40,23 @@
                 {{ courseVib?.titleForCourse || "" }}
               </p>
             </transition>
-            <CourseElement
-              v-for="item in courseVib.course"
-              :key="item.id"
-              :CourseVib="item"
-            >
-            </CourseElement>
+            <div class="courseVib__content__info__contentcours">
+              <p class="courseVib__content__info__contentcours__title">
+                Темы курса
+              </p>
+              <provide
+                class="courseVib__content__info__cours"
+                key="expandedElementId"
+                :value="expandedElementId"
+              >
+                <CourseElement
+                  v-for="item in courseVib.course"
+                  :key="item.id"
+                  :CourseVib="item"
+                >
+                </CourseElement>
+              </provide>
+            </div>
             <transition-group
               name="fade-list"
               tag="div"
@@ -187,7 +198,7 @@ export default defineComponent({
     const isClosing = ref(false);
     const token = ref<string | null>(localStorage.getItem("token"));
     const courseAdded = ref(false);
-
+    const expandedElementId = ref("");
     // Проверка, добавлен ли уже курс
     const checkIfCourseAdded = () => {
       if (!props.courseVib) return false;
@@ -312,6 +323,7 @@ export default defineComponent({
       handleClickClose,
       finishLeaveAnimation,
       getIconSrc,
+      expandedElementId,
       geticonTypeSrc,
       addCourseToStorage,
     };
@@ -349,6 +361,46 @@ export default defineComponent({
       position: relative;
       display: flex;
       flex-direction: column;
+      &__contentcours {
+        width: 100%;
+        margin-top: 1.042vw;
+        &__title {
+          font-family: var(--font-family);
+          font-weight: 400;
+          font-size: 1.042vw;
+          line-height: 125%;
+          color: #fff;
+          opacity: 0.8;
+        }
+      }
+      &__cours {
+        display: block;
+        margin-top: 1.042vw;
+        height: 27.969vw;
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        /* Явное определение стилей скроллбара для этого элемента */
+        &::-webkit-scrollbar {
+          width: 0.417vw !important;
+          height: 0.417vw !important;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.05) !important;
+          border-radius: 0.521vw !important;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.2) !important;
+          border-radius: 0.521vw !important;
+          transition: background 0.2s !important;
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.4) !important;
+        }
+      }
       &__conbtn {
         width: 100%;
         display: flex;
@@ -534,11 +586,11 @@ export default defineComponent({
 }
 .slide-fade-enter-from {
   opacity: 0;
-  transform: translateY(20px) scale(0.95);
+  transform: translateY(1.042vw) scale(0.95);
 }
 .slide-fade-leave-to {
   opacity: 0;
-  transform: translateY(20px) scale(0.95);
+  transform: translateY(1.042vw) scale(0.95);
 }
 
 // Анимация появления сверху вниз
@@ -551,11 +603,11 @@ export default defineComponent({
 }
 .fade-down-enter-from {
   opacity: 0;
-  transform: translateY(-20px);
+  transform: translateY(-1.042vw);
 }
 .fade-down-leave-to {
   opacity: 0;
-  transform: translateY(-20px);
+  transform: translateY(-1.042vw);
 }
 
 // Анимация появления снизу вверх
@@ -568,11 +620,11 @@ export default defineComponent({
 }
 .fade-up-enter-from {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(1.042vw);
 }
 .fade-up-leave-to {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(1.042vw);
 }
 
 // Анимация появления справа
@@ -584,11 +636,11 @@ export default defineComponent({
 }
 .fade-right-enter-from {
   opacity: 0;
-  transform: translateX(40px);
+  transform: translateX(2.083vw);
 }
 .fade-right-leave-to {
   opacity: 0;
-  transform: translateX(40px);
+  transform: translateX(2.083vw);
 }
 
 // Анимация для списка элементов
@@ -601,11 +653,11 @@ export default defineComponent({
 }
 .fade-list-enter-from {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(1.042vw);
 }
 .fade-list-leave-to {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(1.042vw);
 }
 
 // Анимация карточек
@@ -621,7 +673,7 @@ export default defineComponent({
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(0.521vw);
   }
   to {
     opacity: 1;
@@ -636,7 +688,7 @@ export default defineComponent({
   }
   to {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-0.521vw);
   }
 }
 
