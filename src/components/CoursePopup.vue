@@ -72,10 +72,11 @@
                   >СНАЧАЛА ВЫПОЛНИТЕ ВХОД?</router-link
                 >
               </transition>
-              <transition v-if="token" name="fade-up" appear>
+              <transition v-if="token && !courseAdded" name="fade-up" appear>
                 <button
                   v-if="contentVisible"
                   class="courseVib__content__info__conbtn__open courseVib__content__info__conbtn__open--green pulse-btn"
+                  @click="addCourseToStorage"
                 >
                   НАЧАТЬ ИЗУЧЕНИЕ КУРСА
                 </button>
@@ -85,6 +86,7 @@
                   v-if="contentVisible"
                   @click="handleClickClose"
                   class="courseVib__content__info__conbtn__close"
+                  :class="{ 'full-width': courseAdded }"
                   type="button"
                 >
                   НАЗАД
@@ -158,6 +160,52 @@ export default defineComponent({
     const contentVisible = ref(false);
     const isClosing = ref(false);
     const token = ref<string | null>(localStorage.getItem("token"));
+    const courseAdded = ref(false);
+
+    // Проверка, добавлен ли уже курс
+    const checkIfCourseAdded = () => {
+      if (!props.courseVib) return false;
+
+      const userCoursesStr = localStorage.getItem("userCourses");
+      if (!userCoursesStr) return false;
+
+      try {
+        const userCourses = JSON.parse(userCoursesStr);
+        return userCourses.some(
+          (course: CourseItem) => course.id === props.courseVib?.id
+        );
+      } catch (e) {
+        console.error("Ошибка при парсинге данных курсов:", e);
+        return false;
+      }
+    };
+
+    // Добавление курса в localStorage
+    const addCourseToStorage = () => {
+      if (!props.courseVib || !token.value) return;
+
+      let userCourses: CourseItem[] = [];
+      const userCoursesStr = localStorage.getItem("userCourses");
+
+      if (userCoursesStr) {
+        try {
+          userCourses = JSON.parse(userCoursesStr);
+        } catch (e) {
+          console.error("Ошибка при парсинге данных курсов:", e);
+          userCourses = [];
+        }
+      }
+
+      // Проверяем, нет ли уже такого курса
+      if (!userCourses.some((course) => course.id === props.courseVib?.id)) {
+        userCourses.push(props.courseVib);
+        localStorage.setItem("userCourses", JSON.stringify(userCourses));
+      }
+
+      // Устанавливаем флаг, что курс добавлен
+      courseAdded.value = true;
+    };
+
     // Отслеживание изменений открытия/закрытия
     watch(
       () => props.open,
@@ -168,6 +216,9 @@ export default defineComponent({
           contentVisible.value = true;
           isClosing.value = false;
           document.body.style.overflow = "hidden";
+
+          // Проверяем, добавлен ли курс
+          courseAdded.value = checkIfCourseAdded();
         } else if (!isClosing.value) {
           // При закрытии - сначала скрываем контент (с анимацией)
           contentVisible.value = false;
@@ -234,10 +285,12 @@ export default defineComponent({
       isVisible,
       contentVisible,
       isClosing,
+      courseAdded,
       handleClickClose,
       finishLeaveAnimation,
       getIconSrc,
       geticonTypeSrc,
+      addCourseToStorage,
     };
   },
 });
