@@ -13,7 +13,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-
+import { CourseData } from "./data/courseData";
+localStorage.setItem("courseData", JSON.stringify(CourseData));
 export default defineComponent({
   name: "App",
 });
