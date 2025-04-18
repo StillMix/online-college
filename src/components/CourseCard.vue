@@ -35,10 +35,16 @@ interface CourseItemInfo {
   subtitle: string;
 }
 
-interface CourseItemCourse {
+interface CourseItemCourseContent {
   id: string;
   name: string;
   passing: string;
+}
+
+interface CourseItemCourse {
+  id: string;
+  name: string;
+  content: CourseItemCourseContent[];
 }
 
 interface CourseItem {

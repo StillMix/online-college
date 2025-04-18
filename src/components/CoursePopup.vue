@@ -40,6 +40,12 @@
                 {{ courseVib?.titleForCourse || "" }}
               </p>
             </transition>
+            <CourseElement
+              v-for="item in courseVib.course"
+              :key="item.id"
+              :CourseVib="item"
+            >
+            </CourseElement>
             <transition-group
               name="fade-list"
               tag="div"
@@ -125,6 +131,8 @@ import {
   onBeforeUnmount,
 } from "vue";
 
+import CourseElement from "@/components/CourseElement.vue";
+
 interface CourseItemInfo {
   id: string;
   title: string;
@@ -159,6 +167,9 @@ interface CourseItem {
 
 export default defineComponent({
   name: "CourseVibPopup",
+  components: {
+    CourseElement,
+  },
   props: {
     open: {
       type: Boolean,
@@ -185,10 +196,8 @@ export default defineComponent({
       if (!userCoursesStr) return false;
 
       try {
-        const userCourses = JSON.parse(userCoursesStr);
-        return userCourses.some(
-          (course: CourseItem) => course.id === props.courseVib?.id
-        );
+        const userCourses: string[] = JSON.parse(userCoursesStr);
+        return userCourses.includes(props.courseVib.id);
       } catch (e) {
         console.error("Ошибка при парсинге данных курсов:", e);
         return false;
@@ -199,7 +208,7 @@ export default defineComponent({
     const addCourseToStorage = () => {
       if (!props.courseVib || !token.value) return;
 
-      let userCourses: CourseItem[] = [];
+      let userCourses: string[] = []; // Массив строк (id)
       const userCoursesStr = localStorage.getItem("userCourses");
 
       if (userCoursesStr) {
@@ -211,16 +220,15 @@ export default defineComponent({
         }
       }
 
-      // Проверяем, нет ли уже такого курса
-      if (!userCourses.some((course) => course.id === props.courseVib?.id)) {
-        userCourses.push(props.courseVib);
+      // Проверяем, нет ли уже такого id
+      if (!userCourses.includes(props.courseVib.id)) {
+        userCourses.push(props.courseVib.id);
         localStorage.setItem("userCourses", JSON.stringify(userCourses));
       }
 
       // Устанавливаем флаг, что курс добавлен
       courseAdded.value = true;
     };
-
     // Отслеживание изменений открытия/закрытия
     watch(
       () => props.open,
