@@ -40,7 +40,10 @@
                 {{ courseVib?.titleForCourse || "" }}
               </p>
             </transition>
-            <div class="courseVib__content__info__contentcours">
+            <div
+              v-if="courseAdded"
+              class="courseVib__content__info__contentcours"
+            >
               <p class="courseVib__content__info__contentcours__title">
                 Темы курса
               </p>
