@@ -35,6 +35,12 @@ interface CourseItemInfo {
   subtitle: string;
 }
 
+interface CourseItemCourse {
+  id: string;
+  name: string;
+  passing: string;
+}
+
 interface CourseItem {
   id: string;
   title: string;
@@ -46,6 +52,7 @@ interface CourseItem {
   icontype: string;
   titleForCourse: string;
   info: CourseItemInfo[];
+  course: CourseItemCourse[];
 }
 
 export default defineComponent({

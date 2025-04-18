@@ -32,7 +32,7 @@
                 {{ courseVib?.title || "" }}
               </p>
             </transition>
-            <transition name="fade-down" appear>
+            <transition name="fade-down" v-if="!courseAdded" appear>
               <p
                 class="courseVib__content__info__subtitle"
                 v-if="contentVisible && courseVib"
@@ -44,7 +44,9 @@
               name="fade-list"
               tag="div"
               class="courseVib__content__info__textcon"
-              v-if="courseVib?.info?.length > 0 && contentVisible"
+              v-if="
+                courseVib?.info?.length > 0 && contentVisible && !courseAdded
+              "
             >
               <p class="courseVib__content__info__textcon__title" key="title">
                 ЧТО ВЫ УЗНАЕТЕ?
@@ -129,6 +131,18 @@ interface CourseItemInfo {
   subtitle: string;
 }
 
+interface CourseItemCourseContent {
+  id: string;
+  name: string;
+  passing: string;
+}
+
+interface CourseItemCourse {
+  id: string;
+  name: string;
+  content: CourseItemCourseContent[];
+}
+
 interface CourseItem {
   id: string;
   title: string;
@@ -140,6 +154,7 @@ interface CourseItem {
   icontype: string;
   titleForCourse: string;
   info: CourseItemInfo[];
+  course: CourseItemCourse[];
 }
 
 export default defineComponent({
@@ -484,6 +499,9 @@ export default defineComponent({
   }
 }
 
+.full-width {
+  width: 100%;
+}
 // Анимации
 // Общая анимация появления/исчезновения
 .fade-enter-active {
