@@ -12,12 +12,14 @@
         />
       </div>
       <div v-else class="CourseView__empty">
-        <img
-          class="CourseView__empty-icon"
-          src="../assets/coursevoprIcon.svg"
-          alt="Нет курсов"
-        />
-        <p class="CourseView__empty-text">У вас ещё нет выбранных курсов</p>
+        <div class="CourseView__empty__con">
+          <img
+            class="CourseView__empty__con-icon"
+            src="../assets/courseNone.svg"
+            alt="Нет курсов"
+          />
+          <p class="CourseView__empty__con-text">Курсы не найдены</p>
+        </div>
         <router-link to="/" class="CourseView__find-button"
           >Найти курсы</router-link
         >
@@ -179,27 +181,33 @@ export default defineComponent({
     justify-content: center;
     min-height: 20vw;
 
-    &-icon {
-      width: 7vw;
-      height: 7vw;
-      opacity: 0.3;
-      margin-bottom: 1vw;
-    }
+    &__con {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 2.604vw;
+      &-icon {
+        width: 2.604vw;
+        height: 2.604vw;
+        opacity: 0.3;
+      }
 
-    &-text {
-      font-family: var(--font-family);
-      font-weight: 400;
-      font-size: 1.042vw;
-      color: rgba(255, 255, 255, 0.6);
-      margin-bottom: 1.5vw;
+      &-text {
+        font-family: var(--font-family);
+        font-weight: 500;
+        font-size: 1.042vw;
+        color: #fff;
+        opacity: 0.3;
+      }
     }
   }
 
   &__find-button {
+    margin-top: 0.521vw;
     border-radius: 7.292vw;
     width: 10vw;
     height: 2.604vw;
-    background: #39b874;
+    background: rgba(8, 220, 207, 0.8);
     font-family: var(--font-family);
     font-weight: 400;
     font-size: 0.938vw;
@@ -209,11 +217,12 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+    cursor: pointer;
 
     &:hover {
-      background: #45cc83;
+      background: rgba(7, 201, 188, 0.8);
       transform: translateY(-0.104vw);
-      box-shadow: 0 0.26vw 0.781vw rgba(57, 184, 116, 0.4);
+      box-shadow: 0 0.26vw 0.781vw rgba(8, 220, 207, 0.4);
     }
 
     &:active {
