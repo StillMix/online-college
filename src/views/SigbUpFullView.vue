@@ -9,7 +9,7 @@
           <p class="signUpFull__popup__form__left__subtitle">
             Выполните последние шаги перед созданием аккаунта!
           </p>
-          <label class="signUpFull__popup__form__left__label">
+          <label class="signUpFull__popup__form__left__label animate-field">
             <loginIcon
               class="signUpFull__popup__form__left__label__img"
               color="#484848"
@@ -22,7 +22,7 @@
               placeholder="Имя"
             />
           </label>
-          <label class="signUpFull__popup__form__left__label">
+          <label class="signUpFull__popup__form__left__label animate-field">
             <emailIcon
               class="signUpFull__popup__form__left__label__img"
               color="#484848"
@@ -35,23 +35,32 @@
               placeholder="Введите код из письма"
             />
           </label>
-          <button class="signUpFull__popup__form__left__btn" type="submit">
+          <button
+            class="signUpFull__popup__form__left__btn pulse-animation"
+            type="submit"
+          >
             Сохранить и продолжить
           </button>
         </div>
-        <label class="signUpFull__popup__form__label">
-          <template v-if="previewImage">
+        <label class="signUpFull__popup__form__label image-upload-animation">
+          <transition name="fade-scale">
             <img
+              v-if="previewImage"
               :src="previewImage"
               class="signUpFull__popup__form__label__preview"
             />
-          </template>
-          <template v-else>
-            <inputImg color="#484848" width="2.083vw" height="2.083vw" />
-            <p class="signUpFull__popup__form__label__title">
-              Загрузите изображение (необязательно)
-            </p>
-          </template>
+            <div v-else class="upload-placeholder">
+              <inputImg
+                color="#484848"
+                width="2.083vw"
+                height="2.083vw"
+                class="floating-icon"
+              />
+              <p class="signUpFull__popup__form__label__title">
+                Загрузите изображение (необязательно)
+              </p>
+            </div>
+          </transition>
           <input
             type="file"
             class="signUpFull__popup__form__label__input"
@@ -61,11 +70,11 @@
         </label>
       </form>
     </div>
-    <div class="signUpFull__emailsucc">
+    <div class="signUpFull__emailsucc slide-in-animation">
       <div class="signUpFull__emailsucc__textcon">
         <p class="signUpFull__emailsucc__textcon__title">
           <emailIcon
-            class="signUpFull__emailsucc__textcon__title__img"
+            class="signUpFull__emailsucc__textcon__title__img rotate-icon"
             color="white"
             width="1.25vw"
             height="1.25vw"
@@ -81,7 +90,7 @@
       <button
         class="signUpFull__emailsucc__btn"
         @click="handleRefresh"
-        :class="{ refreshing: isRefreshing }"
+        :class="{ refreshing: isRefreshing, 'shine-button': !isRefreshing }"
         :disabled="isRefreshing"
       >
         {{ isRefreshing ? "Обновление..." : "Обновить" }}
@@ -91,7 +100,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import AppLoader from "@/components/Loader.vue";
 import inputImg from "../assets/icons/inputImg.vue";
@@ -159,6 +168,16 @@ export default defineComponent({
       }, 4000);
     };
 
+    // Применяем поочередную анимацию к полям ввода
+    onMounted(() => {
+      const animateFields = document.querySelectorAll(".animate-field");
+      animateFields.forEach((field, index) => {
+        setTimeout(() => {
+          field.classList.add("animate-in");
+        }, 300 + index * 200);
+      });
+    });
+
     return {
       isLoading,
       isSubmitting,
@@ -186,6 +205,7 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   &__emailsucc {
     display: flex;
     padding: 1.042vw;
@@ -197,8 +217,56 @@ export default defineComponent({
     background: #2a2a2a;
     overflow: hidden;
     margin-top: 1.042vw;
+    position: relative;
+
+    /* Новая анимация для блока emailsucc */
+    &.slide-in-animation {
+      opacity: 0;
+      transform: translateY(1.5vw);
+      animation: slideInUp 0.8s ease-out forwards;
+      animation-delay: 0.6s;
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(1.5vw);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Добавляем эффект подсветки границ */
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      box-shadow: 0 0 0 0.052vw rgba(57, 184, 116, 0);
+      border-radius: 0.521vw;
+      transition: box-shadow 0.5s ease;
+      z-index: 0;
+      animation: glowBorder 2s infinite alternate;
+    }
+
+    @keyframes glowBorder {
+      0% {
+        box-shadow: 0 0 0 0.052vw rgba(57, 184, 116, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0.052vw rgba(57, 184, 116, 0.5);
+      }
+    }
+
     &__textcon {
       width: 32.552vw;
+      position: relative;
+      z-index: 1;
+
       &__title {
         display: flex;
         align-items: center;
@@ -207,7 +275,29 @@ export default defineComponent({
         font-weight: 400;
         font-size: 0.938vw;
         color: var(--colors-default-static-static-100);
+
+        /* Анимация для иконки в заголовке */
+        &__img.rotate-icon {
+          animation: rotateAnimation 5s infinite alternate;
+          transform-origin: center;
+        }
+
+        @keyframes rotateAnimation {
+          0% {
+            transform: rotate(0deg);
+          }
+          25% {
+            transform: rotate(-10deg);
+          }
+          75% {
+            transform: rotate(10deg);
+          }
+          100% {
+            transform: rotate(0deg);
+          }
+        }
       }
+
       &__subtitle {
         font-family: var(--font-family);
         font-weight: 400;
@@ -215,8 +305,37 @@ export default defineComponent({
         line-height: 143%;
         color: var(--colors-default-static-static-100);
         opacity: 0.5;
+        position: relative;
+        overflow: hidden;
+
+        /* Анимация подсветки текста */
+        &::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 50%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+          0% {
+            left: -100%;
+          }
+          100% {
+            left: 100%;
+          }
+        }
       }
     }
+
     &__btn {
       border-radius: 7.292vw;
       width: 9.271vw;
@@ -229,6 +348,41 @@ export default defineComponent({
       color: var(--colors-default-static-static-200);
       transition: all 0.3s ease;
       cursor: pointer;
+      position: relative;
+      z-index: 1;
+
+      /* Новая анимация для кнопки обновления */
+      &.shine-button {
+        overflow: hidden;
+
+        &::before {
+          content: "";
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          transform: rotate(30deg);
+          animation: shineEffect 6s infinite;
+          z-index: -1;
+        }
+
+        @keyframes shineEffect {
+          0% {
+            transform: rotate(30deg) translateX(-100%);
+          }
+          20%,
+          100% {
+            transform: rotate(30deg) translateX(100%);
+          }
+        }
+      }
 
       &:hover:not(:disabled) {
         transform: scale(1.05);
@@ -259,6 +413,7 @@ export default defineComponent({
       }
     }
   }
+
   &__popup {
     position: relative;
     border-radius: 0.521vw;
@@ -269,20 +424,50 @@ export default defineComponent({
     padding: 2.083vw;
     box-shadow: 0 0.521vw 1.302vw rgba(0, 0, 0, 0.5);
     animation: fadeIn 0.8s ease-out;
+
+    /* Добавляем эффект тени */
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 0.521vw;
+      box-shadow: inset 0 0 1.042vw rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+    }
+
     &__form {
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      position: relative;
+      z-index: 1;
+
       &__left {
         width: 21.302vw;
+
         &__title {
           font-family: var(--font-family);
           font-weight: 500;
           font-size: 1.25vw;
           color: var(--colors-default-static-static-100);
+          position: relative;
+          display: inline-block;
+
+          @keyframes growLine {
+            from {
+              width: 0;
+            }
+            to {
+              width: 100%;
+            }
+          }
         }
+
         &__subtitle {
           font-family: var(--font-family);
           font-weight: 400;
@@ -290,7 +475,13 @@ export default defineComponent({
           color: var(--colors-default-static-static-100);
           opacity: 0.5;
           margin: 0;
+          transition: opacity 0.5s ease;
+
+          &:hover {
+            opacity: 0.8;
+          }
         }
+
         &__label {
           margin-top: 1.042vw;
           width: 100%;
@@ -298,10 +489,22 @@ export default defineComponent({
           position: relative;
           display: flex;
           align-items: center;
+          opacity: 0;
+          transform: translateY(0.5vw);
+          transition: all 0.5s ease-out;
+
+          /* Анимация для полей ввода */
+          &.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+          }
+
           &__img {
             position: absolute;
             left: 1.354vw;
+            transition: transform 0.3s ease;
           }
+
           &__input {
             border-radius: 7.292vw;
             width: 21.302vw;
@@ -312,15 +515,34 @@ export default defineComponent({
             font-size: 0.938vw;
             color: var(--colors-default-static-static-100);
             padding-left: 2.813vw;
+            transition: all 0.3s ease;
+            border: 0.052vw solid transparent;
+
+            &:focus {
+              border-color: #39b874;
+              box-shadow: 0 0 0.521vw rgba(57, 184, 116, 0.3);
+              background: #3a3a3a;
+            }
+
+            &:focus + .signUpFull__popup__form__left__label__img {
+              transform: scale(1.1) rotate(-10deg);
+            }
+
             &::placeholder {
               font-family: var(--font-family);
               font-weight: 400;
               font-size: 0.938vw;
               color: var(--colors-default-static-static-100);
               opacity: 0.3;
+              transition: opacity 0.3s ease;
+            }
+
+            &:focus::placeholder {
+              opacity: 0.1;
             }
           }
         }
+
         &__btn {
           border-radius: 7.292vw;
           width: 100%;
@@ -337,6 +559,46 @@ export default defineComponent({
           margin-top: 3.177vw;
           cursor: pointer;
           transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+
+          /* Новая анимация пульсации для кнопки */
+          &.pulse-animation {
+            animation: buttonPulse 2s infinite;
+          }
+
+          @keyframes buttonPulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(57, 184, 116, 0.7);
+            }
+            70% {
+              box-shadow: 0 0 0 0.521vw rgba(57, 184, 116, 0);
+            }
+            100% {
+              box-shadow: 0 0 0 0 rgba(57, 184, 116, 0);
+            }
+          }
+
+          /* Эффект волны при нажатии */
+          &::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0.521vw;
+            height: 0.521vw;
+            background: rgba(255, 255, 255, 0.7);
+            opacity: 0;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            transition: all 0.5s ease;
+          }
+
+          &:active::after {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(20);
+            transition: all 0s;
+          }
 
           &:hover {
             background: #45cc83;
@@ -348,6 +610,7 @@ export default defineComponent({
           }
         }
       }
+
       &__label {
         background: #363636;
         border-radius: 0.521vw;
@@ -362,8 +625,28 @@ export default defineComponent({
         cursor: pointer;
         transition: all 0.3s ease;
 
+        /* Новая анимация для блока загрузки изображения */
+        &.image-upload-animation {
+          animation: float 3s ease-in-out infinite;
+          box-shadow: 0 0.521vw 1.042vw rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes float {
+          0% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-0.417vw);
+          }
+          100% {
+            transform: translateY(0px);
+          }
+        }
+
         &:hover {
           background: #424242;
+          transform: scale(1.02);
+          box-shadow: 0 0.521vw 1.563vw rgba(0, 0, 0, 0.3);
         }
 
         &__title {
@@ -374,7 +657,14 @@ export default defineComponent({
           color: var(--colors-default-static-static-100);
           opacity: 0.3;
           width: 10.313vw;
+          margin-top: 0.781vw;
+          transition: opacity 0.3s ease;
         }
+
+        &:hover &__title {
+          opacity: 0.6;
+        }
+
         &__input {
           position: absolute;
           width: 100%;
@@ -384,15 +674,29 @@ export default defineComponent({
           visibility: hidden;
           cursor: pointer;
         }
+
         &__preview {
           width: 100%;
           height: 100%;
           object-fit: cover;
           object-position: center;
+          animation: zoomIn 0.5s ease-out;
+        }
+
+        @keyframes zoomIn {
+          from {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
         }
       }
     }
   }
+
   &__img {
     margin-bottom: 2.083vw;
     width: 8.854vw;
@@ -410,5 +714,44 @@ export default defineComponent({
       }
     }
   }
+}
+
+/* Дополнительные анимации */
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-icon {
+  animation: floatingIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatingIcon {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-0.26vw) rotate(-5deg);
+  }
+  75% {
+    transform: translateY(0.26vw) rotate(5deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* Анимации для переходов */
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: all 0.5s;
+}
+
+.fade-scale-enter-from,
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
 }
 </style>

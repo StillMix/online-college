@@ -13,7 +13,12 @@
         </p>
         <form class="signUp__popup__form" @submit.prevent="handleSubmit">
           <label class="signUp__popup__form__label">
-            <loginIcon color="#484848" width="1.25vw" height="1.25vw" />
+            <loginIcon
+              class="signUp__popup__form__label__img"
+              color="#484848"
+              width="1.25vw"
+              height="1.25vw"
+            />
             <input
               placeholder="Логин"
               class="signUp__popup__form__label__input"
@@ -21,7 +26,12 @@
             />
           </label>
           <label class="signUp__popup__form__label">
-            <emailIcon color="#484848" width="1.25vw" height="1.25vw" />
+            <emailIcon
+              class="signUp__popup__form__label__img"
+              color="#484848"
+              width="1.25vw"
+              height="1.25vw"
+            />
             <input
               placeholder="Почта"
               class="signUp__popup__form__label__input"
@@ -98,9 +108,6 @@ export default defineComponent({
 
       // Имитация процесса входа с задержкой в 1000 секунд
       setTimeout(() => {
-        // Сохраняем токен в localStorage
-        localStorage.setItem("token", "вошли");
-
         // Перенаправляем на главную страницу
         router.push("/signupfull");
       }, 4000);

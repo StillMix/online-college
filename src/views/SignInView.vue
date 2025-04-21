@@ -13,7 +13,12 @@
         </p>
         <form class="signIn__popup__form" @submit.prevent="handleSubmit">
           <label class="signIn__popup__form__label">
-            <emailIcon color="#484848" width="1.25vw" height="1.25vw" />
+            <emailIcon
+              class="signIn__popup__form__label__img"
+              color="#484848"
+              width="1.25vw"
+              height="1.25vw"
+            />
             <input
               placeholder="Почта/логин"
               class="signIn__popup__form__label__input"
