@@ -47,6 +47,13 @@ const routes: Array<RouteRecordRaw> = [
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/SettingsView.vue"),
   },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "not-found",
+    meta: { transition: "slide" },
+    component: () =>
+      import(/* webpackChunkName: "not-found" */ "../views/NotFoundView.vue"),
+  },
 ];
 
 const router = createRouter({
