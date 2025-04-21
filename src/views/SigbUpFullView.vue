@@ -40,11 +40,24 @@
           </button>
         </div>
         <label class="signUpFull__popup__form__label">
-          <inputImg color="#484848" width="2.083vw" height="2.083vw" />
-          <p class="signUpFull__popup__form__label__title">
-            Загрузите изображение (необязательно)
-          </p>
-          <input type="file" class="signUpFull__popup__form__label__input" />
+          <template v-if="previewImage">
+            <img
+              :src="previewImage"
+              class="signUpFull__popup__form__label__preview"
+            />
+          </template>
+          <template v-else>
+            <inputImg color="#484848" width="2.083vw" height="2.083vw" />
+            <p class="signUpFull__popup__form__label__title">
+              Загрузите изображение (необязательно)
+            </p>
+          </template>
+          <input
+            type="file"
+            class="signUpFull__popup__form__label__input"
+            accept="image/*"
+            @change="handleImageSelect"
+          />
         </label>
       </form>
     </div>
@@ -65,7 +78,14 @@
           нажмите кнопку обновить, что находится справа
         </p>
       </div>
-      <button class="signUpFull__emailsucc__btn">Обновить</button>
+      <button
+        class="signUpFull__emailsucc__btn"
+        @click="handleRefresh"
+        :class="{ refreshing: isRefreshing }"
+        :disabled="isRefreshing"
+      >
+        {{ isRefreshing ? "Обновление..." : "Обновить" }}
+      </button>
     </div>
   </div>
 </template>
@@ -91,6 +111,8 @@ export default defineComponent({
     const login = ref("");
     const email = ref("");
     const password = ref("");
+    const previewImage = ref<string | null>(null);
+    const isRefreshing = ref(false);
     const router = useRouter();
 
     // Имитация начальной загрузки приложения
@@ -98,11 +120,36 @@ export default defineComponent({
       isLoading.value = false;
     }, 10);
 
+    // Обработчик выбора изображения
+    const handleImageSelect = (event: Event) => {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files.length > 0) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target) {
+            previewImage.value = e.target.result as string;
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    // Обработчик нажатия на кнопку обновить
+    const handleRefresh = () => {
+      isRefreshing.value = true;
+
+      // Имитация запроса обновления - через 3 секунды возвращаем состояние кнопки
+      setTimeout(() => {
+        isRefreshing.value = false;
+      }, 3000);
+    };
+
     // Обработчик формы входа
     const handleSubmit = () => {
       isSubmitting.value = true;
 
-      // Имитация процесса входа с задержкой в 1000 секунд
+      // Имитация процесса входа с задержкой в 4 секунды
       setTimeout(() => {
         // Сохраняем токен в localStorage
         localStorage.setItem("token", "вошли");
@@ -122,6 +169,10 @@ export default defineComponent({
       inputImg,
       handleSubmit,
       loginIcon,
+      previewImage,
+      handleImageSelect,
+      isRefreshing,
+      handleRefresh,
     };
   },
 });
@@ -176,6 +227,36 @@ export default defineComponent({
       font-size: 0.938vw;
       text-align: center;
       color: var(--colors-default-static-static-200);
+      transition: all 0.3s ease;
+      cursor: pointer;
+
+      &:hover:not(:disabled) {
+        transform: scale(1.05);
+        box-shadow: 0 0.26vw 0.521vw rgba(255, 255, 255, 0.2);
+      }
+
+      &:active:not(:disabled) {
+        transform: scale(0.98);
+      }
+
+      &.refreshing {
+        background: #39b874;
+        color: #fff;
+        cursor: wait;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.8;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.8;
+        }
+      }
     }
   }
   &__popup {
@@ -254,6 +335,17 @@ export default defineComponent({
           text-align: center;
           color: var(--colors-default-static-static-100);
           margin-top: 3.177vw;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &:hover {
+            background: #45cc83;
+            transform: translateY(-0.104vw);
+          }
+
+          &:active {
+            transform: translateY(0.052vw);
+          }
         }
       }
       &__label {
@@ -267,6 +359,13 @@ export default defineComponent({
         align-items: center;
         justify-content: center;
         position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: #424242;
+        }
+
         &__title {
           font-family: var(--font-family);
           font-weight: 400;
@@ -283,6 +382,13 @@ export default defineComponent({
           top: 0;
           left: 0;
           visibility: hidden;
+          cursor: pointer;
+        }
+        &__preview {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
         }
       }
     }
