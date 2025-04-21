@@ -48,6 +48,13 @@ const routes: Array<RouteRecordRaw> = [
       import(/* webpackChunkName: "about" */ "../views/SettingsView.vue"),
   },
   {
+    path: "/admin",
+    name: "admin",
+    meta: { transition: "slide" },
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/AdminView.vue"),
+  },
+  {
     path: "/:pathMatch(.*)*",
     name: "not-found",
     meta: { transition: "slide" },
