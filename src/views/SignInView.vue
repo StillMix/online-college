@@ -13,11 +13,7 @@
         </p>
         <form class="signIn__popup__form" @submit.prevent="handleSubmit">
           <label class="signIn__popup__form__label">
-            <img
-              class="signIn__popup__form__label__img"
-              src="../assets/email.svg"
-              alt="icon"
-            />
+            <emailIcon color="#484848" width="1.25vw" height="1.25vw" />
             <input
               placeholder="Почта/логин"
               class="signIn__popup__form__label__input"
@@ -54,11 +50,12 @@
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
 import AppLoader from "@/components/Loader.vue";
-
+import emailIcon from "../assets/icons/emailIcon.vue";
 export default defineComponent({
   name: "SignInView",
   components: {
     AppLoader,
+    emailIcon,
   },
   setup() {
     const isLoading = ref(true);
@@ -91,6 +88,7 @@ export default defineComponent({
       isSubmitting,
       email,
       password,
+      emailIcon,
       handleSubmit,
     };
   },

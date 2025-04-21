@@ -13,11 +13,7 @@
         </p>
         <form class="signUp__popup__form" @submit.prevent="handleSubmit">
           <label class="signUp__popup__form__label">
-            <img
-              class="signUp__popup__form__label__img"
-              src="../assets/loginIcon.svg"
-              alt="icon"
-            />
+            <loginIcon color="#484848" width="1.25vw" height="1.25vw" />
             <input
               placeholder="Логин"
               class="signUp__popup__form__label__input"
@@ -25,11 +21,7 @@
             />
           </label>
           <label class="signUp__popup__form__label">
-            <img
-              class="signUp__popup__form__label__img"
-              src="../assets/email.svg"
-              alt="icon"
-            />
+            <emailIcon color="#484848" width="1.25vw" height="1.25vw" />
             <input
               placeholder="Почта"
               class="signUp__popup__form__label__input"
@@ -78,11 +70,14 @@
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
 import AppLoader from "@/components/Loader.vue";
-
+import loginIcon from "../assets/icons/loginIcon.vue";
+import emailIcon from "../assets/icons/emailIcon.vue";
 export default defineComponent({
   name: "signUpView",
   components: {
     AppLoader,
+    emailIcon,
+    loginIcon,
   },
   setup() {
     const isLoading = ref(true);
@@ -107,7 +102,7 @@ export default defineComponent({
         localStorage.setItem("token", "вошли");
 
         // Перенаправляем на главную страницу
-        router.push("/");
+        router.push("/signupfull");
       }, 4000);
     };
 
@@ -117,6 +112,8 @@ export default defineComponent({
       email,
       login,
       password,
+      loginIcon,
+      emailIcon,
       handleSubmit,
     };
   },

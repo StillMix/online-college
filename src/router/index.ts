@@ -33,6 +33,13 @@ const routes: Array<RouteRecordRaw> = [
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/SignUpView.vue"),
   },
+  {
+    path: "/signupfull",
+    name: "signupfull",
+    meta: { transition: "slide" },
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/SigbUpFullView.vue"),
+  },
 ];
 
 const router = createRouter({
