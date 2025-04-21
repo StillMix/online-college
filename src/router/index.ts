@@ -40,6 +40,13 @@ const routes: Array<RouteRecordRaw> = [
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/SigbUpFullView.vue"),
   },
+  {
+    path: "/settings",
+    name: "settings",
+    meta: { transition: "slide" },
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/SettingsView.vue"),
+  },
 ];
 
 const router = createRouter({
