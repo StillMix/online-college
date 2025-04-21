@@ -237,7 +237,6 @@ export default defineComponent({
     .courseCardes__info {
       transform: translateY(0);
       height: 7.8vw;
-      background: linear-gradient(to top, #2a2a2a, rgba(42, 42, 42, 0.95));
 
       &__title {
         transform: translateY(-0.2vw);

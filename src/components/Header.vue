@@ -58,6 +58,22 @@
           "
         />ПОДДЕРЖКА
       </router-link>
+      <router-link
+        v-if="token"
+        to="/admin"
+        class="header__navs__link"
+        active-class="header__navs__link__active"
+        @mouseenter="onHoverLink('pod')"
+        @mouseleave="onLeaveLink"
+      >
+        <adminsIcon
+          class="header__navs__link__img"
+          :color="$route.path === '/admin' ? 'white' : '#484848'"
+          width="1.25vw"
+          height="1.25vw"
+        />
+        АДМИНИСТРИРОВАНИЕ
+      </router-link>
     </div>
     <div class="header__acc__sign" v-if="token" @click.stop="toggleDropdown">
       <p class="header__acc__sign__title">TESTUSERNICKNAME</p>
@@ -127,9 +143,13 @@ import {
   onBeforeUnmount,
 } from "vue";
 import { useRoute } from "vue-router";
+import adminsIcon from "../assets/icons/adminsIcon.vue";
 
 export default defineComponent({
   name: "AppHeader",
+  components: {
+    adminsIcon,
+  },
   setup() {
     const route = useRoute();
     const currentLink = ref("");
@@ -158,12 +178,14 @@ export default defineComponent({
       main: "/",
       course: "/course",
       pod: "/pod",
+      admin: "/admin",
     };
 
     const currentRoutePath = computed(() => {
       if (route.path === "/") return "main";
       if (route.path === "/course") return "course";
       if (route.path === "/pod") return "pod";
+      if (route.path === "/admin") return "admin";
       return "";
     });
 
@@ -173,6 +195,12 @@ export default defineComponent({
         width: `${indicatorPosition.value.width}px`,
         opacity: currentLink.value ? "1" : "0",
       };
+    });
+
+    const isAdmin = computed(() => {
+      // Здесь можно добавить логику проверки, является ли пользователь администратором
+      // Например, проверка наличия определенного флага в localStorage
+      return localStorage.getItem("isAdmin") === "true";
     });
 
     const setCurrentLink = () => {
@@ -202,6 +230,7 @@ export default defineComponent({
       console.log("Logging out...");
       // Удаляем токен из localStorage
       localStorage.removeItem("token");
+      localStorage.removeItem("isAdmin");
       // Обновляем состояние
       token.value = null;
       // Закрываем выпадающее меню
@@ -250,6 +279,7 @@ export default defineComponent({
       isDropdownVisible,
       toggleDropdown,
       logout,
+      isAdmin,
     };
   },
 });
