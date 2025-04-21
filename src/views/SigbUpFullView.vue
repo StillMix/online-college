@@ -1,9 +1,15 @@
 <template>
   <div class="signUpFull">
-    <AppLoader :is-visible="isLoading" loading-text="Загрузка приложения..." />
     <img class="signUpFull__img" src="../assets/kktsID.svg" />
     <div class="signUpFull__popup">
-      <form class="signUpFull__popup__form" @submit.prevent="handleSubmit">
+      <div v-if="isSubmitting" class="signUpFull__popup__loader">
+        <AppLoader :is-visible="true" loading-text="Создание аккаунта..." />
+      </div>
+      <form
+        v-else
+        class="signUpFull__popup__form"
+        @submit.prevent="handleSubmit"
+      >
         <div class="signUpFull__popup__form__left">
           <p class="signUpFull__popup__form__left__title">ЕЩЁ ЧУТЬ ЧУТЬ</p>
           <p class="signUpFull__popup__form__left__subtitle">
