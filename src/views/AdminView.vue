@@ -155,22 +155,33 @@
 
               <label class="adminView__modal__form__label">
                 Тип курса
-                <input
-                  type="text"
-                  class="adminView__modal__form__input"
+                <select
+                  class="adminView__modal__form__input adminView__modal__form__select"
                   v-model="editingCourse.type"
+                  @change="updateIconType(editingCourse.type)"
                   required
-                />
+                >
+                  <option v-for="type in courseTypes" :key="type" :value="type">
+                    {{ type }}
+                  </option>
+                </select>
               </label>
 
               <label class="adminView__modal__form__label">
                 Уровень курса
-                <input
-                  type="text"
-                  class="adminView__modal__form__input"
+                <select
+                  class="adminView__modal__form__input adminView__modal__form__select"
                   v-model="editingCourse.timetoendL"
                   required
-                />
+                >
+                  <option
+                    v-for="level in courseLevels"
+                    :key="level"
+                    :value="level"
+                  >
+                    {{ level }}
+                  </option>
+                </select>
               </label>
             </div>
 
@@ -186,17 +197,35 @@
               </label>
 
               <label class="adminView__modal__form__label">
-                Название иконки курса
-                <input
-                  type="text"
-                  class="adminView__modal__form__input"
-                  v-model="editingCourse.icon"
-                  required
-                />
-              </label>
+                Иконка курса
+                <div class="adminView__modal__form__file">
+                  <input
+                    type="file"
+                    class="adminView__modal__form__file__input"
+                    @change="handleCourseIconUpload"
+                    accept="image/svg+xml"
+                  />
+                  <span class="adminView__modal__form__file__label">
+                    {{
+                      courseIconFile
+                        ? courseIconFile.name
+                        : "Выберите SVG файл..."
+                    }}
+                  </span>
+                  <button
+                    type="button"
+                    class="adminView__modal__form__file__button"
+                  >
+                    Обзор
+                  </button>
+                </div>
 
-              <label class="adminView__modal__form__label">
-                Название иконки типа
+                <div
+                  v-if="courseIconPreview"
+                  class="adminView__modal__form__file__preview"
+                >
+                  <img :src="courseIconPreview" alt="Предпросмотр иконки" />
+                </div>
               </label>
             </div>
           </div>
@@ -513,6 +542,22 @@ export default defineComponent({
     const showDeleteModal = ref(false);
     const editMode = ref(false);
 
+    // Доступные типы курсов
+    const courseTypes = ref([
+      "ПРОГРАММИРОВАНИЕ",
+      "ДИЗАЙН",
+      "МАРКЕТИНГ",
+      "МЕНЕДЖМЕНТ",
+      "АНАЛИТИКА",
+    ]);
+
+    // Доступные уровни курсов
+    const courseLevels = ref(["С НУЛЯ", "НАЧАЛЬНЫЙ", "СРЕДНИЙ", "ПРОДВИНУТЫЙ"]);
+
+    // Для загрузки иконок
+    const courseIconFile = ref<File | null>(null);
+    const courseIconPreview = ref<string | null>(null);
+
     // Курс для редактирования/создания/удаления
     const editingCourse = ref<CourseItem>({
       id: "",
@@ -590,6 +635,26 @@ export default defineComponent({
       loading.value = false;
     };
 
+    // Обработчик загрузки иконки курса
+    const handleCourseIconUpload = (event: Event) => {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files.length > 0) {
+        courseIconFile.value = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target) {
+            courseIconPreview.value = e.target.result as string;
+            // Сохраняем в имя файла (без расширения) в поле icon
+            if (courseIconFile.value) {
+              const fileName = courseIconFile.value.name.split(".")[0];
+              editingCourse.value.icon = fileName;
+            }
+          }
+        };
+        reader.readAsDataURL(courseIconFile.value);
+      }
+    };
+
     // Очистка поискового запроса
     const clearSearch = () => {
       searchQuery.value = "";
@@ -647,6 +712,10 @@ export default defineComponent({
         ],
       };
 
+      // Сбрасываем предпросмотр
+      courseIconPreview.value = null;
+      courseIconFile.value = null;
+
       showEditModal.value = true;
     };
 
@@ -656,6 +725,19 @@ export default defineComponent({
 
       // Создаем глубокую копию курса для редактирования
       editingCourse.value = JSON.parse(JSON.stringify(course));
+
+      // Сбрасываем предпросмотр иконки
+      courseIconPreview.value = null;
+      courseIconFile.value = null;
+
+      // Если у курса есть иконка, пытаемся получить ее для предпросмотра
+      if (course.icon) {
+        try {
+          courseIconPreview.value = getIconSrc(course.icon);
+        } catch (error) {
+          console.error("Не удалось загрузить превью иконки курса:", error);
+        }
+      }
 
       showEditModal.value = true;
     };
@@ -749,8 +831,36 @@ export default defineComponent({
       lesson.passing = lesson.passing === "yes" ? "no" : "yes";
     };
 
+    // Изменение типа курса обновляет иконку типа
+    const updateIconType = (type: string) => {
+      // Получаем название иконки на основе типа курса
+      switch (type) {
+        case "ПРОГРАММИРОВАНИЕ":
+          editingCourse.value.icontype = "programIcon";
+          break;
+        case "ДИЗАЙН":
+          editingCourse.value.icontype = "designIcon";
+          break;
+        case "МАРКЕТИНГ":
+          editingCourse.value.icontype = "marketingIcon";
+          break;
+        case "МЕНЕДЖМЕНТ":
+          editingCourse.value.icontype = "managementIcon";
+          break;
+        case "АНАЛИТИКА":
+          editingCourse.value.icontype = "analyticsIcon";
+          break;
+        default:
+          editingCourse.value.icontype = "programIcon";
+          break;
+      }
+    };
+
     // Сохранение курса (создание или редактирование)
     const saveCourse = () => {
+      // В реальном приложении здесь была бы загрузка файла на сервер
+      // Но для учебного проекта просто сохраняем имя файла
+
       if (editMode.value) {
         // Редактирование существующего курса
         const index = courses.value.findIndex(
@@ -840,8 +950,14 @@ export default defineComponent({
       editingCourse,
       deletingCourse,
       notification,
+      courseTypes,
+      courseLevels,
+      courseIconFile,
+      courseIconPreview,
       clearSearch,
       getIconSrc,
+      handleCourseIconUpload,
+      updateIconType,
       openCreateModal,
       openEditModal,
       openDeleteModal,
@@ -1294,262 +1410,325 @@ export default defineComponent({
       display: flex;
       flex-direction: column;
       gap: 1.563vw;
-
-      &__row {
+      &__file {
+        position: relative;
         display: flex;
-        gap: 1.042vw;
-      }
-
-      &__col {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 0.781vw;
-
-        &--passing {
-          flex: 0.5;
-        }
-      }
-
-      &__label {
-        display: flex;
-        flex-direction: column;
-        gap: 0.313vw;
-        font-family: var(--font-family);
-        font-weight: 400;
-        font-size: 0.833vw;
-        color: rgba(255, 255, 255, 0.7);
-
-        &--checkbox {
-          flex-direction: row;
-          align-items: center;
-          gap: 0.521vw;
-        }
-      }
-
-      &__input {
-        border-radius: 0.417vw;
-        background: #363636;
         height: 2.083vw;
-        padding: 0 0.781vw;
-        font-family: var(--font-family);
-        font-weight: 400;
-        font-size: 0.833vw;
-        color: #fff;
-        transition: all 0.3s ease;
-
-        &:focus {
-          background: #404040;
-          box-shadow: 0 0 0.417vw rgba(8, 220, 207, 0.5);
-        }
-      }
-
-      &__checkbox {
-        width: 0.938vw;
-        height: 0.938vw;
-        accent-color: #08dccf;
-        cursor: pointer;
-      }
-
-      &__color {
-        display: flex;
-        align-items: center;
-        gap: 0.521vw;
-
-        &__picker {
-          width: 2.083vw;
-          height: 2.083vw;
-          border: none;
-          border-radius: 0.417vw;
-          background: transparent;
-          cursor: pointer;
-
-          &::-webkit-color-swatch {
-            border-radius: 0.417vw;
-            border: none;
-          }
-
-          &::-moz-color-swatch {
-            border-radius: 0.417vw;
-            border: none;
-          }
-        }
 
         &__input {
-          flex: 1;
-        }
-      }
-
-      &__section {
-        background: #363636;
-        border-radius: 0.625vw;
-        padding: 1.042vw;
-
-        &__title {
-          font-family: var(--font-family);
-          font-weight: 500;
-          font-size: 1.042vw;
-          color: #fff;
-          margin: 0 0 1.042vw 0;
+          position: absolute;
+          opacity: 0;
+          width: 100%;
+          height: 100%;
+          cursor: pointer;
+          z-index: 1;
         }
 
-        &__item {
-          background: rgba(0, 0, 0, 0.2);
-          border-radius: 0.521vw;
-          padding: 1.042vw;
-          margin-bottom: 1.042vw;
-        }
-
-        &__header {
+        &__label {
           display: flex;
-          justify-content: space-between;
           align-items: center;
-          margin-bottom: 0.781vw;
-        }
-
-        &__number {
-          font-family: var(--font-family);
-          font-weight: 500;
-          font-size: 0.938vw;
-          color: #08dccf;
-        }
-
-        &__remove {
+          padding: 0 0.781vw;
+          background: #363636;
+          border-radius: 0.417vw 0 0 0.417vw;
           font-family: var(--font-family);
           font-weight: 400;
-          font-size: 0.729vw;
-          color: #ff5b5b;
-          background: transparent;
-          cursor: pointer;
-          transition: all 0.3s ease;
-
-          &:hover {
-            text-decoration: underline;
-            opacity: 0.8;
-          }
-        }
-      }
-
-      &__info {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 0.521vw;
-        padding: 1.042vw;
-        margin-bottom: 1.042vw;
-
-        &__header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 0.781vw;
-        }
-
-        &__number {
-          font-family: var(--font-family);
-          font-weight: 500;
-          font-size: 0.938vw;
-          color: #08dccf;
-        }
-
-        &__remove {
-          font-family: var(--font-family);
-          font-weight: 400;
-          font-size: 0.729vw;
-          color: #ff5b5b;
-          background: transparent;
-          cursor: pointer;
-          transition: all 0.3s ease;
-
-          &:hover {
-            text-decoration: underline;
-            opacity: 0.8;
-          }
-        }
-      }
-
-      &__lessons {
-        margin-top: 1.042vw;
-
-        &__title {
-          font-family: var(--font-family);
-          font-weight: 500;
-          font-size: 0.938vw;
-          color: rgba(255, 255, 255, 0.7);
-          margin: 0 0 0.781vw 0;
-        }
-      }
-
-      &__lesson {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 0.417vw;
-        padding: 0.781vw;
-        margin-bottom: 0.781vw;
-
-        &__header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 0.521vw;
-        }
-
-        &__number {
-          font-family: var(--font-family);
-          font-weight: 500;
           font-size: 0.833vw;
           color: rgba(255, 255, 255, 0.7);
+          flex: 1;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
-        &__remove {
+        &__button {
+          padding: 0 0.781vw;
+          height: 100%;
+          background: #08dccf;
+          border-radius: 0 0.417vw 0.417vw 0;
           font-family: var(--font-family);
           font-weight: 400;
-          font-size: 0.729vw;
-          color: #ff5b5b;
-          background: transparent;
+          font-size: 0.833vw;
+          color: #fff;
           cursor: pointer;
           transition: all 0.3s ease;
 
           &:hover {
-            text-decoration: underline;
-            opacity: 0.8;
+            background: #09e9db;
           }
         }
-      }
 
-      &__add {
-        padding: 0.521vw 1.042vw;
-        border-radius: 0.417vw;
-        background: #08dccf;
-        font-family: var(--font-family);
-        font-weight: 400;
-        font-size: 0.833vw;
-        color: #fff;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: fit-content;
-
-        &:hover {
-          background: #09e9db;
-          transform: translateY(-0.104vw);
-          box-shadow: 0 0.26vw 0.781vw rgba(8, 220, 207, 0.4);
-        }
-
-        &:active {
-          transform: translateY(0.052vw);
-        }
-
-        &--lesson {
-          background: rgba(8, 220, 207, 0.2);
+        &__preview {
           margin-top: 0.521vw;
+          width: 3.646vw;
+          height: 3.646vw;
+          border-radius: 0.417vw;
+          background: rgba(255, 255, 255, 0.05);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
 
-          &:hover {
-            background: rgba(8, 220, 207, 0.4);
+          img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+          }
+          &__row {
+            display: flex;
+            gap: 1.042vw;
+          }
+
+          &__col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.781vw;
+
+            &--passing {
+              flex: 0.5;
+            }
+          }
+
+          &__label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.313vw;
+            font-family: var(--font-family);
+            font-weight: 400;
+            font-size: 0.833vw;
+            color: rgba(255, 255, 255, 0.7);
+
+            &--checkbox {
+              flex-direction: row;
+              align-items: center;
+              gap: 0.521vw;
+            }
+          }
+
+          &__input {
+            border-radius: 0.417vw;
+            background: #363636;
+            height: 2.083vw;
+            padding: 0 0.781vw;
+            font-family: var(--font-family);
+            font-weight: 400;
+            font-size: 0.833vw;
+            color: #fff;
+            transition: all 0.3s ease;
+
+            &:focus {
+              background: #404040;
+              box-shadow: 0 0 0.417vw rgba(8, 220, 207, 0.5);
+            }
+          }
+
+          &__checkbox {
+            width: 0.938vw;
+            height: 0.938vw;
+            accent-color: #08dccf;
+            cursor: pointer;
+          }
+
+          &__color {
+            display: flex;
+            align-items: center;
+            gap: 0.521vw;
+
+            &__picker {
+              width: 2.083vw;
+              height: 2.083vw;
+              border: none;
+              border-radius: 0.417vw;
+              background: transparent;
+              cursor: pointer;
+
+              &::-webkit-color-swatch {
+                border-radius: 0.417vw;
+                border: none;
+              }
+
+              &::-moz-color-swatch {
+                border-radius: 0.417vw;
+                border: none;
+              }
+            }
+
+            &__input {
+              flex: 1;
+            }
+          }
+
+          &__section {
+            background: #363636;
+            border-radius: 0.625vw;
+            padding: 1.042vw;
+
+            &__title {
+              font-family: var(--font-family);
+              font-weight: 500;
+              font-size: 1.042vw;
+              color: #fff;
+              margin: 0 0 1.042vw 0;
+            }
+
+            &__item {
+              background: rgba(0, 0, 0, 0.2);
+              border-radius: 0.521vw;
+              padding: 1.042vw;
+              margin-bottom: 1.042vw;
+            }
+
+            &__header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 0.781vw;
+            }
+
+            &__number {
+              font-family: var(--font-family);
+              font-weight: 500;
+              font-size: 0.938vw;
+              color: #08dccf;
+            }
+
+            &__remove {
+              font-family: var(--font-family);
+              font-weight: 400;
+              font-size: 0.729vw;
+              color: #ff5b5b;
+              background: transparent;
+              cursor: pointer;
+              transition: all 0.3s ease;
+
+              &:hover {
+                text-decoration: underline;
+                opacity: 0.8;
+              }
+            }
+          }
+
+          &__info {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.521vw;
+            padding: 1.042vw;
+            margin-bottom: 1.042vw;
+
+            &__header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 0.781vw;
+            }
+
+            &__number {
+              font-family: var(--font-family);
+              font-weight: 500;
+              font-size: 0.938vw;
+              color: #08dccf;
+            }
+
+            &__remove {
+              font-family: var(--font-family);
+              font-weight: 400;
+              font-size: 0.729vw;
+              color: #ff5b5b;
+              background: transparent;
+              cursor: pointer;
+              transition: all 0.3s ease;
+
+              &:hover {
+                text-decoration: underline;
+                opacity: 0.8;
+              }
+            }
+          }
+
+          &__lessons {
+            margin-top: 1.042vw;
+
+            &__title {
+              font-family: var(--font-family);
+              font-weight: 500;
+              font-size: 0.938vw;
+              color: rgba(255, 255, 255, 0.7);
+              margin: 0 0 0.781vw 0;
+            }
+          }
+
+          &__lesson {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.417vw;
+            padding: 0.781vw;
+            margin-bottom: 0.781vw;
+
+            &__header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 0.521vw;
+            }
+
+            &__number {
+              font-family: var(--font-family);
+              font-weight: 500;
+              font-size: 0.833vw;
+              color: rgba(255, 255, 255, 0.7);
+            }
+
+            &__remove {
+              font-family: var(--font-family);
+              font-weight: 400;
+              font-size: 0.729vw;
+              color: #ff5b5b;
+              background: transparent;
+              cursor: pointer;
+              transition: all 0.3s ease;
+
+              &:hover {
+                text-decoration: underline;
+                opacity: 0.8;
+              }
+            }
+          }
+
+          &__add {
+            padding: 0.521vw 1.042vw;
+            border-radius: 0.417vw;
+            background: #08dccf;
+            font-family: var(--font-family);
+            font-weight: 400;
+            font-size: 0.833vw;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+
+            &:hover {
+              background: #09e9db;
+              transform: translateY(-0.104vw);
+              box-shadow: 0 0.26vw 0.781vw rgba(8, 220, 207, 0.4);
+            }
+
+            &:active {
+              transform: translateY(0.052vw);
+            }
+
+            &--lesson {
+              background: rgba(8, 220, 207, 0.2);
+              margin-top: 0.521vw;
+
+              &:hover {
+                background: rgba(8, 220, 207, 0.4);
+              }
+            }
           }
         }
       }
     }
-
     &__actions {
       display: flex;
       justify-content: flex-end;
