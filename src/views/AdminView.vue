@@ -186,23 +186,6 @@
               </label>
 
               <label class="adminView__modal__form__label">
-                Цвет курса
-                <div class="adminView__modal__form__color">
-                  <input
-                    type="color"
-                    class="adminView__modal__form__color__picker"
-                    v-model="editingCourse.color"
-                  />
-                  <input
-                    type="text"
-                    class="adminView__modal__form__input adminView__modal__form__color__input"
-                    v-model="editingCourse.color"
-                    required
-                  />
-                </div>
-              </label>
-
-              <label class="adminView__modal__form__label">
                 Название иконки курса
                 <input
                   type="text"
@@ -214,12 +197,6 @@
 
               <label class="adminView__modal__form__label">
                 Название иконки типа
-                <input
-                  type="text"
-                  class="adminView__modal__form__input"
-                  v-model="editingCourse.icontype"
-                  required
-                />
               </label>
             </div>
           </div>
