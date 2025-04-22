@@ -182,8 +182,8 @@ export default defineComponent({
   emits: ["update:modelValue"],
   setup(props, { emit }) {
     const editorContent = ref<HTMLDivElement | null>(null);
-    const lastSelection = ref<Range | null>(null);
-    const savedSelection = ref<Range | null>(null);
+    const lastSelection = ref<Range | undefined>(null);
+    const savedSelection = ref<Range | undefined>(null);
 
     // Модальные окна
     const showImageModal = ref(false);
@@ -206,28 +206,28 @@ export default defineComponent({
         icon: "fas fa-bold",
         title: "Полужирный (Ctrl+B)",
         isActive: false,
-        value: null,
+        value: undefined, // Заменил null на undefined
       },
       {
         command: "italic",
         icon: "fas fa-italic",
         title: "Курсив (Ctrl+I)",
         isActive: false,
-        value: null,
+        value: undefined, // Заменил null на undefined
       },
       {
         command: "underline",
         icon: "fas fa-underline",
         title: "Подчеркнутый (Ctrl+U)",
         isActive: false,
-        value: null,
+        value: undefined, // Заменил null на undefined
       },
       {
         command: "strikeThrough",
         icon: "fas fa-strikethrough",
         title: "Зачеркнутый",
         isActive: false,
-        value: null,
+        value: undefined, // Заменил null на undefined
       },
       {
         command: "formatBlock",
@@ -262,14 +262,14 @@ export default defineComponent({
         icon: "fas fa-list-ul",
         title: "Маркированный список",
         isActive: false,
-        value: null,
+        value: undefined, // Заменил null на undefined
       },
       {
         command: "insertOrderedList",
         icon: "fas fa-list-ol",
         title: "Нумерованный список",
         isActive: false,
-        value: null,
+        value: undefined, // Заменил null на undefined
       },
     ]);
 
@@ -280,28 +280,28 @@ export default defineComponent({
         icon: "fas fa-align-left",
         title: "По левому краю",
         isActive: false,
-        value: null,
+        value: undefined, // Заменил null на undefined
       },
       {
         command: "justifyCenter",
         icon: "fas fa-align-center",
         title: "По центру",
         isActive: false,
-        value: null,
+        value: undefined, // Заменил null на undefined
       },
       {
         command: "justifyRight",
         icon: "fas fa-align-right",
         title: "По правому краю",
         isActive: false,
-        value: null,
+        value: undefined, // Заменил null на undefined
       },
       {
         command: "justifyFull",
         icon: "fas fa-align-justify",
         title: "По ширине",
         isActive: false,
-        value: null,
+        value: undefined, // Заменил null на undefined
       },
     ]);
 

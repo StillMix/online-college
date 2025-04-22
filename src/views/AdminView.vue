@@ -359,51 +359,72 @@
                     </button>
                   </div>
 
-                  <div class="adminView__modal__form__row">
-                    <div class="adminView__modal__form__col">
-                      <label class="adminView__modal__form__label">
-                        ID урока
-                        <input
-                          type="text"
-                          class="adminView__modal__form__input"
-                          v-model="lesson.id"
-                          required
-                        />
-                      </label>
-                    </div>
-                    <div class="adminView__modal__form__col">
-                      <label class="adminView__modal__form__label">
-                        Название урока
-                        <input
-                          type="text"
-                          class="adminView__modal__form__input"
-                          v-model="lesson.name"
-                          required
-                        />
-                      </label>
-                    </div>
-                    <div
-                      class="adminView__modal__form__col adminView__modal__form__col--passing"
-                    >
-                      <label
-                        class="adminView__modal__form__label adminView__modal__form__label--checkbox"
+                  <div class="adminView__modal__form__lesson">
+                    <div class="adminView__modal__form__lesson__header">
+                      <span class="adminView__modal__form__lesson__number">
+                        Урок {{ lessonIndex + 1 }}
+                      </span>
+                      <button
+                        type="button"
+                        class="adminView__modal__form__lesson__remove"
+                        @click="removeLesson(sectionIndex, lessonIndex)"
                       >
-                        <input
-                          type="checkbox"
-                          class="adminView__modal__form__checkbox"
-                          :checked="lesson.passing === 'yes'"
-                          @change="toggleLessonPassing(lesson)"
-                        />
-                        Пройден
-                      </label>
+                        Удалить
+                      </button>
                     </div>
-                    <label class="adminView__modal__form__label">
-                      Описание
-                      <RichTextEditor
-                        v-model="item.subtitle"
-                        placeholder="Введите описание..."
-                      />
-                    </label>
+
+                    <div class="adminView__modal__form__row">
+                      <div class="adminView__modal__form__col">
+                        <label class="adminView__modal__form__label">
+                          ID урока
+                          <input
+                            type="text"
+                            class="adminView__modal__form__input"
+                            v-model="lesson.id"
+                            required
+                          />
+                        </label>
+                      </div>
+                      <div class="adminView__modal__form__col">
+                        <label class="adminView__modal__form__label">
+                          Название урока
+                          <input
+                            type="text"
+                            class="adminView__modal__form__input"
+                            v-model="lesson.name"
+                            required
+                          />
+                        </label>
+                      </div>
+                      <div
+                        class="adminView__modal__form__col adminView__modal__form__col--passing"
+                      >
+                        <label
+                          class="adminView__modal__form__label adminView__modal__form__label--checkbox"
+                        >
+                          <input
+                            type="checkbox"
+                            class="adminView__modal__form__checkbox"
+                            :checked="lesson.passing === 'yes'"
+                            @change="toggleLessonPassing(lesson)"
+                          />
+                          Пройден
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- Добавляем редактор для описания урока -->
+                    <div class="adminView__modal__form__row">
+                      <div class="adminView__modal__form__col">
+                        <label class="adminView__modal__form__label">
+                          Описание урока
+                          <RichTextEditor
+                            v-model="lesson.description"
+                            placeholder="Введите содержание урока..."
+                          />
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -951,6 +972,7 @@ interface CourseItemCourseContent {
   id: string;
   name: string;
   passing: string;
+  description?: string;
 }
 
 interface CourseItemCourse {
