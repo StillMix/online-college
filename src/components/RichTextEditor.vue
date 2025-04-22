@@ -165,7 +165,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, watch } from "vue";
+import { defineComponent, ref, onMounted, watch, computed } from "vue";
 
 export default defineComponent({
   name: "RichTextEditor",
@@ -206,24 +206,28 @@ export default defineComponent({
         icon: "fas fa-bold",
         title: "Полужирный (Ctrl+B)",
         isActive: false,
+        value: null,
       },
       {
         command: "italic",
         icon: "fas fa-italic",
         title: "Курсив (Ctrl+I)",
         isActive: false,
+        value: null,
       },
       {
         command: "underline",
         icon: "fas fa-underline",
         title: "Подчеркнутый (Ctrl+U)",
         isActive: false,
+        value: null,
       },
       {
         command: "strikeThrough",
         icon: "fas fa-strikethrough",
         title: "Зачеркнутый",
         isActive: false,
+        value: null,
       },
       {
         command: "formatBlock",
@@ -258,12 +262,14 @@ export default defineComponent({
         icon: "fas fa-list-ul",
         title: "Маркированный список",
         isActive: false,
+        value: null,
       },
       {
         command: "insertOrderedList",
         icon: "fas fa-list-ol",
         title: "Нумерованный список",
         isActive: false,
+        value: null,
       },
     ]);
 
@@ -274,24 +280,28 @@ export default defineComponent({
         icon: "fas fa-align-left",
         title: "По левому краю",
         isActive: false,
+        value: null,
       },
       {
         command: "justifyCenter",
         icon: "fas fa-align-center",
         title: "По центру",
         isActive: false,
+        value: null,
       },
       {
         command: "justifyRight",
         icon: "fas fa-align-right",
         title: "По правому краю",
         isActive: false,
+        value: null,
       },
       {
         command: "justifyFull",
         icon: "fas fa-align-justify",
         title: "По ширине",
         isActive: false,
+        value: null,
       },
     ]);
 
@@ -322,8 +332,8 @@ export default defineComponent({
     };
 
     // Выполнение команды форматирования
-    const executeCommand = (command: string, value: string | null = null) => {
-      document.execCommand(command, false, value);
+    const executeCommand = (command: string, value?: string) => {
+      document.execCommand(command, false, value || "");
       updateContent();
       updateButtonStates();
     };

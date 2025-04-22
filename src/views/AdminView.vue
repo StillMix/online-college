@@ -397,6 +397,13 @@
                         Пройден
                       </label>
                     </div>
+                    <label class="adminView__modal__form__label">
+                      Описание
+                      <RichTextEditor
+                        v-model="item.subtitle"
+                        placeholder="Введите описание..."
+                      />
+                    </label>
                   </div>
                 </div>
 
@@ -933,7 +940,7 @@
 import { defineComponent, ref, computed, onMounted } from "vue";
 import Header from "@/components/Header.vue";
 import AppLoader from "@/components/Loader.vue";
-
+import RichTextEditor from "@/components/RichTextEditor.vue";
 interface CourseItemInfo {
   id: string;
   title: string;
@@ -971,6 +978,7 @@ export default defineComponent({
   components: {
     Header,
     AppLoader,
+    RichTextEditor,
   },
   setup() {
     const courses = ref<CourseItem[]>([]);
