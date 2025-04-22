@@ -486,7 +486,6 @@
         </button>
       </div>
     </transition>
-
     <div
       class="adminView__modal"
       v-if="showEditModal"
@@ -556,20 +555,6 @@
                       {{ level }}
                     </option>
                   </select>
-                </label>
-
-                <label class="adminView__modal__form__label">
-                  Цвет курса
-                  <div class="adminView__modal__form__color-picker">
-                    <input
-                      type="color"
-                      class="adminView__modal__form__color-input"
-                      v-model="editingCourse.color"
-                    />
-                    <span class="adminView__modal__form__color-value">{{
-                      editingCourse.color
-                    }}</span>
-                  </div>
                 </label>
               </div>
 
@@ -1120,21 +1105,12 @@ export default defineComponent({
       try {
         return require(`@/assets/${iconName}.svg`);
       } catch (error) {
-        console.error(`Иконка ${iconName} не найдена:`, error);
-        return "";
-      }
-    };
-    const getIconSrc = (iconName) => {
-      try {
-        return require(`@/assets/${iconName}.svg`);
-      } catch (error) {
         // Если иконка не найдена, возвращаем стандартную иконку
         console.error(`Иконка ${iconName} не найдена:`, error);
         return require("@/assets/courseNone.svg");
       }
     };
 
-    // При открытии модальных окон, поправим код для форматирования
     const openCreateModal = () => {
       editMode.value = false;
 
@@ -1187,54 +1163,6 @@ export default defineComponent({
       } catch (error) {
         console.error("Не удалось загрузить превью иконки:", error);
       }
-
-      showEditModal.value = true;
-    };
-    // Открытие модального окна создания курса
-    const openCreateModal = () => {
-      editMode.value = false;
-
-      // Генерируем новый ID
-      const newId = (
-        Math.max(0, ...courses.value.map((c) => parseInt(c.id))) + 1
-      ).toString();
-
-      // Сбрасываем форму с начальными значениями
-      editingCourse.value = {
-        id: newId,
-        title: "",
-        subtitle: "",
-        type: "ПРОГРАММИРОВАНИЕ",
-        timetoendL: "С НУЛЯ",
-        color: "#a63cf9",
-        icon: "coursevoprIcon",
-        icontype: "programIcon",
-        titleForCourse: "",
-        info: [
-          {
-            id: "1",
-            title: "",
-            subtitle: "",
-          },
-        ],
-        course: [
-          {
-            id: "1",
-            name: "ВВЕДЕНИЕ",
-            content: [
-              {
-                id: "1",
-                name: "Что будет в курсе?",
-                passing: "no",
-              },
-            ],
-          },
-        ],
-      };
-
-      // Сбрасываем предпросмотр
-      courseIconPreview.value = null;
-      courseIconFile.value = null;
 
       showEditModal.value = true;
     };
