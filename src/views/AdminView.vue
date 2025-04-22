@@ -486,6 +486,461 @@
         </button>
       </div>
     </transition>
+
+    <div
+      class="adminView__modal"
+      v-if="showEditModal"
+      @click.self="closeModals"
+    >
+      <div class="adminView__modal__content">
+        <h2 class="adminView__modal__title">
+          {{ editMode ? "Редактирование курса" : "Создание нового курса" }}
+        </h2>
+
+        <div class="adminView__modal__layout">
+          <!-- Форма редактирования курса -->
+          <form class="adminView__modal__form" @submit.prevent="saveCourse">
+            <!-- Существующий код формы -->
+            <div class="adminView__modal__form__row">
+              <div class="adminView__modal__form__col">
+                <label class="adminView__modal__form__label">
+                  Название курса
+                  <input
+                    type="text"
+                    class="adminView__modal__form__input"
+                    v-model="editingCourse.title"
+                    required
+                  />
+                </label>
+
+                <label class="adminView__modal__form__label">
+                  Подзаголовок
+                  <input
+                    type="text"
+                    class="adminView__modal__form__input"
+                    v-model="editingCourse.subtitle"
+                    required
+                  />
+                </label>
+
+                <label class="adminView__modal__form__label">
+                  Тип курса
+                  <select
+                    class="adminView__modal__form__input adminView__modal__form__select"
+                    v-model="editingCourse.type"
+                    @change="updateIconType(editingCourse.type)"
+                    required
+                  >
+                    <option
+                      v-for="type in courseTypes"
+                      :key="type"
+                      :value="type"
+                    >
+                      {{ type }}
+                    </option>
+                  </select>
+                </label>
+
+                <label class="adminView__modal__form__label">
+                  Уровень курса
+                  <select
+                    class="adminView__modal__form__input adminView__modal__form__select"
+                    v-model="editingCourse.timetoendL"
+                    required
+                  >
+                    <option
+                      v-for="level in courseLevels"
+                      :key="level"
+                      :value="level"
+                    >
+                      {{ level }}
+                    </option>
+                  </select>
+                </label>
+
+                <label class="adminView__modal__form__label">
+                  Цвет курса
+                  <div class="adminView__modal__form__color-picker">
+                    <input
+                      type="color"
+                      class="adminView__modal__form__color-input"
+                      v-model="editingCourse.color"
+                    />
+                    <span class="adminView__modal__form__color-value">{{
+                      editingCourse.color
+                    }}</span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="adminView__modal__form__col">
+                <label class="adminView__modal__form__label">
+                  Название для страницы курса
+                  <input
+                    type="text"
+                    class="adminView__modal__form__input"
+                    v-model="editingCourse.titleForCourse"
+                    required
+                  />
+                </label>
+
+                <label class="adminView__modal__form__label">
+                  Иконка курса
+                  <div class="adminView__modal__form__file">
+                    <input
+                      type="file"
+                      class="adminView__modal__form__file__input"
+                      @change="handleCourseIconUpload"
+                      accept="image/svg+xml"
+                    />
+                    <span class="adminView__modal__form__file__label">
+                      {{
+                        courseIconFile
+                          ? courseIconFile.name
+                          : "Выберите SVG файл..."
+                      }}
+                    </span>
+                    <button
+                      type="button"
+                      class="adminView__modal__form__file__button"
+                    >
+                      Обзор
+                    </button>
+                  </div>
+
+                  <div
+                    v-if="courseIconPreview"
+                    class="adminView__modal__form__file__preview"
+                  >
+                    <img :src="courseIconPreview" alt="Предпросмотр иконки" />
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Дополнительные секции формы... -->
+            <!-- (остальной код формы остается без изменений) -->
+
+            <div class="adminView__modal__form__section">
+              <h3 class="adminView__modal__form__section__title">
+                Информация о курсе
+              </h3>
+
+              <div
+                v-for="(item, index) in editingCourse.info"
+                :key="index"
+                class="adminView__modal__form__info"
+              >
+                <div class="adminView__modal__form__info__header">
+                  <span class="adminView__modal__form__info__number">{{
+                    index + 1
+                  }}</span>
+                  <button
+                    type="button"
+                    class="adminView__modal__form__info__remove"
+                    @click="removeInfoItem(index)"
+                  >
+                    Удалить
+                  </button>
+                </div>
+
+                <div class="adminView__modal__form__row">
+                  <div class="adminView__modal__form__col">
+                    <label class="adminView__modal__form__label">
+                      Заголовок
+                      <input
+                        type="text"
+                        class="adminView__modal__form__input"
+                        v-model="item.title"
+                        required
+                      />
+                    </label>
+                  </div>
+                  <div class="adminView__modal__form__col">
+                    <label class="adminView__modal__form__label">
+                      Описание
+                      <input
+                        type="text"
+                        class="adminView__modal__form__input"
+                        v-model="item.subtitle"
+                        required
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="adminView__modal__form__add"
+                @click="addInfoItem"
+              >
+                Добавить информацию о курсе
+              </button>
+            </div>
+
+            <div class="adminView__modal__form__section">
+              <h3 class="adminView__modal__form__section__title">
+                Разделы курса
+              </h3>
+
+              <div
+                v-for="(section, sectionIndex) in editingCourse.course"
+                :key="sectionIndex"
+                class="adminView__modal__form__section__item"
+              >
+                <div class="adminView__modal__form__section__header">
+                  <span class="adminView__modal__form__section__number">
+                    Раздел {{ sectionIndex + 1 }}
+                  </span>
+                  <button
+                    type="button"
+                    class="adminView__modal__form__section__remove"
+                    @click="removeSection(sectionIndex)"
+                  >
+                    Удалить раздел
+                  </button>
+                </div>
+
+                <div class="adminView__modal__form__row">
+                  <div class="adminView__modal__form__col">
+                    <label class="adminView__modal__form__label">
+                      ID раздела
+                      <input
+                        type="text"
+                        class="adminView__modal__form__input"
+                        v-model="section.id"
+                        required
+                      />
+                    </label>
+                  </div>
+                  <div class="adminView__modal__form__col">
+                    <label class="adminView__modal__form__label">
+                      Название раздела
+                      <input
+                        type="text"
+                        class="adminView__modal__form__input"
+                        v-model="section.name"
+                        required
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="adminView__modal__form__lessons">
+                  <h4 class="adminView__modal__form__lessons__title">
+                    Уроки раздела
+                  </h4>
+
+                  <div
+                    v-for="(lesson, lessonIndex) in section.content"
+                    :key="lessonIndex"
+                    class="adminView__modal__form__lesson"
+                  >
+                    <div class="adminView__modal__form__lesson__header">
+                      <span class="adminView__modal__form__lesson__number">
+                        Урок {{ lessonIndex + 1 }}
+                      </span>
+                      <button
+                        type="button"
+                        class="adminView__modal__form__lesson__remove"
+                        @click="removeLesson(sectionIndex, lessonIndex)"
+                      >
+                        Удалить
+                      </button>
+                    </div>
+
+                    <div class="adminView__modal__form__row">
+                      <div class="adminView__modal__form__col">
+                        <label class="adminView__modal__form__label">
+                          ID урока
+                          <input
+                            type="text"
+                            class="adminView__modal__form__input"
+                            v-model="lesson.id"
+                            required
+                          />
+                        </label>
+                      </div>
+                      <div class="adminView__modal__form__col">
+                        <label class="adminView__modal__form__label">
+                          Название урока
+                          <input
+                            type="text"
+                            class="adminView__modal__form__input"
+                            v-model="lesson.name"
+                            required
+                          />
+                        </label>
+                      </div>
+                      <div
+                        class="adminView__modal__form__col adminView__modal__form__col--passing"
+                      >
+                        <label
+                          class="adminView__modal__form__label adminView__modal__form__label--checkbox"
+                        >
+                          <input
+                            type="checkbox"
+                            class="adminView__modal__form__checkbox"
+                            :checked="lesson.passing === 'yes'"
+                            @change="toggleLessonPassing(lesson)"
+                          />
+                          Пройден
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="adminView__modal__form__add adminView__modal__form__add--lesson"
+                    @click="addLesson(sectionIndex)"
+                  >
+                    Добавить урок
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="adminView__modal__form__add"
+                @click="addSection"
+              >
+                Добавить раздел курса
+              </button>
+            </div>
+
+            <div class="adminView__modal__actions">
+              <button
+                type="button"
+                class="adminView__modal__actions__button adminView__modal__actions__button--cancel"
+                @click="closeModals"
+              >
+                Отмена
+              </button>
+              <button
+                type="submit"
+                class="adminView__modal__actions__button adminView__modal__actions__button--save"
+              >
+                {{ editMode ? "Сохранить изменения" : "Создать курс" }}
+              </button>
+            </div>
+          </form>
+
+          <!-- Новый блок предпросмотра курса -->
+          <div class="adminView__modal__preview">
+            <h3 class="adminView__modal__preview__title">Предпросмотр курса</h3>
+
+            <!-- Карточка курса в режиме предпросмотра -->
+            <div
+              class="adminView__modal__preview__card"
+              :style="{ backgroundColor: editingCourse.color }"
+            >
+              <div class="adminView__modal__preview__card__header">
+                <div
+                  class="adminView__modal__preview__card__icon"
+                  v-if="courseIconPreview"
+                >
+                  <img :src="courseIconPreview" alt="Иконка типа" />
+                </div>
+                <div class="adminView__modal__preview__card__icon" v-else>
+                  <img
+                    :src="getIconSrc(editingCourse.icontype)"
+                    alt="Иконка типа"
+                  />
+                </div>
+                <div class="adminView__modal__preview__card__meta">
+                  <span class="adminView__modal__preview__card__type">
+                    {{ editingCourse.type }}
+                  </span>
+                  <span class="adminView__modal__preview__card__level">
+                    {{ editingCourse.timetoendL }}
+                  </span>
+                </div>
+              </div>
+
+              <div
+                class="adminView__modal__preview__card__bg-icon"
+                v-if="courseIconPreview"
+              >
+                <img :src="courseIconPreview" alt="Фоновая иконка" />
+              </div>
+              <div class="adminView__modal__preview__card__bg-icon" v-else>
+                <img
+                  :src="getIconSrc(editingCourse.icon)"
+                  alt="Фоновая иконка"
+                />
+              </div>
+
+              <div class="adminView__modal__preview__card__info">
+                <h4 class="adminView__modal__preview__card__title">
+                  {{ editingCourse.title || "Название курса" }}
+                </h4>
+                <p class="adminView__modal__preview__card__subtitle">
+                  {{ editingCourse.subtitle || "Подзаголовок курса" }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Информация о курсе -->
+            <div
+              class="adminView__modal__preview__info"
+              v-if="editingCourse.info.length > 0"
+            >
+              <h4 class="adminView__modal__preview__info__title">
+                Информация о курсе:
+              </h4>
+              <ul class="adminView__modal__preview__info__list">
+                <li
+                  v-for="(item, index) in editingCourse.info"
+                  :key="index"
+                  class="adminView__modal__preview__info__item"
+                >
+                  <strong>{{ item.title || `Пункт ${index + 1}` }}</strong>
+                  <p>{{ item.subtitle || "Описание пункта" }}</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Структура курса -->
+            <div
+              class="adminView__modal__preview__structure"
+              v-if="editingCourse.course.length > 0"
+            >
+              <h4 class="adminView__modal__preview__structure__title">
+                Структура курса:
+              </h4>
+              <div
+                v-for="(section, sectionIndex) in editingCourse.course"
+                :key="sectionIndex"
+                class="adminView__modal__preview__structure__section"
+              >
+                <h5
+                  class="adminView__modal__preview__structure__section__title"
+                >
+                  {{ section.name || `Раздел ${sectionIndex + 1}` }}
+                </h5>
+                <ul class="adminView__modal__preview__structure__lessons">
+                  <li
+                    v-for="(lesson, lessonIndex) in section.content"
+                    :key="lessonIndex"
+                    class="adminView__modal__preview__structure__lesson"
+                    :class="{ completed: lesson.passing === 'yes' }"
+                  >
+                    {{ lesson.name || `Урок ${lessonIndex + 1}` }}
+                    <span
+                      v-if="lesson.passing === 'yes'"
+                      class="adminView__modal__preview__structure__lesson__status"
+                      >✓</span
+                    >
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -669,7 +1124,72 @@ export default defineComponent({
         return "";
       }
     };
+    const getIconSrc = (iconName) => {
+      try {
+        return require(`@/assets/${iconName}.svg`);
+      } catch (error) {
+        // Если иконка не найдена, возвращаем стандартную иконку
+        console.error(`Иконка ${iconName} не найдена:`, error);
+        return require("@/assets/courseNone.svg");
+      }
+    };
 
+    // При открытии модальных окон, поправим код для форматирования
+    const openCreateModal = () => {
+      editMode.value = false;
+
+      // Генерируем новый ID
+      const newId = (
+        Math.max(0, ...courses.value.map((c) => parseInt(c.id))) + 1
+      ).toString();
+
+      // Сбрасываем форму с начальными значениями
+      editingCourse.value = {
+        id: newId,
+        title: "",
+        subtitle: "",
+        type: "ПРОГРАММИРОВАНИЕ",
+        timetoendL: "С НУЛЯ",
+        color: "#a63cf9",
+        icon: "coursevoprIcon",
+        icontype: "programIcon",
+        titleForCourse: "",
+        info: [
+          {
+            id: "1",
+            title: "",
+            subtitle: "",
+          },
+        ],
+        course: [
+          {
+            id: "1",
+            name: "ВВЕДЕНИЕ",
+            content: [
+              {
+                id: "1",
+                name: "Что будет в курсе?",
+                passing: "no",
+              },
+            ],
+          },
+        ],
+      };
+
+      // Сбрасываем предпросмотр
+      courseIconPreview.value = null;
+      courseIconFile.value = null;
+
+      // Загружаем иконку для предпросмотра
+      try {
+        getIconSrc(editingCourse.value.icon);
+        getIconSrc(editingCourse.value.icontype);
+      } catch (error) {
+        console.error("Не удалось загрузить превью иконки:", error);
+      }
+
+      showEditModal.value = true;
+    };
     // Открытие модального окна создания курса
     const openCreateModal = () => {
       editMode.value = false;
@@ -1842,5 +2362,296 @@ export default defineComponent({
 
 .notification-leave-active {
   animation: slideInRight 0.3s ease reverse;
+}
+
+.adminView {
+  &__modal {
+    &__layout {
+      display: flex;
+      gap: 1.563vw;
+    }
+
+    &__form {
+      width: 60%;
+      flex-shrink: 0;
+    }
+
+    &__preview {
+      width: 40%;
+      background: #363636;
+      border-radius: 0.625vw;
+      padding: 1.042vw;
+      display: flex;
+      flex-direction: column;
+      gap: 1.042vw;
+      max-height: 70vh;
+      overflow-y: auto;
+      position: sticky;
+      top: 1.042vw;
+
+      /* Стилизация скроллбара */
+      &::-webkit-scrollbar {
+        width: 0.417vw;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 0.521vw;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: rgba(8, 220, 207, 0.3);
+        border-radius: 0.521vw;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: rgba(8, 220, 207, 0.5);
+      }
+
+      &__title {
+        font-family: var(--font-family);
+        font-weight: 500;
+        font-size: 1.042vw;
+        color: #fff;
+        margin: 0 0 0.781vw 0;
+        border-bottom: 0.052vw solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 0.521vw;
+      }
+
+      &__card {
+        position: relative;
+        border-radius: 0.521vw;
+        width: 100%;
+        height: 15vw;
+        overflow: hidden;
+        box-shadow: 0 0.26vw 0.781vw rgba(0, 0, 0, 0.2);
+
+        &__header {
+          display: flex;
+          padding: 0.781vw;
+          align-items: center;
+          gap: 0.521vw;
+          position: relative;
+          z-index: 2;
+        }
+
+        &__icon {
+          width: 1.25vw;
+          height: 1.25vw;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+        }
+
+        &__meta {
+          display: flex;
+          flex-direction: column;
+        }
+
+        &__type {
+          font-family: var(--font-family);
+          font-weight: 500;
+          font-size: 0.625vw;
+          color: #fff;
+        }
+
+        &__level {
+          font-family: var(--font-family);
+          font-weight: 500;
+          font-size: 0.521vw;
+          color: #fff;
+          opacity: 0.7;
+        }
+
+        &__bg-icon {
+          position: absolute;
+          bottom: 3.333vw;
+          right: -3.438vw;
+          width: 16.302vw;
+          height: 16.302vw;
+          opacity: 0.3;
+          transform: rotate(8deg);
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+        }
+
+        &__info {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          padding: 0.781vw;
+          background: #2a2a2a;
+          z-index: 2;
+        }
+
+        &__title {
+          font-family: var(--font-family);
+          font-weight: 500;
+          font-size: 0.833vw;
+          color: #fff;
+          margin: 0 0 0.313vw 0;
+        }
+
+        &__subtitle {
+          font-family: var(--font-family);
+          font-weight: 400;
+          font-size: 0.625vw;
+          color: rgba(255, 255, 255, 0.7);
+          margin: 0;
+        }
+      }
+
+      &__info {
+        background: #2a2a2a;
+        border-radius: 0.521vw;
+        padding: 0.781vw;
+
+        &__title {
+          font-family: var(--font-family);
+          font-weight: 500;
+          font-size: 0.938vw;
+          color: #fff;
+          margin: 0 0 0.521vw 0;
+        }
+
+        &__list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        &__item {
+          margin-bottom: 0.521vw;
+          padding-bottom: 0.521vw;
+          border-bottom: 0.052vw solid rgba(255, 255, 255, 0.1);
+
+          &:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+          }
+
+          strong {
+            font-family: var(--font-family);
+            font-weight: 500;
+            font-size: 0.833vw;
+            color: #fff;
+            display: block;
+            margin-bottom: 0.208vw;
+          }
+
+          p {
+            font-family: var(--font-family);
+            font-weight: 400;
+            font-size: 0.729vw;
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+          }
+        }
+      }
+
+      &__structure {
+        background: #2a2a2a;
+        border-radius: 0.521vw;
+        padding: 0.781vw;
+
+        &__title {
+          font-family: var(--font-family);
+          font-weight: 500;
+          font-size: 0.938vw;
+          color: #fff;
+          margin: 0 0 0.521vw 0;
+        }
+
+        &__section {
+          margin-bottom: 0.781vw;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          &__title {
+            font-family: var(--font-family);
+            font-weight: 500;
+            font-size: 0.833vw;
+            color: #fff;
+            margin: 0 0 0.417vw 0;
+            padding-bottom: 0.313vw;
+            border-bottom: 0.052vw solid rgba(255, 255, 255, 0.1);
+          }
+        }
+
+        &__lessons {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        &__lesson {
+          font-family: var(--font-family);
+          font-weight: 400;
+          font-size: 0.729vw;
+          color: rgba(255, 255, 255, 0.7);
+          padding: 0.313vw 0.521vw;
+          border-radius: 0.208vw;
+          margin-bottom: 0.208vw;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.05);
+          }
+
+          &.completed {
+            color: #39b874;
+          }
+
+          &__status {
+            color: #39b874;
+            font-weight: bold;
+          }
+        }
+      }
+    }
+
+    &__form__color-picker {
+      display: flex;
+      align-items: center;
+      gap: 0.521vw;
+
+      &__color-input {
+        width: 2.083vw;
+        height: 2.083vw;
+        border: none;
+        border-radius: 0.208vw;
+        cursor: pointer;
+
+        &::-webkit-color-swatch {
+          border: none;
+          border-radius: 0.208vw;
+        }
+      }
+
+      &__color-value {
+        font-family: var(--font-family);
+        font-weight: 400;
+        font-size: 0.833vw;
+        color: #fff;
+      }
+    }
+  }
 }
 </style>
