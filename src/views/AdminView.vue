@@ -396,21 +396,22 @@
                           />
                         </label>
                       </div>
-                      <div
-                        class="adminView__modal__form__col adminView__modal__form__col--passing"
-                      >
-                        <label
-                          class="adminView__modal__form__label adminView__modal__form__label--checkbox"
-                        >
-                          <input
-                            type="checkbox"
-                            class="adminView__modal__form__checkbox"
-                            :checked="lesson.passing === 'yes'"
-                            @change="toggleLessonPassing(lesson)"
-                          />
-                          Пройден
-                        </label>
-                      </div>
+                      <!-- Удаляем блок с чекбоксом "Пройден" -->
+                      <!-- <div
+    class="adminView__modal__form__col adminView__modal__form__col--passing"
+  >
+    <label
+      class="adminView__modal__form__label adminView__modal__form__label--checkbox"
+    >
+      <input
+        type="checkbox"
+        class="adminView__modal__form__checkbox"
+        :checked="lesson.passing === 'yes'"
+        @change="toggleLessonPassing(lesson)"
+      />
+      Пройден
+    </label>
+  </div> -->
                     </div>
 
                     <!-- Добавляем редактор для описания урока -->
@@ -1290,6 +1291,7 @@ export default defineComponent({
         id: newId,
         name: `Урок ${newId}`,
         passing: "no",
+        description: "", // Добавляем пустое описание для редактора
       });
     };
 
