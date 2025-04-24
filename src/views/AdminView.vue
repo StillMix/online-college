@@ -2,7 +2,7 @@
   <div class="adminView">
     <Header />
     <div class="adminView__container">
-      <h1 class="adminView__title">Администрирование курсов</h1>
+      <h1 class="adminView__title">Панель администрирования</h1>
 
       <div class="adminView__actions">
         <button
