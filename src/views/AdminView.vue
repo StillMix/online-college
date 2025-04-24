@@ -382,6 +382,15 @@
                         />
                       </label>
                     </div>
+                    <div class="adminView__modal__form__lesson__actions">
+                      <button
+                        type="button"
+                        class="adminView__modal__form__lesson__edit"
+                        @click="openLessonEditModal(sectionIndex, lessonIndex)"
+                      >
+                        Редактировать описание
+                      </button>
+                    </div>
                     <div
                       class="adminView__modal__form__col adminView__modal__form__col--passing"
                     ></div>
@@ -475,6 +484,44 @@
       </div>
     </transition>
   </div>
+  <div
+    class="adminView__lesson-modal"
+    v-if="showLessonEditModal"
+    @click.self="closeModals"
+  >
+    <div class="adminView__lesson-modal__content">
+      <h2 class="adminView__lesson-modal__title">
+        Добавить(если оно есть то редактировать) описания урока "{{
+          currentEditingLesson?.name
+        }}"
+      </h2>
+
+      <div class="adminView__lesson-modal__editor">
+        <RichTextEditor
+          v-model="lessonDescription"
+          @update:modelValue="updateLessonDescription"
+          placeholder="Введите описание урока..."
+        />
+      </div>
+
+      <div class="adminView__lesson-modal__actions">
+        <button
+          type="button"
+          class="adminView__lesson-modal__actions__button adminView__lesson-modal__actions__button--cancel"
+          @click="closeModals"
+        >
+          Отмена
+        </button>
+        <button
+          type="button"
+          class="adminView__lesson-modal__actions__button adminView__lesson-modal__actions__button--save"
+          @click="saveLessonDescription"
+        >
+          Сохранить описание
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -482,6 +529,7 @@ import { defineComponent, ref, computed, onMounted } from "vue";
 import Header from "@/components/Header.vue";
 import AppLoader from "@/components/Loader.vue";
 import RichTextEditor from "@/components/RichTextEditor.vue";
+
 interface CourseItemInfo {
   id: string;
   title: string;
@@ -492,7 +540,7 @@ interface CourseItemCourseContent {
   id: string;
   name: string;
   passing: string;
-  description?: string;
+  description?: string; // Добавляем поле для хранения описания в формате Rich Text
 }
 
 interface CourseItemCourse {
@@ -520,7 +568,7 @@ export default defineComponent({
   components: {
     Header,
     AppLoader,
-    // RichTextEditor,
+    RichTextEditor,
   },
   setup() {
     const courses = ref<CourseItem[]>([]);
@@ -531,6 +579,13 @@ export default defineComponent({
     const showEditModal = ref(false);
     const showDeleteModal = ref(false);
     const editMode = ref(false);
+
+    // Состояние для модального окна редактирования урока
+    const showLessonEditModal = ref(false);
+    const currentEditingLesson = ref<CourseItemCourseContent | null>(null);
+    const currentSectionIndex = ref<number | null>(null);
+    const currentLessonIndex = ref<number | null>(null);
+    const lessonDescription = ref("");
 
     // Доступные типы курсов
     const courseTypes = ref([
@@ -575,6 +630,7 @@ export default defineComponent({
               id: "1",
               name: "Что будет в курсе?",
               passing: "no",
+              description: "", // Добавляем пустое описание по умолчанию
             },
           ],
         },
@@ -696,6 +752,7 @@ export default defineComponent({
                 id: "1",
                 name: "Что будет в курсе?",
                 passing: "no",
+                description: "",
               },
             ],
           },
@@ -746,10 +803,49 @@ export default defineComponent({
       showDeleteModal.value = true;
     };
 
+    // Открытие модального окна редактирования описания урока
+    const openLessonEditModal = (sectionIndex: number, lessonIndex: number) => {
+      currentSectionIndex.value = sectionIndex;
+      currentLessonIndex.value = lessonIndex;
+
+      const lesson =
+        editingCourse.value.course[sectionIndex].content[lessonIndex];
+      currentEditingLesson.value = lesson;
+      lessonDescription.value = lesson.description || "";
+
+      showLessonEditModal.value = true;
+    };
+
+    // Сохранение описания урока
+    const saveLessonDescription = () => {
+      if (
+        currentSectionIndex.value !== null &&
+        currentLessonIndex.value !== null &&
+        currentEditingLesson.value
+      ) {
+        // Обновляем описание урока
+        editingCourse.value.course[currentSectionIndex.value].content[
+          currentLessonIndex.value
+        ].description = lessonDescription.value;
+
+        showNotification("Описание урока сохранено!");
+        showLessonEditModal.value = false;
+      }
+    };
+
     // Закрытие всех модальных окон
     const closeModals = () => {
       showEditModal.value = false;
       showDeleteModal.value = false;
+      showLessonEditModal.value = false;
+      currentEditingLesson.value = null;
+      currentSectionIndex.value = null;
+      currentLessonIndex.value = null;
+    };
+
+    // Обновление описания урока из редактора
+    const updateLessonDescription = (html: string) => {
+      lessonDescription.value = html;
     };
 
     // Добавление элемента info
@@ -787,6 +883,7 @@ export default defineComponent({
             id: "1",
             name: "Урок 1",
             passing: "no",
+            description: "",
           },
         ],
       });
@@ -945,6 +1042,7 @@ export default defineComponent({
       filteredCourses,
       showEditModal,
       showDeleteModal,
+      showLessonEditModal,
       editMode,
       editingCourse,
       deletingCourse,
@@ -953,6 +1051,8 @@ export default defineComponent({
       courseLevels,
       courseIconFile,
       courseIconPreview,
+      currentEditingLesson,
+      lessonDescription,
       clearSearch,
       getIconSrc,
       handleCourseIconUpload,
@@ -960,6 +1060,9 @@ export default defineComponent({
       openCreateModal,
       openEditModal,
       openDeleteModal,
+      openLessonEditModal,
+      saveLessonDescription,
+      updateLessonDescription,
       closeModals,
       addInfoItem,
       removeInfoItem,
@@ -1670,6 +1773,118 @@ export default defineComponent({
           &:hover {
             text-decoration: underline;
             opacity: 0.8;
+          }
+        }
+        &__actions {
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 0.5vw;
+        }
+
+        &__edit {
+          padding: 0.313vw 0.625vw;
+          border-radius: 0.313vw;
+          background: #08dccf;
+          font-family: var(--font-family);
+          font-weight: 400;
+          font-size: 0.729vw;
+          color: #fff;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &:hover {
+            background: #09e9db;
+            transform: translateY(-0.052vw);
+          }
+
+          &:active {
+            transform: translateY(0.052vw);
+          }
+        }
+      }
+
+      &__lesson-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1100; /* Выше, чем у основного модального окна */
+        animation: fadeIn 0.3s ease;
+
+        &__content {
+          background: #2a2a2a;
+          border-radius: 0.625vw;
+          padding: 1.563vw;
+          width: 70vw;
+          max-width: 95vw;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 0.521vw 1.563vw rgba(0, 0, 0, 0.3);
+          animation: scaleIn 0.3s ease;
+          display: flex;
+          flex-direction: column;
+        }
+
+        &__title {
+          font-family: var(--font-family);
+          font-weight: 500;
+          font-size: 1.25vw;
+          color: #fff;
+          margin: 0 0 1.563vw 0;
+          border-bottom: 0.052vw solid rgba(255, 255, 255, 0.1);
+          padding-bottom: 0.781vw;
+        }
+
+        &__editor {
+          flex: 1;
+          min-height: 25vw;
+          margin-bottom: 1.563vw;
+        }
+
+        &__actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 0.781vw;
+
+          &__button {
+            padding: 0.521vw 1.563vw;
+            border-radius: 0.417vw;
+            font-family: var(--font-family);
+            font-weight: 400;
+            font-size: 0.938vw;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+              transform: translateY(-0.104vw);
+            }
+
+            &:active {
+              transform: translateY(0.052vw);
+            }
+
+            &--cancel {
+              background: #363636;
+
+              &:hover {
+                background: #404040;
+              }
+            }
+
+            &--save {
+              background: #39b874;
+
+              &:hover {
+                background: #45cc83;
+                box-shadow: 0 0.26vw 0.781vw rgba(57, 184, 116, 0.4);
+              }
+            }
           }
         }
       }
