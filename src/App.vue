@@ -13,8 +13,17 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { CourseData } from "./data/courseData";
-localStorage.setItem("courseData", JSON.stringify(CourseData));
+import axios from "axios";
+
+try {
+  const response = await axios.get(`http://localhost:8000/api/courses/`);
+  if (response.data) {
+    console.log(response.data);
+    localStorage.setItem("courseData", JSON.stringify(response.data));
+  }
+} catch (error) {
+  console.error(error);
+}
 export default defineComponent({
   name: "App",
 });

@@ -53,8 +53,9 @@
                 :value="expandedElementId"
               >
                 <CourseElement
-                  v-for="item in courseVib.course"
+                  v-for="(item, index) in courseVib.sections"
                   :key="item.id"
+                  :index="index"
                   :CourseVib="item"
                 >
                 </CourseElement>
@@ -124,7 +125,7 @@
             >
               <img
                 class="courseVib__content__type__img"
-                :src="getIconSrc()"
+                :src="`http://127.0.0.1:8000/${courseVib.icon}`"
                 alt="Course type icon"
               />
             </div>
@@ -176,7 +177,7 @@ interface CourseItem {
   icontype: string;
   titleForCourse: string;
   info: CourseItemInfo[];
-  course: CourseItemCourse[];
+  sections: CourseItemCourse[];
 }
 
 export default defineComponent({

@@ -47,7 +47,7 @@
             :style="{ backgroundColor: course.color }"
           >
             <img
-              :src="getIconSrc(course.icon)"
+              :src="`http://127.0.0.1:8000/${course.icon}`"
               alt="Иконка курса"
               class="course-control__course__icon__img"
             />
@@ -193,7 +193,7 @@
                 />
               </label>
 
-              <label class="course-control__modal__form__label">
+              <label v-if="editMode" class="course-control__modal__form__label">
                 Иконка курса
                 <div class="course-control__modal__form__file">
                   <input
@@ -291,7 +291,7 @@
             </h3>
 
             <div
-              v-for="(section, sectionIndex) in editingCourse.course"
+              v-for="(section, sectionIndex) in editingCourse.sections"
               :key="sectionIndex"
               class="course-control__modal__form__section__item"
             >
@@ -527,6 +527,7 @@
 </template>
 
 <script lang="ts">
+import axios from "axios";
 import { defineComponent, ref, computed, onMounted, PropType } from "vue";
 import AppLoader from "@/components/Loader.vue";
 import RichTextEditor from "@/components/RichTextEditor.vue";
@@ -561,7 +562,7 @@ interface CourseItem {
   icontype: string;
   titleForCourse: string;
   info: CourseItemInfo[];
-  course: CourseItemCourse[];
+  sections: CourseItemCourse[];
 }
 
 export default defineComponent({
@@ -630,7 +631,7 @@ export default defineComponent({
           subtitle: "",
         },
       ],
-      course: [
+      sections: [
         {
           id: "1",
           name: "ВВЕДЕНИЕ",
@@ -752,7 +753,7 @@ export default defineComponent({
             subtitle: "",
           },
         ],
-        course: [
+        sections: [
           {
             id: "1",
             name: "ВВЕДЕНИЕ",
@@ -797,7 +798,7 @@ export default defineComponent({
       // Если у курса есть иконка, пытаемся получить ее для предпросмотра
       if (course.icon) {
         try {
-          courseIconPreview.value = getIconSrc(course.icon);
+          courseIconPreview.value = `http://127.0.0.1:8000/${course.icon}`;
         } catch (error) {
           console.error("Не удалось загрузить превью иконки курса:", error);
         }
@@ -818,7 +819,7 @@ export default defineComponent({
       currentLessonIndex.value = lessonIndex;
 
       const lesson =
-        editingCourse.value.course[sectionIndex].content[lessonIndex];
+        editingCourse.value.sections[sectionIndex].content[lessonIndex];
       currentEditingLesson.value = lesson;
       lessonDescription.value = lesson.description || "";
 
@@ -833,7 +834,7 @@ export default defineComponent({
         currentEditingLesson.value
       ) {
         // Обновляем описание урока
-        editingCourse.value.course[currentSectionIndex.value].content[
+        editingCourse.value.sections[currentSectionIndex.value].content[
           currentLessonIndex.value
         ].description = lessonDescription.value;
 
@@ -882,9 +883,9 @@ export default defineComponent({
 
     // Добавление раздела курса
     const addSection = () => {
-      const newId = (editingCourse.value.course.length + 1).toString();
+      const newId = (editingCourse.value.sections.length + 1).toString();
 
-      editingCourse.value.course.push({
+      editingCourse.value.sections.push({
         id: newId,
         name: "Новый раздел",
         content: [
@@ -900,15 +901,15 @@ export default defineComponent({
 
     // Удаление раздела курса
     const removeSection = (index: number) => {
-      if (editingCourse.value.course.length > 1) {
-        editingCourse.value.course.splice(index, 1);
+      if (editingCourse.value.sections.length > 1) {
+        editingCourse.value.sections.splice(index, 1);
       } else {
         showNotification("Должен быть хотя бы один раздел курса", "error");
       }
     };
     // Добавление урока в раздел
     const addLesson = (sectionIndex: number) => {
-      const section = editingCourse.value.course[sectionIndex];
+      const section = editingCourse.value.sections[sectionIndex];
       const newId = (section.content.length + 1).toString();
 
       section.content.push({
@@ -921,7 +922,7 @@ export default defineComponent({
 
     // Удаление урока из раздела
     const removeLesson = (sectionIndex: number, lessonIndex: number) => {
-      const section = editingCourse.value.course[sectionIndex];
+      const section = editingCourse.value.sections[sectionIndex];
 
       if (section.content.length > 1) {
         section.content.splice(lessonIndex, 1);
@@ -960,11 +961,7 @@ export default defineComponent({
       }
     };
 
-    // Сохранение курса (создание или редактирование)
-    const saveCourse = () => {
-      // В реальном приложении здесь была бы загрузка файла на сервер
-      // Но для учебного проекта просто сохраняем имя файла
-
+    const saveCourse = async () => {
       if (editMode.value) {
         // Редактирование существующего курса
         const index = courses.value.findIndex(
@@ -981,8 +978,21 @@ export default defineComponent({
         }
       } else {
         // Создание нового курса
-        courses.value.push(JSON.parse(JSON.stringify(editingCourse.value)));
-        showNotification("Новый курс успешно создан!");
+        try {
+          const response = await axios.post(
+            "http://localhost:8000/api/courses/",
+            {
+              course: editingCourse.value,
+            }
+          );
+
+          if (response.data) {
+            showNotification("Курс успешно создан!");
+          }
+        } catch (error) {
+          console.error(error);
+          showNotification("Ошибка при создании курса", "error");
+        }
       }
 
       // Сохраняем обновленные данные в localStorage

@@ -10,7 +10,7 @@
     <div class="courseElement__header">
       <div class="courseElement__header__info">
         <p class="courseElement__header__info__title">
-          {{ CourseVib.id }}. {{ CourseVib.name }}
+          {{ index + 1 }}. {{ CourseVib.name }}
         </p>
         <p class="courseElement__header__info__subtitle">
           {{ CourseVib.content.length }}
@@ -25,12 +25,13 @@
       <div class="courseElement__courses-container" v-if="isExpanded">
         <router-link
           class="courseElement__courses"
-          v-for="item in CourseVib.content"
+          v-for="(item, index) in CourseVib.content"
           :key="item.id"
-          :to="`/course/${CourseVib.id}/${item.id}`"
+          :to="`/course/learn`"
+          @click="courseClick(item)"
         >
           <p class="courseElement__courses__title">
-            {{ item.id }}. {{ item.name }}
+            {{ index + 1 }}. {{ item.name }}
           </p>
           <img
             v-if="item.passing === 'yes'"
@@ -76,6 +77,10 @@ export default defineComponent({
   props: {
     CourseVib: {
       type: Object as PropType<CourseItemCourse>,
+      required: true,
+    },
+    index: {
+      type: Number,
       required: true,
     },
   },
@@ -139,6 +144,9 @@ export default defineComponent({
     };
   },
   methods: {
+    courseClick(items: any) {
+      localStorage.setItem("courseSelect", JSON.stringify(items));
+    },
     handleClick() {
       this.$emit("courseSelected", this.CourseVib);
     },

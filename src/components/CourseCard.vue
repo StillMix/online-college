@@ -17,7 +17,11 @@
         </p>
       </div>
     </div>
-    <img class="courseCardes__img" :src="getIconSrc()" alt="Course icon" />
+    <img
+      class="courseCardes__img"
+      :src="`http://127.0.0.1:8000/${course.icon}`"
+      alt="Course icon"
+    />
     <div class="courseCardes__info">
       <p class="courseCardes__info__title">{{ course.title }}</p>
       <p class="courseCardes__info__subtitle">{{ course.subtitle }}</p>
@@ -79,7 +83,7 @@ export default defineComponent({
     },
     getIconSrc() {
       try {
-        return require(`@/assets/${this.course.icon}.svg`);
+        return require(`http://127.0.0.1:8000/${this.course.icon}`);
       } catch (error) {
         console.error(`Иконка ${this.course.icon} не найдена:`, error);
         return "";

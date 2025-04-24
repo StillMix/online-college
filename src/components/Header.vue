@@ -5,6 +5,7 @@
       <div class="header__navs__indicator" :style="indicatorStyle"></div>
       <router-link
         to="/"
+        @click="courseDelClick()"
         class="header__navs__link"
         active-class="header__navs__link__active"
         exact
@@ -22,6 +23,7 @@
         />ГЛАВНАЯ
       </router-link>
       <router-link
+        @click="courseDelClick()"
         v-if="token"
         to="/course"
         class="header__navs__link"
@@ -41,6 +43,7 @@
       </router-link>
       <div v-if="token" class="header__navs__razdel"></div>
       <router-link
+        @click="courseDelClick()"
         v-if="token"
         to="/pod"
         class="header__navs__link"
@@ -59,6 +62,7 @@
         />ПОДДЕРЖКА
       </router-link>
       <router-link
+        @click="courseDelClick()"
         v-if="token"
         to="/admin"
         class="header__navs__link"
@@ -281,6 +285,11 @@ export default defineComponent({
       logout,
       isAdmin,
     };
+  },
+  methods: {
+    courseDelClick() {
+      localStorage.removeItem("courseSelect");
+    },
   },
 });
 </script>

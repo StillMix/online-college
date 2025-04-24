@@ -48,6 +48,13 @@ const routes: Array<RouteRecordRaw> = [
       import(/* webpackChunkName: "about" */ "../views/SettingsView.vue"),
   },
   {
+    path: "/course/learn",
+    name: "learn",
+    meta: { transition: "slide" },
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/LearnView.vue"),
+  },
+  {
     path: "/admin",
     name: "admin",
     meta: { transition: "slide" },
