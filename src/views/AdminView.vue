@@ -484,6 +484,7 @@
       </div>
     </transition>
   </div>
+  <!-- Модальное окно редактирования урока -->
   <div
     class="adminView__lesson-modal"
     v-if="showLessonEditModal"
@@ -491,15 +492,16 @@
   >
     <div class="adminView__lesson-modal__content">
       <h2 class="adminView__lesson-modal__title">
-        Добавить(если оно есть то редактировать) описания урока "{{
-          currentEditingLesson?.name
-        }}"
+        {{
+          currentEditingLesson
+            ? `Редактирование урока "${currentEditingLesson.name}"`
+            : "Редактирование урока"
+        }}
       </h2>
 
       <div class="adminView__lesson-modal__editor">
         <RichTextEditor
           v-model="lessonDescription"
-          @update:modelValue="updateLessonDescription"
           placeholder="Введите описание урока..."
         />
       </div>
@@ -1803,92 +1805,6 @@ export default defineComponent({
         }
       }
 
-      &__lesson-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.7);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1100; /* Выше, чем у основного модального окна */
-        animation: fadeIn 0.3s ease;
-
-        &__content {
-          background: #2a2a2a;
-          border-radius: 0.625vw;
-          padding: 1.563vw;
-          width: 70vw;
-          max-width: 95vw;
-          max-height: 90vh;
-          overflow-y: auto;
-          box-shadow: 0 0.521vw 1.563vw rgba(0, 0, 0, 0.3);
-          animation: scaleIn 0.3s ease;
-          display: flex;
-          flex-direction: column;
-        }
-
-        &__title {
-          font-family: var(--font-family);
-          font-weight: 500;
-          font-size: 1.25vw;
-          color: #fff;
-          margin: 0 0 1.563vw 0;
-          border-bottom: 0.052vw solid rgba(255, 255, 255, 0.1);
-          padding-bottom: 0.781vw;
-        }
-
-        &__editor {
-          flex: 1;
-          min-height: 25vw;
-          margin-bottom: 1.563vw;
-        }
-
-        &__actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 0.781vw;
-
-          &__button {
-            padding: 0.521vw 1.563vw;
-            border-radius: 0.417vw;
-            font-family: var(--font-family);
-            font-weight: 400;
-            font-size: 0.938vw;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-
-            &:hover {
-              transform: translateY(-0.104vw);
-            }
-
-            &:active {
-              transform: translateY(0.052vw);
-            }
-
-            &--cancel {
-              background: #363636;
-
-              &:hover {
-                background: #404040;
-              }
-            }
-
-            &--save {
-              background: #39b874;
-
-              &:hover {
-                background: #45cc83;
-                box-shadow: 0 0.26vw 0.781vw rgba(57, 184, 116, 0.4);
-              }
-            }
-          }
-        }
-      }
-
       &__add {
         padding: 0.521vw 1.042vw;
         border-radius: 0.417vw;
@@ -2013,6 +1929,92 @@ export default defineComponent({
       &:hover {
         opacity: 1;
         transform: scale(1.1);
+      }
+    }
+  }
+
+  &__lesson-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100; /* Выше, чем у основного модального окна */
+    animation: fadeIn 0.3s ease;
+
+    &__content {
+      background: #2a2a2a;
+      border-radius: 0.625vw;
+      padding: 1.563vw;
+      width: 70vw;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 0.521vw 1.563vw rgba(0, 0, 0, 0.3);
+      animation: scaleIn 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    &__title {
+      font-family: var(--font-family);
+      font-weight: 500;
+      font-size: 1.25vw;
+      color: #fff;
+      margin: 0 0 1.563vw 0;
+      border-bottom: 0.052vw solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.781vw;
+    }
+
+    &__editor {
+      flex: 1;
+      min-height: 25vw;
+      margin-bottom: 1.563vw;
+    }
+
+    &__actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.781vw;
+
+      &__button {
+        padding: 0.521vw 1.563vw;
+        border-radius: 0.417vw;
+        font-family: var(--font-family);
+        font-weight: 400;
+        font-size: 0.938vw;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-0.104vw);
+        }
+
+        &:active {
+          transform: translateY(0.052vw);
+        }
+
+        &--cancel {
+          background: #363636;
+
+          &:hover {
+            background: #404040;
+          }
+        }
+
+        &--save {
+          background: #39b874;
+
+          &:hover {
+            background: #45cc83;
+            box-shadow: 0 0.26vw 0.781vw rgba(57, 184, 116, 0.4);
+          }
+        }
       }
     }
   }
