@@ -527,8 +527,7 @@
 </template>
 
 <script lang="ts">
-import axios from "axios";
-import { defineComponent, ref, computed, onMounted, PropType } from "vue";
+import { defineComponent, ref, computed, onMounted } from "vue";
 import AppLoader from "@/components/Loader.vue";
 import RichTextEditor from "@/components/RichTextEditor.vue";
 
@@ -542,7 +541,7 @@ interface CourseItemCourseContent {
   id: string;
   name: string;
   passing: string;
-  description?: string; // Добавляем поле для хранения описания в формате Rich Text
+  description?: string;
 }
 
 interface CourseItemCourse {
@@ -572,12 +571,10 @@ export default defineComponent({
     RichTextEditor,
   },
   props: {
-    // Используем Props для большей гибкости и переиспользуемости компонента
     initialLoading: {
       type: Boolean,
       default: true,
     },
-    // Можно добавить и другие пропсы, если нужно
   },
   emits: ["course-updated", "course-created", "course-deleted"],
   setup(props, { emit }) {
@@ -640,7 +637,7 @@ export default defineComponent({
               id: "1",
               name: "Что будет в курсе?",
               passing: "no",
-              description: "", // Добавляем пустое описание по умолчанию
+              description: "",
             },
           ],
         },
@@ -672,23 +669,37 @@ export default defineComponent({
     });
 
     // Загрузка данных
-    const loadCourses = () => {
+    const loadCourses = async () => {
       loading.value = true;
-      const courseDataStr = localStorage.getItem("courseData");
-
-      if (courseDataStr) {
-        try {
-          courses.value = JSON.parse(courseDataStr);
-        } catch (e) {
-          console.error("Ошибка при парсинге данных курсов:", e);
-          courses.value = [];
+      try {
+        const response = await fetch("http://localhost:8000/api/courses/");
+        if (response.ok) {
+          const data = await response.json();
+          courses.value = data;
+          // Обновляем localStorage
+          localStorage.setItem("courseData", JSON.stringify(data));
+        } else {
+          // Если API недоступен, пробуем загрузить из localStorage
+          const courseDataStr = localStorage.getItem("courseData");
+          if (courseDataStr) {
+            courses.value = JSON.parse(courseDataStr);
+          }
         }
-      } else {
-        console.warn("Данные курсов не найдены в localStorage");
-        courses.value = [];
+      } catch (error) {
+        console.error("Ошибка при загрузке курсов:", error);
+        // Пробуем загрузить из localStorage в случае ошибки
+        const courseDataStr = localStorage.getItem("courseData");
+        if (courseDataStr) {
+          try {
+            courses.value = JSON.parse(courseDataStr);
+          } catch (e) {
+            console.error("Ошибка при парсинге данных курсов:", e);
+            courses.value = [];
+          }
+        }
+      } finally {
+        loading.value = false;
       }
-
-      loading.value = false;
     };
 
     // Обработчик загрузки иконки курса
@@ -700,11 +711,6 @@ export default defineComponent({
         reader.onload = (e) => {
           if (e.target) {
             courseIconPreview.value = e.target.result as string;
-            // Сохраняем в имя файла (без расширения) в поле icon
-            if (courseIconFile.value) {
-              const fileName = courseIconFile.value.name.split(".")[0];
-              editingCourse.value.icon = fileName;
-            }
           }
         };
         reader.readAsDataURL(courseIconFile.value);
@@ -721,7 +727,6 @@ export default defineComponent({
       try {
         return require(`@/assets/${iconName}.svg`);
       } catch (error) {
-        // Если иконка не найдена, возвращаем стандартную иконку
         console.error(`Иконка ${iconName} не найдена:`, error);
         return require("@/assets/courseNone.svg");
       }
@@ -772,14 +777,6 @@ export default defineComponent({
       // Сбрасываем предпросмотр
       courseIconPreview.value = null;
       courseIconFile.value = null;
-
-      // Загружаем иконку для предпросмотра
-      try {
-        getIconSrc(editingCourse.value.icon);
-        getIconSrc(editingCourse.value.icontype);
-      } catch (error) {
-        console.error("Не удалось загрузить превью иконки:", error);
-      }
 
       showEditModal.value = true;
     };
@@ -916,7 +913,7 @@ export default defineComponent({
         id: newId,
         name: `Урок ${newId}`,
         passing: "no",
-        description: "", // Добавляем пустое описание для редактора
+        description: "",
       });
     };
 
@@ -964,14 +961,13 @@ export default defineComponent({
     // Функция для загрузки изображения курса
     const uploadCourseImage = async (courseId: string, file: File | null) => {
       if (!file) {
-        showNotification("Файл не выбран", "error");
         return null;
       }
 
-      const formData = new FormData();
-      formData.append("file", file);
-
       try {
+        const formData = new FormData();
+        formData.append("file", file);
+
         const response = await fetch(
           `http://localhost:8000/api/courses/${courseId}/upload-image`,
           {
@@ -987,7 +983,6 @@ export default defineComponent({
         }
 
         const result = await response.json();
-        showNotification("Изображение успешно загружено!");
         return result.path;
       } catch (error) {
         console.error("Ошибка при загрузке изображения:", error);
@@ -998,156 +993,199 @@ export default defineComponent({
 
     // Функция для обновления курса
     const updateCourse = async () => {
-      if (editMode.value && deletingCourse.value) {
-        try {
-          // Создаем копию объекта для модификации
-          const courseData = JSON.parse(JSON.stringify(editingCourse.value));
+      try {
+        // Создаем копию объекта для отправки на сервер
+        const courseData = {
+          ...JSON.parse(JSON.stringify(editingCourse.value)),
+        };
 
-          // Переименовываем поле sections в course для API
-          courseData.course = courseData.sections;
-          delete courseData.sections;
+        // Переименовываем поле sections в course для API
+        courseData.course = courseData.sections;
+        delete courseData.sections;
 
-          const response = await fetch(
-            `http://localhost:8000/api/courses/${courseData.id}`,
-            {
+        // Отправляем запрос на обновление курса
+        const response = await fetch(
+          `http://localhost:8000/api/courses/${courseData.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(courseData),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Ошибка при обновлении курса: ${response.status}`);
+        }
+
+        let updatedCourse = await response.json();
+
+        // Если есть новое изображение, загружаем его
+        if (courseIconFile.value) {
+          const imagePath = await uploadCourseImage(
+            courseData.id,
+            courseIconFile.value
+          );
+          if (imagePath) {
+            // Обновляем путь к иконке в объекте курса
+            updatedCourse.icon = imagePath;
+            editingCourse.value.icon = imagePath;
+
+            // Обновляем курс на сервере с новой иконкой
+            await fetch(`http://localhost:8000/api/courses/${courseData.id}`, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify(courseData),
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`Ошибка при обновлении курса: ${response.status}`);
+              body: JSON.stringify({
+                ...courseData,
+                icon: imagePath,
+              }),
+            });
           }
-
-          // Если есть новое изображение, загружаем его
-          if (courseIconFile.value) {
-            const imagePath = await uploadCourseImage(
-              courseData.id,
-              courseIconFile.value
-            );
-            if (imagePath) {
-              // Обновляем путь к иконке в объекте курса
-              editingCourse.value.icon = imagePath;
-            }
-          }
-
-          // Обновляем курс в списке
-          const index = courses.value.findIndex((c) => c.id === courseData.id);
-          if (index !== -1) {
-            courses.value[index] = JSON.parse(
-              JSON.stringify(editingCourse.value)
-            );
-          }
-
-          // Обновляем localStorage
-          localStorage.setItem("courseData", JSON.stringify(courses.value));
-
-          showNotification("Курс успешно обновлен!");
-          closeModals();
-        } catch (error) {
-          console.error("Ошибка при обновлении курса:", error);
-          showNotification(`Ошибка при обновлении курса: ${error}`, "error");
         }
+
+        // Обновляем курс в списке
+        const index = courses.value.findIndex((c) => c.id === courseData.id);
+        if (index !== -1) {
+          // Преобразуем sections обратно для локального использования
+          updatedCourse.sections = updatedCourse.course;
+          delete updatedCourse.course;
+
+          courses.value[index] = updatedCourse;
+        }
+
+        // Обновляем localStorage
+        localStorage.setItem("courseData", JSON.stringify(courses.value));
+
+        showNotification("Курс успешно обновлен!");
+        emit("course-updated", updatedCourse);
+        closeModals();
+      } catch (error) {
+        console.error("Ошибка при обновлении курса:", error);
+        showNotification(`Ошибка при обновлении курса: ${error}`, "error");
       }
     };
 
     // Функция для удаления курса
     const deleteCourse = async () => {
-      if (deletingCourse.value) {
-        try {
-          const response = await fetch(
-            `http://localhost:8000/api/courses/${deletingCourse.value.id}`,
-            {
-              method: "DELETE",
-            }
-          );
+      if (!deletingCourse.value) {
+        showNotification("Не выбран курс для удаления", "error");
+        return;
+      }
 
-          if (!response.ok) {
-            throw new Error(`Ошибка при удалении курса: ${response.status}`);
+      try {
+        // Отправляем запрос на удаление курса
+        const response = await fetch(
+          `http://localhost:8000/api/courses/${deletingCourse.value.id}`,
+          {
+            method: "DELETE",
           }
+        );
 
-          // Удаляем курс из списка
-          const index = courses.value.findIndex(
-            (c) => c.id === deletingCourse.value?.id
-          );
-          if (index !== -1) {
-            courses.value.splice(index, 1);
-          }
-
-          // Обновляем localStorage
-          localStorage.setItem("courseData", JSON.stringify(courses.value));
-
-          showNotification("Курс успешно удален!");
-          closeModals();
-        } catch (error) {
-          console.error("Ошибка при удалении курса:", error);
-          showNotification(`Ошибка при удалении курса: ${error}`, "error");
+        if (!response.ok) {
+          throw new Error(`Ошибка при удалении курса: ${response.status}`);
         }
+
+        // Удаляем курс из списка
+        const index = courses.value.findIndex(
+          (c) => c.id === deletingCourse.value?.id
+        );
+        if (index !== -1) {
+          courses.value.splice(index, 1);
+        }
+
+        // Обновляем localStorage
+        localStorage.setItem("courseData", JSON.stringify(courses.value));
+
+        showNotification("Курс успешно удален!");
+        emit("course-deleted", deletingCourse.value.id);
+        closeModals();
+      } catch (error) {
+        console.error("Ошибка при удалении курса:", error);
+        showNotification(`Ошибка при удалении курса: ${error}`, "error");
       }
     };
 
-    // Модификация для функции сохранения курса
+    // Создание нового курса
+    const createCourse = async () => {
+      try {
+        // Создаем копию объекта для отправки на сервер
+        const courseData = {
+          ...JSON.parse(JSON.stringify(editingCourse.value)),
+        };
+
+        // Переименовываем поле sections в course для API
+        courseData.course = courseData.sections;
+        delete courseData.sections;
+
+        // Отправляем запрос на создание курса
+        const response = await fetch("http://localhost:8000/api/courses/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(courseData),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Ошибка API:", errorData);
+          throw new Error(`Ошибка при создании курса: ${response.status}`);
+        }
+
+        let newCourse = await response.json();
+
+        // Если у нас есть загруженный файл иконки, загружаем его
+        if (courseIconFile.value) {
+          const imagePath = await uploadCourseImage(
+            newCourse.id,
+            courseIconFile.value
+          );
+          if (imagePath) {
+            newCourse.icon = imagePath;
+
+            // Обновляем курс на сервере с новой иконкой
+            await fetch(`http://localhost:8000/api/courses/${newCourse.id}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                ...courseData,
+                id: newCourse.id,
+                icon: imagePath,
+              }),
+            });
+          }
+        }
+
+        // Преобразуем course обратно в sections для локального хранения
+        newCourse.sections = newCourse.course || [];
+        delete newCourse.course;
+
+        // Добавляем созданный курс в список
+        courses.value.push(newCourse);
+
+        // Обновляем localStorage
+        localStorage.setItem("courseData", JSON.stringify(courses.value));
+
+        showNotification("Курс успешно создан!");
+        emit("course-created", newCourse);
+        closeModals();
+      } catch (error) {
+        console.error("Ошибка при создании курса:", error);
+        showNotification(`Ошибка при создании курса: ${error}`, "error");
+      }
+    };
+
+    // Функция для сохранения курса (создание или обновление)
     const saveCourse = async () => {
       if (editMode.value) {
-        // Если режим редактирования - вызываем функцию обновления
         await updateCourse();
       } else {
-        // Создание нового курса (оставляем существующий код)
-        try {
-          // Создаем копию объекта для модификации
-          const courseData = JSON.parse(JSON.stringify(editingCourse.value));
-
-          // Переименовываем поле sections в course
-          courseData.course = courseData.sections;
-          delete courseData.sections;
-
-          const response = await fetch("http://localhost:8000/api/courses", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(courseData),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Ошибка API:", errorData);
-            showNotification(
-              `Ошибка при создании курса: ${response.status}`,
-              "error"
-            );
-            return;
-          }
-
-          const result = await response.json();
-          console.log("Результат создания курса:", result);
-
-          // Если у нас есть загруженный файл иконки, загружаем его
-          if (courseIconFile.value) {
-            const imagePath = await uploadCourseImage(
-              result.id,
-              courseIconFile.value
-            );
-            if (imagePath) {
-              result.icon = imagePath;
-            }
-          }
-
-          // Добавляем созданный курс в список
-          courses.value.push(result);
-
-          // Обновляем localStorage
-          localStorage.setItem("courseData", JSON.stringify(courses.value));
-
-          showNotification("Курс успешно создан!");
-          closeModals();
-        } catch (error) {
-          console.error("Ошибка при создании курса:", error);
-          showNotification("Ошибка при создании курса", "error");
-        }
+        await createCourse();
       }
     };
 
@@ -1221,6 +1259,7 @@ export default defineComponent({
   },
 });
 </script>
+
 <style lang="scss">
 .course-control {
   width: 100%;
