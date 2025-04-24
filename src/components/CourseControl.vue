@@ -1088,19 +1088,7 @@ export default defineComponent({
         }
       }
     };
-    const handleCourseIconUpload = (event: Event) => {
-      const input = event.target as HTMLInputElement;
-      if (input.files && input.files.length > 0) {
-        courseIconFile.value = input.files[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (e.target) {
-            courseIconPreview.value = e.target.result as string;
-          }
-        };
-        reader.readAsDataURL(courseIconFile.value);
-      }
-    };
+
     // Модификация для функции сохранения курса
     const saveCourse = async () => {
       if (editMode.value) {
@@ -1161,29 +1149,6 @@ export default defineComponent({
           showNotification("Ошибка при создании курса", "error");
         }
       }
-    };
-
-    // Удаление курса
-    const deleteCourse = () => {
-      if (deletingCourse.value) {
-        const index = courses.value.findIndex(
-          (c) => c.id === deletingCourse.value?.id
-        );
-
-        if (index !== -1) {
-          courses.value.splice(index, 1);
-
-          // Обновляем localStorage
-          localStorage.setItem("courseData", JSON.stringify(courses.value));
-
-          showNotification("Курс успешно удален!");
-        } else {
-          showNotification("Ошибка при удалении курса", "error");
-        }
-      }
-
-      // Закрываем модальное окно
-      closeModals();
     };
 
     // Показ уведомления
