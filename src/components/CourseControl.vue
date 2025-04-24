@@ -979,24 +979,42 @@ export default defineComponent({
       } else {
         // Создание нового курса
         try {
-          const response = await axios.post(
-            "http://localhost:8000/api/courses/",
-            {
-              course: editingCourse.value,
-            }
-          );
+          // Создаем копию объекта для модификации
+          const courseData = JSON.parse(JSON.stringify(editingCourse.value));
 
-          if (response.data) {
+          // Переименовываем поле sections в course
+          courseData.course = courseData.sections;
+          delete courseData.sections;
+
+          const response = await fetch("http://localhost:8000/api/courses", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(courseData),
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            console.log(result);
+
+            // Добавляем созданный курс в список
+            courses.value.push(editingCourse.value);
+
             showNotification("Курс успешно создан!");
+          } else {
+            const errorData = await response.json();
+            console.error("Ошибка API:", errorData);
+            showNotification(
+              `Ошибка при создании курса: ${response.status}`,
+              "error"
+            );
           }
         } catch (error) {
           console.error(error);
           showNotification("Ошибка при создании курса", "error");
         }
       }
-
-      // Сохраняем обновленные данные в localStorage
-      localStorage.setItem("courseData", JSON.stringify(courses.value));
 
       // Закрываем модальное окно
       closeModals();
