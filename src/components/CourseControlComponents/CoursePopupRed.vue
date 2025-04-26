@@ -45,6 +45,7 @@
             color: 'black',
             marginTop: '0.521vw',
           }"
+          :elemID="elemRed.id"
           @click="addSection"
         >
           Добавить раздел
@@ -128,17 +129,24 @@ export default defineComponent({
       }
     };
     // Обновление информации о курсе
-    const updateCourseInfo = (
+    const updateCourseInfo = async (
       id: string,
       title: string,
-      subtitle: string,
-      idcourseinfo: string
+      subtitle: string
     ) => {
       const index = courseInfoList.value.findIndex((info) => info.id === id);
       if (index !== -1) {
         courseInfoList.value[index] = { id, title, subtitle };
       }
-      await courseApi.updateCourseInfo(props.elemRed.id, idcourseinfo, newInfo);
+
+      if (props.elemRed) {
+        const updatedInfo = { id, title, subtitle };
+        try {
+          await courseApi.updateCourseInfo(props.elemRed.id, id, updatedInfo);
+        } catch (error) {
+          console.error("Ошибка при обновлении информации о курсе:", error);
+        }
+      }
     };
 
     // Удаление информации о курсе
@@ -169,16 +177,26 @@ export default defineComponent({
     };
 
     // Обновление раздела
-    const updateCourseSection = (section: CourseItemCourse, idcourseinfo) => {
+    const updateCourseSection = async (
+      section: CourseItemCourse,
+      idcourseinfo: string
+    ) => {
       const index = courseSections.value.findIndex((s) => s.id === section.id);
       if (index !== -1) {
         courseSections.value[index] = section;
       }
-      await courseApi.updateCourseSection(
-        props.elemRed.id,
-        idcourseinfo,
-        newInfo
-      );
+
+      if (props.elemRed) {
+        try {
+          await courseApi.updateCourseSection(
+            props.elemRed.id,
+            section.id,
+            section
+          );
+        } catch (error) {
+          console.error("Ошибка при обновлении раздела курса:", error);
+        }
+      }
     };
 
     // Удаление раздела

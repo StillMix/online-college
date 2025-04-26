@@ -57,13 +57,17 @@ import { defineComponent, ref, PropType, onMounted } from "vue";
 import { AppInput, AppButton } from "../UI";
 import CourseLessons from "./CourseLessons.vue";
 import { CourseItemCourse, CourseItemCourseContent } from "@/types";
-
+import { courseApi } from "@/api";
 export default defineComponent({
   name: "CourseSection",
   components: { AppInput, AppButton, CourseLessons },
   props: {
     section: {
       type: Object as PropType<CourseItemCourse>,
+      required: false,
+    },
+    elemID: {
+      type: String,
       required: false,
     },
   },
@@ -91,6 +95,11 @@ export default defineComponent({
         passing: "no",
         description: "",
       });
+      await courseApi.createCourseLesson(
+        props.elemRed.id,
+        props.section.id,
+        lessons.value
+      );
     };
 
     // Обновление урока
@@ -117,7 +126,7 @@ export default defineComponent({
         content: lessons.value,
       };
 
-      emit("save", updatedSection, sectionName.value.id);
+      emit("save", updatedSection, sectionName.value); // Убираем доступ к .id
     };
 
     return {

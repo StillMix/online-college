@@ -108,12 +108,12 @@ export default defineComponent({
 
     // Сохранение информации
     const saveInfo = () => {
+      console.log(props.id);
       if (infoTitle.value.trim() === "") return;
 
-      emit("save", props.id, infoTitle.value, infoSubtitle.value, info.value.id);
+      emit("save", props.id, infoTitle.value, infoSubtitle.value);
       isModified.value = false;
     };
-
     // Удаление информации
     const deleteInfo = () => {
       emit("delete", props.id);
