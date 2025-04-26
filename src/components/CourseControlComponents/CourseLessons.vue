@@ -1,46 +1,168 @@
 <template>
   <div class="course-Lessonsinfo">
-    <AppInput
-      :styleLabel="{
-        margin: '0',
-      }"
-      :styleInput="{
-        width: '20vw',
-      }"
-      type="text"
-      placeholder="Название"
-      required
-    />
-    <AppButton
-      :styleOverrides="{
-        width: '11.177vw',
-        backgroundColor: 'white',
-        color: 'black',
-      }"
-    >
-      Добавить описание
-    </AppButton>
-    <AppButton
-      :styleOverrides="{
-        width: '11.177vw',
-        backgroundColor: 'white',
-        color: 'black',
-      }"
-    >
-      Сохранить
-    </AppButton>
+    <div class="course-Lessonsinfo__header">
+      <div class="course-Lessonsinfo__header__title">
+        <span class="course-Lessonsinfo__header__title__number">{{
+          index + 1
+        }}</span>
+        <AppInput
+          v-model="lessonName"
+          :styleLabel="{
+            margin: '0',
+          }"
+          :styleInput="{
+            width: '100%',
+            paddingLeft: '10px',
+          }"
+          type="text"
+          placeholder="Название урока"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="course-Lessonsinfo__content">
+      <div class="course-Lessonsinfo__controls">
+        <AppButton
+          v-if="!showDescription"
+          :styleOverrides="{
+            width: 'auto',
+            padding: '0.417vw 0.833vw',
+            backgroundColor: '#363636',
+            color: 'white',
+          }"
+          @click="toggleDescription"
+        >
+          Добавить описание
+        </AppButton>
+
+        <AppButton
+          :styleOverrides="{
+            width: 'auto',
+            padding: '0.417vw 0.833vw',
+            backgroundColor: '#FF5B5B',
+            color: 'white',
+          }"
+          @click="removeLesson"
+        >
+          Удалить
+        </AppButton>
+      </div>
+    </div>
+
+    <div class="course-Lessonsinfo__actions">
+      <AppButton
+        :styleOverrides="{
+          width: 'auto',
+          padding: '0.417vw 0.833vw',
+          backgroundColor: 'white',
+          color: 'black',
+        }"
+        @click="saveLesson"
+      >
+        Сохранить
+      </AppButton>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import {
+  defineComponent,
+  ref,
+  PropType,
+  computed,
+  watch,
+  onMounted,
+} from "vue";
 import { AppInput, AppButton } from "../UI";
+import { CourseItemCourseContent } from "@/types";
 
 export default defineComponent({
   name: "CourseLessons",
   components: { AppInput, AppButton },
-  setup() {
-    return {};
+  props: {
+    lesson: {
+      type: Object as PropType<CourseItemCourseContent>,
+      required: false,
+    },
+    index: {
+      type: Number,
+      default: 0,
+    },
+  },
+  emits: ["update", "remove"],
+  setup(props, { emit }) {
+    const lessonName = ref(props.lesson?.name || `Урок ${props.index + 1}`);
+    const lessonPassing = ref(props.lesson?.passing || "no");
+    const lessonDescription = ref(props.lesson?.description || "");
+    const showDescription = ref(!!props.lesson?.description);
+
+    // Вычисляемое свойство для определения класса статуса
+    const statusClass = computed(() => {
+      return lessonPassing.value === "yes"
+        ? "course-Lessonsinfo__header__status--active"
+        : "course-Lessonsinfo__header__status--pending";
+    });
+
+    // Отслеживаем изменения props.lesson
+    watch(
+      () => props.lesson,
+      (newLesson) => {
+        if (newLesson) {
+          lessonName.value = newLesson.name;
+          lessonPassing.value = newLesson.passing;
+          lessonDescription.value = newLesson.description || "";
+          showDescription.value = !!newLesson.description;
+        }
+      },
+      { deep: true }
+    );
+
+    // Инициализация при монтировании
+    onMounted(() => {
+      if (props.lesson) {
+        lessonName.value = props.lesson.name;
+        lessonPassing.value = props.lesson.passing;
+        lessonDescription.value = props.lesson.description || "";
+        showDescription.value = !!props.lesson.description;
+      }
+    });
+
+    // Переключение отображения поля описания
+    const toggleDescription = () => {
+      showDescription.value = !showDescription.value;
+    };
+
+    // Удаление урока
+    const removeLesson = () => {
+      if (props.lesson) {
+        emit("remove", props.lesson.id);
+      }
+    };
+
+    // Сохранение урока
+    const saveLesson = () => {
+      const updatedLesson: CourseItemCourseContent = {
+        id: props.lesson?.id || `lesson_${Date.now()}`,
+        name: lessonName.value,
+        passing: lessonPassing.value,
+        description: showDescription.value ? lessonDescription.value : "",
+      };
+
+      emit("update", updatedLesson.id, updatedLesson);
+    };
+
+    return {
+      lessonName,
+      lessonPassing,
+      lessonDescription,
+      showDescription,
+      statusClass,
+      toggleDescription,
+      removeLesson,
+      saveLesson,
+    };
   },
 });
 </script>
@@ -48,17 +170,16 @@ export default defineComponent({
 <style lang="scss" scoped>
 .course-Lessonsinfo {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.042vw;
+  flex-direction: column;
+  gap: 0.781vw;
   width: 100%;
-  background-color: #2a2a2a;
-  border-radius: 0.625vw;
+  background-color: #363636;
+  border-radius: 0.521vw;
   padding: 1.042vw;
   box-shadow: 0 0.104vw 0.417vw rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  margin-bottom: 0.521vw;
 
   // Декоративная линия слева
   &::before {
@@ -74,7 +195,7 @@ export default defineComponent({
   }
 
   &:hover {
-    background-color: #333333;
+    background-color: #404040;
     box-shadow: 0 0.208vw 0.625vw rgba(0, 0, 0, 0.2);
     transform: translateY(-0.052vw);
 
@@ -84,22 +205,17 @@ export default defineComponent({
   }
 
   &__header {
-    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 0.521vw;
-    margin-bottom: 0.833vw;
-    border-bottom: 0.052vw solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+    margin-bottom: 0.521vw;
 
     &__title {
-      font-family: var(--font-family);
-      font-weight: 500;
-      font-size: 0.938vw;
-      color: #fff;
       display: flex;
       align-items: center;
-      gap: 0.417vw;
+      gap: 0.521vw;
+      flex: 1;
 
       &__number {
         display: flex;
@@ -111,15 +227,17 @@ export default defineComponent({
         border-radius: 50%;
         font-size: 0.729vw;
         color: #08dccf;
+        font-weight: 600;
       }
     }
 
     &__status {
-      padding: 0.208vw 0.417vw;
+      padding: 0.208vw 0.521vw;
       border-radius: 1.042vw;
       font-family: var(--font-family);
       font-weight: 400;
       font-size: 0.625vw;
+      white-space: nowrap;
 
       &--active {
         background: rgba(57, 184, 116, 0.2);
@@ -135,14 +253,9 @@ export default defineComponent({
 
   &__content {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.833vw;
+    flex-direction: column;
+    gap: 0.781vw;
     width: 100%;
-  }
-
-  &__input-area {
-    flex: 1;
-    min-width: 20.833vw;
   }
 
   &__controls {
@@ -152,31 +265,11 @@ export default defineComponent({
     align-items: center;
   }
 
-  &__description {
-    width: 100%;
-    margin-top: 0.833vw;
-    padding: 0.833vw;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 0.417vw;
-    font-family: var(--font-family);
-    font-weight: 400;
-    font-size: 0.833vw;
-    color: rgba(255, 255, 255, 0.8);
-
-    &__label {
-      font-size: 0.729vw;
-      color: rgba(255, 255, 255, 0.5);
-      margin-bottom: 0.417vw;
-      display: block;
-    }
-  }
-
   &__actions {
     display: flex;
     justify-content: flex-end;
-    gap: 0.521vw;
-    margin-top: 0.833vw;
     width: 100%;
+    margin-top: 0.313vw;
   }
 
   // Анимация появления компонента
@@ -190,6 +283,17 @@ export default defineComponent({
     to {
       opacity: 1;
       transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-0.313vw);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 }

@@ -87,7 +87,7 @@
       </div>
     </div>
 
-    <div class="course-maininfo__right">
+    <div class="course-maininfo__right" v-if="elemRed">
       <div class="course-maininfo__selImg">
         <input
           class="course-maininfo__selImg__input"
@@ -213,6 +213,19 @@ export default defineComponent({
       const file = target.files?.[0];
       if (file) {
         previewUrl.value = URL.createObjectURL(file);
+        let courses;
+        courses = await courseApi.uploadCourseImage(
+          elemRed.id,
+          previewUrl.value
+        );
+
+        if (courses) {
+          console.log(
+            this.edit ? "Курс успешно создан:" : "Курс успешно обновлен:",
+            courses
+          );
+          await courseApi.getAllCourses();
+        }
       }
     };
 

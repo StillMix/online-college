@@ -1,50 +1,133 @@
 <template>
   <div class="course-sectioninfo">
     <AppInput
+      v-model="sectionName"
       :styleLabel="{
         margin: '0',
       }"
       :styleInput="{
         width: '20vw',
+        paddingLeft: '10px',
       }"
       type="text"
-      placeholder="Название"
+      placeholder="Название раздела"
       required
     />
     <div class="course-sectioninfo__lessons">
-      <CourseLessons />
+      <CourseLessons
+        v-for="(lesson, index) in lessons"
+        :key="lesson.id"
+        :lesson="lesson"
+        :index="index"
+        @remove="removeLesson"
+        @update="updateLesson"
+      />
+      <p v-if="lessons.length === 0" class="course-sectioninfo__lessons__empty">
+        Уроки еще не добавлены. Нажмите "Добавить урок", чтобы создать первый
+        урок.
+      </p>
     </div>
-    <AppButton
-      :styleOverrides="{
-        width: '11.177vw',
-        backgroundColor: 'white',
-        color: 'black',
-      }"
-    >
-      Добавить урок
-    </AppButton>
-    <AppButton
-      :styleOverrides="{
-        width: '11.177vw',
-        backgroundColor: 'white',
-        color: 'black',
-      }"
-    >
-      Сохранить
-    </AppButton>
+    <div class="course-sectioninfo__actions">
+      <AppButton
+        :styleOverrides="{
+          width: '11.177vw',
+          backgroundColor: 'white',
+          color: 'black',
+        }"
+        @click="addLesson"
+      >
+        Добавить урок
+      </AppButton>
+      <AppButton
+        :styleOverrides="{
+          width: '11.177vw',
+          backgroundColor: 'white',
+          color: 'black',
+        }"
+        @click="saveSection"
+      >
+        Сохранить
+      </AppButton>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref, PropType, onMounted } from "vue";
 import { AppInput, AppButton } from "../UI";
 import CourseLessons from "./CourseLessons.vue";
+import { CourseItemCourse, CourseItemCourseContent } from "@/types";
 
 export default defineComponent({
   name: "CourseSection",
   components: { AppInput, AppButton, CourseLessons },
-  setup() {
-    return {};
+  props: {
+    section: {
+      type: Object as PropType<CourseItemCourse>,
+      required: false,
+    },
+  },
+  emits: ["save", "delete", "update-lesson"],
+  setup(props, { emit }) {
+    const sectionName = ref(props.section?.name || "Новый раздел");
+    const lessons = ref<CourseItemCourseContent[]>([]);
+
+    // Инициализация данных при монтировании компонента
+    onMounted(() => {
+      if (props.section) {
+        sectionName.value = props.section.name;
+        if (props.section.content && props.section.content.length > 0) {
+          lessons.value = [...props.section.content];
+        }
+      }
+    });
+
+    // Добавление нового урока
+    const addLesson = () => {
+      const newLessonId = `lesson_${Date.now()}`;
+      lessons.value.push({
+        id: newLessonId,
+        name: `Урок ${lessons.value.length + 1}`,
+        passing: "no",
+        description: "",
+      });
+    };
+
+    // Обновление урока
+    const updateLesson = (
+      lessonId: string,
+      updatedLesson: CourseItemCourseContent
+    ) => {
+      const index = lessons.value.findIndex((lesson) => lesson.id === lessonId);
+      if (index !== -1) {
+        lessons.value[index] = { ...updatedLesson };
+      }
+    };
+
+    // Удаление урока
+    const removeLesson = (lessonId: string) => {
+      lessons.value = lessons.value.filter((lesson) => lesson.id !== lessonId);
+    };
+
+    // Сохранение раздела
+    const saveSection = () => {
+      const updatedSection: CourseItemCourse = {
+        id: props.section?.id || `section_${Date.now()}`,
+        name: sectionName.value,
+        content: lessons.value,
+      };
+
+      emit("save", updatedSection);
+    };
+
+    return {
+      sectionName,
+      lessons,
+      addLesson,
+      updateLesson,
+      removeLesson,
+      saveSection,
+    };
   },
 });
 </script>
@@ -91,58 +174,6 @@ export default defineComponent({
     }
   }
 
-  &__header {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.042vw;
-    padding-bottom: 0.833vw;
-    border-bottom: 0.052vw solid rgba(255, 255, 255, 0.1);
-
-    &__title {
-      font-family: var(--font-family);
-      font-weight: 500;
-      font-size: 1.042vw;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 0.417vw;
-
-      &__icon {
-        font-size: 0.938vw;
-        color: #08dccf;
-      }
-    }
-
-    &__actions {
-      display: flex;
-      gap: 0.521vw;
-    }
-  }
-
-  &__input-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.042vw;
-    width: 100%;
-    margin-bottom: 1.042vw;
-  }
-
-  &__form-group {
-    flex: 1;
-    min-width: 15.625vw;
-
-    &__label {
-      font-family: var(--font-family);
-      font-weight: 400;
-      font-size: 0.729vw;
-      color: rgba(255, 255, 255, 0.6);
-      margin-bottom: 0.313vw;
-      display: block;
-    }
-  }
-
   &__lessons {
     width: 100%;
     margin: 1.042vw 0;
@@ -150,6 +181,10 @@ export default defineComponent({
     background: rgba(0, 0, 0, 0.2);
     border-radius: 0.417vw;
     transition: background-color 0.3s ease;
+    min-height: 10vw;
+    display: flex;
+    flex-direction: column;
+    gap: 0.781vw;
 
     &:hover {
       background: rgba(0, 0, 0, 0.3);
@@ -161,126 +196,17 @@ export default defineComponent({
       font-size: 0.833vw;
       color: rgba(255, 255, 255, 0.5);
       text-align: center;
-      padding: 1.563vw 0;
-    }
-
-    &__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 0.521vw;
-      margin-bottom: 0.833vw;
-      border-bottom: 0.052vw solid rgba(255, 255, 255, 0.1);
-
-      &__title {
-        font-family: var(--font-family);
-        font-weight: 500;
-        font-size: 0.938vw;
-        color: #fff;
-      }
-    }
-
-    &__list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.521vw;
+      padding: 3vw 0;
+      font-style: italic;
     }
   }
 
   &__actions {
     display: flex;
-    flex-wrap: wrap;
     justify-content: space-between;
-    align-items: center;
     width: 100%;
-    margin-top: 1.042vw;
-    gap: 0.521vw;
-
-    &__left {
-      display: flex;
-      gap: 0.521vw;
-    }
-
-    &__right {
-      display: flex;
-      gap: 0.521vw;
-    }
-  }
-
-  &__button {
-    padding: 0.521vw 1.042vw;
-    border-radius: 0.417vw;
-    font-family: var(--font-family);
-    font-weight: 400;
-    font-size: 0.833vw;
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.313vw;
-
-    &--primary {
-      background: #fff;
-      color: #000;
-
-      &:hover {
-        background: #f0f0f0;
-        transform: translateY(-0.104vw);
-        box-shadow: 0 0.208vw 0.417vw rgba(255, 255, 255, 0.2);
-      }
-
-      &__icon {
-        color: #08dccf;
-      }
-    }
-
-    &--secondary {
-      background: #363636;
-      color: #fff;
-
-      &:hover {
-        background: #424242;
-        transform: translateY(-0.104vw);
-      }
-    }
-
-    &--delete {
-      background: #363636;
-      color: #ff5b5b;
-
-      &:hover {
-        background: #ff5b5b;
-        color: #fff;
-        transform: translateY(-0.104vw);
-        box-shadow: 0 0.208vw 0.417vw rgba(255, 91, 91, 0.3);
-      }
-    }
-
-    &:active {
-      transform: translateY(0.052vw);
-    }
-  }
-
-  // Стили для перетаскивания элементов
-  &__draggable {
-    cursor: move;
-    position: relative;
-
-    &::before {
-      content: "≡";
-      position: absolute;
-      left: -1.042vw;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 1.042vw;
-      color: rgba(255, 255, 255, 0.3);
-      transition: color 0.2s ease;
-    }
-
-    &:hover::before {
-      color: rgba(255, 255, 255, 0.7);
-    }
+    margin-top: 0.781vw;
+    gap: 0.781vw;
   }
 
   // Анимация появления компонента
