@@ -1,9 +1,7 @@
+// Затем импортируем модули, которые используют API_BASE_URL
 import * as courseApi from "./courseApi";
 
 export { courseApi };
-
-// Базовые константы для API
-export const API_BASE_URL = "http://localhost:8000";
 
 // GET /api/courses/ получить все курсы
 // GET /api/courses/{id} получить конкретный

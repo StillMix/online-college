@@ -1,5 +1,5 @@
 <template>
-  <div class="course-Lessonsinfo">
+  <div class="course-info">
     <AppInput
       :styleLabel="{
         margin: '0',
@@ -11,15 +11,17 @@
       placeholder="Название"
       required
     />
-    <AppButton
-      :styleOverrides="{
-        width: '11.177vw',
-        backgroundColor: 'white',
-        color: 'black',
+    <AppInput
+      :styleLabel="{
+        margin: '0',
       }"
-    >
-      Добавить описание
-    </AppButton>
+      :styleInput="{
+        width: '20vw',
+      }"
+      type="text"
+      placeholder="Подзаголовок"
+      required
+    />
     <AppButton
       :styleOverrides="{
         width: '11.177vw',
@@ -37,7 +39,7 @@ import { defineComponent } from "vue";
 import { AppInput, AppButton } from "../UI";
 
 export default defineComponent({
-  name: "CourseLessons",
+  name: "CourseInfo",
   components: { AppInput, AppButton },
   setup() {
     return {};
@@ -46,7 +48,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.course-Lessonsinfo {
+.course-info {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;

@@ -12,20 +12,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import axios from "axios";
+import { defineComponent, onMounted } from "vue";
+import { courseApi } from "./api/index";
 
-try {
-  const response = await axios.get(`http://localhost:8000/api/courses/`);
-  if (response.data) {
-    console.log(response.data);
-    localStorage.setItem("courseData", JSON.stringify(response.data));
-  }
-} catch (error) {
-  console.error(error);
-}
 export default defineComponent({
   name: "App",
+  setup() {
+    // Загрузка данных курсов при монтировании компонента
+    onMounted(async () => {
+      try {
+        const courses = await courseApi.getAllCourses();
+        if (courses) {
+          console.log("Курсы загружены:", courses);
+          localStorage.setItem("courseData", JSON.stringify(courses));
+        }
+      } catch (error) {
+        console.error("Ошибка при загрузке курсов:", error);
+      }
+    });
+  },
 });
 </script>
 

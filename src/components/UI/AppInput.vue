@@ -1,6 +1,6 @@
 <template>
   <div class="app-input-wrapper">
-    <label class="app-input__container">
+    <label :style="styleLabel" class="app-input__container">
       <emailIcon
         v-if="type === 'email' || type === 'emailtext'"
         customClass="app-input__container__img"
@@ -24,6 +24,7 @@
         height="1.25vw"
       />
       <input
+        :style="styleInput"
         :value="modelValue"
         :type="type"
         :placeholder="placeholder"
@@ -44,7 +45,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "vue";
+import { defineComponent, computed, StyleValue, PropType } from "vue";
 import emailIcon from "@/assets/icons/emailIcon.vue";
 import PassIccon from "@/assets/icons/passIccon.vue";
 import LoginIcon from "@/assets/icons/loginIcon.vue";
@@ -67,6 +68,14 @@ export default defineComponent({
     placeholder: {
       type: String,
       default: "",
+    },
+    styleInput: {
+      type: [Object, String, Array] as PropType<StyleValue>,
+      default: () => ({}),
+    },
+    styleLabel: {
+      type: [Object, String, Array] as PropType<StyleValue>,
+      default: () => ({}),
     },
     type: {
       type: String,
