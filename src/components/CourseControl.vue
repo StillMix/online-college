@@ -847,15 +847,15 @@ export default defineComponent({
       { id: "lessons", name: "Уроки" },
       { id: "review", name: "Обзор" },
     ]);
-    const tabCompleted = ref({
+    const tabCompleted = ref<Record<string, boolean>>({
       basic: false,
       info: false,
       sections: false,
       lessons: false,
       review: false,
     });
-    const courseData = ref<Record<string, any>>({});
-    const currentSectionIndex = ref(null);
+    const courseData = ref<Record<string, unknown>>({});
+    const currentSectionIndex = ref<number | null>(null);
     // Курс для редактирования/создания/удаления
     const editingCourse = ref<CourseItem>({
       id: "",
