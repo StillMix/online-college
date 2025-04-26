@@ -70,12 +70,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref, watch } from "vue";
-
-interface CourseInfoItem {
-  id: string;
-  title: string;
-  subtitle: string;
-}
+import { CourseInfoItem } from "@/types";
 
 export default defineComponent({
   name: "CourseInfoSection",

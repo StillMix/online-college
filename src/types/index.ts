@@ -1,4 +1,18 @@
 // Общие интерфейсы для всего приложения
+export interface UserData {
+  name: string;
+  login: string;
+  email: string;
+  avatar: string | null;
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ImageItem {
+  group: number;
+  number: number;
+}
 
 export interface CourseItemInfo {
   id: string;
@@ -50,4 +64,22 @@ export interface NotificationState {
   show: boolean;
   message: string;
   type: "success" | "error" | "warning" | "info";
+}
+
+export interface CourseInfoItem {
+  id: string;
+  title: string;
+  subtitle: string;
+}
+
+export interface CourseBasicData {
+  id: string;
+  title: string;
+  subtitle: string;
+  type: string;
+  timetoendL: string;
+  color: string;
+  icon: string;
+  icontype: string;
+  titleForCourse: string;
 }

@@ -116,18 +116,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref, watch } from "vue";
-
-interface CourseBasicData {
-  id: string;
-  title: string;
-  subtitle: string;
-  type: string;
-  timetoendL: string;
-  color: string;
-  icon: string;
-  icontype: string;
-  titleForCourse: string;
-}
+import { CourseBasicData } from "@/types";
 
 export default defineComponent({
   name: "CourseBasicInfo",

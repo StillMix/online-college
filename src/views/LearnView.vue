@@ -9,13 +9,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
 import Header from "@/components/Header.vue";
-
-interface CourseItemCourse {
-  id: string;
-  name: string;
-  description: string;
-  passing: string;
-}
+import { CourseItemCourse } from "@/types";
 
 export default defineComponent({
   name: "LearnView",

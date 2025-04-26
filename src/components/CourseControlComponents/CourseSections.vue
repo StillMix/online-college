@@ -72,19 +72,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref, watch } from "vue";
-
-interface CourseItemCourseContent {
-  id: string;
-  name: string;
-  passing: string;
-  description?: string;
-}
-
-interface CourseItemCourse {
-  id: string;
-  name: string;
-  content: CourseItemCourseContent[];
-}
+import { CourseItemCourse } from "@/types";
 
 export default defineComponent({
   name: "CourseSections",

@@ -343,17 +343,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted } from "vue";
 import AppLoader from "@/components/Loader.vue";
-
-interface User {
-  id: string;
-  name: string;
-  login: string;
-  email: string;
-  password: string;
-  avatar: string | null;
-  isAdmin: boolean;
-  createdAt: string;
-}
+import { User } from "@/types";
 
 export default defineComponent({
   name: "UsersControl",

@@ -132,7 +132,7 @@
                 <transition name="fade-scale">
                   <img
                     v-if="previewImage || userData.avatar"
-                    :src="previewImage || userData.avatar"
+                    :src="previewImage ?? userData.avatar ?? undefined"
                     class="settingsView__form__image__preview"
                     alt="Аватар пользователя"
                   />
@@ -220,16 +220,7 @@ import Header from "@/components/Header.vue";
 import loginIcon from "../assets/icons/loginIcon.vue";
 import emailIcon from "../assets/icons/emailIcon.vue";
 import inputImg from "../assets/icons/inputImg.vue";
-
-interface UserData {
-  name: string;
-  login: string;
-  email: string;
-  avatar: string | null;
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
+import { UserData } from "@/types";
 
 export default defineComponent({
   name: "SettingsView",

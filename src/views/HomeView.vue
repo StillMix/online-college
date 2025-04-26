@@ -46,25 +46,7 @@ import { defineComponent, ref, onMounted, computed } from "vue";
 import Header from "@/components/Header.vue";
 import CourseCard from "@/components/CourseCard.vue";
 import CoursePopup from "@/components/CoursePopup.vue";
-
-interface CourseItemInfo {
-  id: string;
-  title: string;
-  subtitle: string;
-}
-
-interface CourseItem {
-  id: string;
-  title: string;
-  subtitle: string;
-  type: string;
-  timetoendL: string;
-  color: string;
-  icon: string;
-  icontype: string;
-  titleForCourse: string;
-  info: CourseItemInfo[];
-}
+import { CourseItem } from "@/types";
 
 export default defineComponent({
   name: "HomeView",

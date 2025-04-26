@@ -56,18 +56,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref, onMounted } from "vue";
-
-interface CourseItemCourseContent {
-  id: string;
-  name: string;
-  passing: string;
-}
-
-interface CourseItemCourse {
-  id: string;
-  name: string;
-  content: CourseItemCourseContent[];
-}
+import { CourseItemCourse } from "@/types";
 
 // Создаем глобальную переменную для хранения ID открытого элемента
 let openedElementId: string | null = null;

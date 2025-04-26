@@ -39,13 +39,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, watch } from "vue";
 import RichTextEditor from "@/components/RichTextEditor.vue";
-
-interface CourseItemCourseContent {
-  id: string;
-  name: string;
-  passing: string;
-  description?: string;
-}
+import { CourseItemCourseContent } from "@/types";
 
 export default defineComponent({
   name: "LessonEditModal",

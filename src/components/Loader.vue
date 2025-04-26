@@ -31,10 +31,7 @@ import {
   computed,
 } from "vue";
 
-interface ImageItem {
-  group: number;
-  number: number;
-}
+import { ImageItem } from "@/types";
 
 export default defineComponent({
   name: "SmoothLoader",
