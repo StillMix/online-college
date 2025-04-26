@@ -110,7 +110,7 @@ export default defineComponent({
     const saveInfo = () => {
       if (infoTitle.value.trim() === "") return;
 
-      emit("save", props.id, infoTitle.value, infoSubtitle.value);
+      emit("save", props.id, infoTitle.value, infoSubtitle.value, info.value.id);
       isModified.value = false;
     };
 

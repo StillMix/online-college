@@ -67,7 +67,7 @@ export default defineComponent({
       required: false,
     },
   },
-  emits: ["save", "delete", "update-lesson"],
+  emits: ["save", "delete"],
   setup(props, { emit }) {
     const sectionName = ref(props.section?.name || "Новый раздел");
     const lessons = ref<CourseItemCourseContent[]>([]);
@@ -117,7 +117,7 @@ export default defineComponent({
         content: lessons.value,
       };
 
-      emit("save", updatedSection);
+      emit("save", updatedSection, sectionName.value.id);
     };
 
     return {

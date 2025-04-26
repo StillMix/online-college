@@ -105,30 +105,40 @@ export default defineComponent({
   setup(props, { emit }) {
     const courseInfoList = ref<CourseItemInfo[]>([]);
     const courseSections = ref<CourseItemCourse[]>([]);
-    const nextInfoId = ref(1);
-    const nextSectionId = ref(1);
     const isLoading = ref(false);
 
     // Добавление новой информации о курсе
-    const addInfo = () => {
+    // Добавление новой информации о курсе
+    const addInfo = async () => {
       const newInfoId = `info_${Date.now()}`;
-      courseInfoList.value.push({
+      const newInfo: CourseItemInfo = {
         id: newInfoId,
         title: "Новый блок информации",
         subtitle: "Описание информационного блока",
-      });
-      const addInfoCard = await courseApi.createCourseInfo(
-        props.elemRed.id,
-        courseInfoList.value
-      );
-    };
+      };
 
+      courseInfoList.value.push(newInfo);
+
+      if (props.elemRed) {
+        try {
+          await courseApi.createCourseInfo(props.elemRed.id, newInfo);
+        } catch (error) {
+          console.error("Ошибка при создании информации о курсе:", error);
+        }
+      }
+    };
     // Обновление информации о курсе
-    const updateCourseInfo = (id: string, title: string, subtitle: string) => {
+    const updateCourseInfo = (
+      id: string,
+      title: string,
+      subtitle: string,
+      idcourseinfo: string
+    ) => {
       const index = courseInfoList.value.findIndex((info) => info.id === id);
       if (index !== -1) {
         courseInfoList.value[index] = { id, title, subtitle };
       }
+      await courseApi.updateCourseInfo(props.elemRed.id, idcourseinfo, newInfo);
     };
 
     // Удаление информации о курсе
@@ -139,25 +149,36 @@ export default defineComponent({
     };
 
     // Добавление нового раздела
-    const addSection = () => {
+    const addSection = async () => {
       const newSectionId = `section_${Date.now()}`;
-      courseSections.value.push({
+      const newSection: CourseItemCourse = {
         id: newSectionId,
         name: "Новый раздел",
         content: [],
-      });
-      const addSectionCard = await courseApi.createCourseSection(
-        props.elemRed.id,
-        courseSections.value
-      );
+      };
+
+      courseSections.value.push(newSection);
+
+      if (props.elemRed) {
+        try {
+          await courseApi.createCourseSection(props.elemRed.id, newSection);
+        } catch (error) {
+          console.error("Ошибка при создании раздела курса:", error);
+        }
+      }
     };
 
     // Обновление раздела
-    const updateCourseSection = (section: CourseItemCourse) => {
+    const updateCourseSection = (section: CourseItemCourse, idcourseinfo) => {
       const index = courseSections.value.findIndex((s) => s.id === section.id);
       if (index !== -1) {
         courseSections.value[index] = section;
       }
+      await courseApi.updateCourseSection(
+        props.elemRed.id,
+        idcourseinfo,
+        newInfo
+      );
     };
 
     // Удаление раздела
