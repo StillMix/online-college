@@ -1,0 +1,252 @@
+// src/api/courseApi.ts
+import axios from "axios";
+import { CourseItem } from "@/types";
+import { API_BASE_URL } from "./index";
+
+const API_URL = `${API_BASE_URL}/api/courses`;
+
+/**
+ * Получить список всех курсов
+ */
+export const getAllCourses = async (): Promise<CourseItem[]> => {
+  try {
+    const response = await axios.get(API_URL);
+    return response.data;
+  } catch (error) {
+    console.error("Ошибка при получении списка курсов:", error);
+
+    // Пытаемся получить данные из localStorage, если API недоступен
+    const courseDataStr = localStorage.getItem("courseData");
+    if (courseDataStr) {
+      return JSON.parse(courseDataStr);
+    }
+
+    throw error;
+  }
+};
+
+/**
+ * Получить курс по ID
+ */
+export const getCourseById = async (courseId: string): Promise<CourseItem> => {
+  try {
+    const response = await axios.get(`${API_URL}/${courseId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Ошибка при получении курса с ID ${courseId}:`, error);
+
+    // Пытаемся найти курс в localStorage, если API недоступен
+    const courseDataStr = localStorage.getItem("courseData");
+    if (courseDataStr) {
+      const courses = JSON.parse(courseDataStr);
+      const course = courses.find((c: CourseItem) => c.id === courseId);
+      if (course) return course;
+    }
+
+    throw error;
+  }
+};
+
+/**
+ * Создать новый курс
+ */
+export const createCourse = async (
+  courseData: Partial<CourseItem>
+): Promise<CourseItem> => {
+  try {
+    const response = await axios.post(API_URL, courseData);
+
+    // Обновляем список курсов в localStorage
+    const updatedCourse = response.data;
+    updateCoursesInLocalStorage(updatedCourse);
+
+    return updatedCourse;
+  } catch (error) {
+    console.error("Ошибка при создании курса:", error);
+    throw error;
+  }
+};
+
+/**
+ * Обновить существующий курс
+ */
+export const updateCourse = async (
+  courseId: string,
+  courseData: Partial<CourseItem>
+): Promise<CourseItem> => {
+  try {
+    const response = await axios.put(`${API_URL}/${courseId}`, courseData);
+
+    // Обновляем список курсов в localStorage
+    const updatedCourse = response.data;
+    updateCoursesInLocalStorage(updatedCourse);
+
+    return updatedCourse;
+  } catch (error) {
+    console.error(`Ошибка при обновлении курса с ID ${courseId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Удалить курс
+ */
+export const deleteCourse = async (courseId: string): Promise<void> => {
+  try {
+    await axios.delete(`${API_URL}/${courseId}`);
+
+    // Удаляем курс из localStorage
+    removeCoursesFromLocalStorage(courseId);
+  } catch (error) {
+    console.error(`Ошибка при удалении курса с ID ${courseId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Загрузить изображение для курса
+ */
+export const uploadCourseImage = async (
+  courseId: string,
+  file: File
+): Promise<string> => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await axios.post(
+      `${API_URL}/${courseId}/upload-image`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data.path;
+  } catch (error) {
+    console.error(
+      `Ошибка при загрузке изображения для курса ${courseId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+// Вспомогательные функции для работы с localStorage
+
+/**
+ * Обновить список курсов в localStorage
+ */
+const updateCoursesInLocalStorage = (updatedCourse: CourseItem): void => {
+  const courseDataStr = localStorage.getItem("courseData");
+  if (courseDataStr) {
+    const courses = JSON.parse(courseDataStr);
+
+    // Ищем индекс курса для обновления
+    const index = courses.findIndex(
+      (c: CourseItem) => c.id === updatedCourse.id
+    );
+
+    if (index !== -1) {
+      // Обновляем существующий курс
+      courses[index] = updatedCourse;
+    } else {
+      // Добавляем новый курс
+      courses.push(updatedCourse);
+    }
+
+    localStorage.setItem("courseData", JSON.stringify(courses));
+  } else {
+    // Если списка нет, создаем новый
+    localStorage.setItem("courseData", JSON.stringify([updatedCourse]));
+  }
+};
+
+/**
+ * Удалить курс из localStorage
+ */
+const removeCoursesFromLocalStorage = (courseId: string): void => {
+  const courseDataStr = localStorage.getItem("courseData");
+  if (courseDataStr) {
+    let courses = JSON.parse(courseDataStr);
+    courses = courses.filter((c: CourseItem) => c.id !== courseId);
+    localStorage.setItem("courseData", JSON.stringify(courses));
+  }
+};
+
+/**
+ * Получить курсы пользователя
+ */
+export const getUserCourses = (): CourseItem[] => {
+  try {
+    // Получаем идентификаторы курсов пользователя
+    const userCoursesIds = localStorage.getItem("userCourses");
+    if (!userCoursesIds) return [];
+
+    // Парсим идентификаторы
+    const courseIds: string[] = JSON.parse(userCoursesIds);
+
+    // Получаем все курсы из localStorage
+    const allCoursesStr = localStorage.getItem("courseData");
+    if (!allCoursesStr) return [];
+
+    const allCourses: CourseItem[] = JSON.parse(allCoursesStr);
+
+    // Фильтруем только те курсы, ID которых есть в списке пользователя
+    return allCourses.filter((course) => courseIds.includes(course.id));
+  } catch (error) {
+    console.error("Ошибка при загрузке данных курсов пользователя:", error);
+    return [];
+  }
+};
+
+/**
+ * Добавить курс в список курсов пользователя
+ */
+export const addUserCourse = (courseId: string): void => {
+  try {
+    let userCourses: string[] = []; // Массив курсов
+    const userCoursesStr = localStorage.getItem("userCourses");
+
+    if (userCoursesStr) {
+      userCourses = JSON.parse(userCoursesStr);
+    }
+
+    // Проверяем, нет ли уже такого id
+    if (!userCourses.includes(courseId)) {
+      userCourses.push(courseId);
+      localStorage.setItem("userCourses", JSON.stringify(userCourses));
+    }
+  } catch (error) {
+    console.error("Ошибка при добавлении курса в список пользователя:", error);
+  }
+};
+
+/**
+ * Поиск курсов по запросу
+ */
+export const searchCourses = (query: string): CourseItem[] => {
+  try {
+    const courseDataStr = localStorage.getItem("courseData");
+    if (!courseDataStr) return [];
+
+    const courses: CourseItem[] = JSON.parse(courseDataStr);
+
+    if (!query.trim()) {
+      return courses;
+    }
+
+    const lowerQuery = query.toLowerCase().trim();
+    return courses.filter(
+      (course) =>
+        course.title.toLowerCase().includes(lowerQuery) ||
+        course.subtitle.toLowerCase().includes(lowerQuery) ||
+        course.type.toLowerCase().includes(lowerQuery)
+    );
+  } catch (error) {
+    console.error("Ошибка при поиске курсов:", error);
+    return [];
+  }
+};
