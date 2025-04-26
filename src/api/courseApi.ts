@@ -19,6 +19,7 @@ const API_URL = `${API_BASE_URL}/api/courses`;
 export const getAllCourses = async (): Promise<CourseItem[]> => {
   try {
     const response = await axios.get(API_URL);
+    localStorage.setItem("courseData", JSON.stringify(response.data));
     return response.data;
   } catch (error) {
     console.error("Ошибка при получении списка курсов:", error);
@@ -102,7 +103,6 @@ export const updateCourse = async (
 export const deleteCourse = async (courseId: string): Promise<void> => {
   try {
     await axios.delete(`${API_URL}/${courseId}`);
-
     // Удаляем курс из localStorage
     removeCoursesFromLocalStorage(courseId);
   } catch (error) {

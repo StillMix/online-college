@@ -20,15 +20,7 @@ export default defineComponent({
   setup() {
     // Загрузка данных курсов при монтировании компонента
     onMounted(async () => {
-      try {
-        const courses = await courseApi.getAllCourses();
-        if (courses) {
-          console.log("Курсы загружены:", courses);
-          localStorage.setItem("courseData", JSON.stringify(courses));
-        }
-      } catch (error) {
-        console.error("Ошибка при загрузке курсов:", error);
-      }
+      await courseApi.getAllCourses();
     });
   },
 });

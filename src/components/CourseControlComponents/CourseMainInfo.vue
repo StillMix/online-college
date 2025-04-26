@@ -1,6 +1,7 @@
 <template>
-  <div class="course-maininfo">
+  <form @submit.prevent="handleSubmit" class="course-maininfo">
     <AppInput
+      v-model="title"
       :styleLabel="{
         margin: '0',
       }"
@@ -12,6 +13,7 @@
       required
     />
     <AppInput
+      v-model="subtitle"
       :styleLabel="{
         margin: '0',
       }"
@@ -28,7 +30,14 @@
       <option value="ПАЯЛЬНИК">ПАЯЛЬНИК</option>
     </select>
 
+    <select v-model="selectedLevel">
+      <option value="С НУЛЯ">С НУЛЯ</option>
+      <option value="СРЕДНИЙ">СРЕДНИЙ</option>
+      <option value="ПРОДВИНУТЫЙ">ПРОДВИНУТЫЙ</option>
+    </select>
+
     <AppInput
+      v-model="titleForCourse"
       :styleLabel="{
         margin: '0',
       }"
@@ -40,13 +49,7 @@
       required
     />
 
-    <select v-model="selectedLevel">
-      <option value="С НУЛЯ">С НУЛЯ</option>
-      <option value="СРЕДНИЙ">СРЕДНИЙ</option>
-      <option value="ПРОДВИНУТЫЙ">ПРОДВИНУТЫЙ</option>
-    </select>
-
-    <div class="course-maininfo__selImg">
+    <div v-if="!edit" class="course-maininfo__selImg">
       <input
         class="course-maininfo__selImg__input"
         type="file"
@@ -63,28 +66,53 @@
       </div>
     </div>
     <AppButton
+      type="submit"
       :styleOverrides="{
         width: '11.177vw',
         backgroundColor: 'white',
         color: 'black',
       }"
     >
-      Создать курс
+      {{ !edit ? "Редактировать курс" : "Создать курс" }}
     </AppButton>
-  </div>
+  </form>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, PropType } from "vue";
+import { CourseItem } from "@/types";
 import { AppInput, AppButton } from "../UI";
+import { courseApi } from "@/api";
 
 export default defineComponent({
   name: "CourseMainInfo",
+  props: {
+    edit: {
+      type: Boolean,
+      required: true,
+    },
+    elemRed: {
+      type: Object as PropType<CourseItem>,
+      required: false,
+    },
+  },
+  emits: ["click"],
   components: { AppInput, AppButton },
-  setup() {
-    const selectedType = ref("");
-    const selectedLevel = ref("");
+  setup(props) {
+    const title = ref(props.elemRed ? props.elemRed.title : "");
+    const subtitle = ref(props.elemRed ? props.elemRed.subtitle : "");
+    const selectedType = ref(props.elemRed ? props.elemRed.type : "");
+    const selectedLevel = ref(props.elemRed ? props.elemRed.timetoendL : "");
+    const color = ref("#2d82b7");
+    const icon = ref(props.elemRed ? props.elemRed.icon : "");
+    const icontype = ref("programIcon");
+    const titleForCourse = ref(
+      props.elemRed ? props.elemRed.titleForCourse : ""
+    );
+    const info = ref([]);
+    const course = ref([]);
     const previewUrl = ref<string | null>(null);
+
     const onFileChange = (event: Event) => {
       const target = event.target as HTMLInputElement;
       const file = target.files?.[0];
@@ -92,7 +120,48 @@ export default defineComponent({
         previewUrl.value = URL.createObjectURL(file);
       }
     };
-    return { selectedType, selectedLevel, onFileChange, previewUrl };
+
+    return {
+      selectedType,
+      selectedLevel,
+      onFileChange,
+      previewUrl,
+      title,
+      subtitle,
+      color,
+      icon,
+      icontype,
+      titleForCourse,
+      info,
+      course,
+    };
+  },
+  methods: {
+    async handleSubmit(event: Event) {
+      event.preventDefault();
+      try {
+        const courseData = {
+          title: this.title,
+          subtitle: this.subtitle,
+          type: this.selectedType,
+          timetoendL: this.selectedLevel,
+          color: this.color,
+          icon: this.icon,
+          icontype: this.icontype,
+          titleForCourse: this.titleForCourse,
+          info: this.info,
+          sections: [],
+        };
+        const courses = await courseApi.createCourse(courseData);
+        if (courses) {
+          console.log("Курс успешно создан:", courses);
+          await courseApi.getAllCourses();
+          this.$emit("click");
+        }
+      } catch (error) {
+        console.error("Ошибка при отправке курса:", error);
+      }
+    },
   },
 });
 </script>
