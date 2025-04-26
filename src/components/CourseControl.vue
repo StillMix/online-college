@@ -9,10 +9,7 @@
         Создать новый курс
       </button>
 
-      <CourseSearchBar
-        v-model="searchQuery"
-        @clear="clearSearch"
-      />
+      <CourseSearchBar v-model="searchQuery" @clear="clearSearch" />
     </div>
 
     <div v-if="loading" class="course-control__loader">
@@ -159,10 +156,11 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import AppLoader from "@/components/Loader.vue";
-import { 
+import {
   CourseBasicInfo,
-  CourseInfoSection, 
+  CourseInfoSection,
   CourseSections,
   CourseLessons,
   CourseReview,
@@ -229,6 +227,7 @@ export default defineComponent({
   },
   emits: ["course-updated", "course-created", "course-deleted"],
   setup(props, { emit }) {
+    const router = useRouter();
     const courses = ref<CourseItem[]>([]);
     const loading = ref(props.initialLoading);
     const searchQuery = ref("");
@@ -277,7 +276,7 @@ export default defineComponent({
     });
     const courseData = ref<Record<string, unknown>>({});
     const currentSectionIndex = ref<number | null>(null);
-    
+
     // Курс для редактирования/создания/удаления
     const editingCourse = ref<CourseItem>({
       id: "",
@@ -788,7 +787,7 @@ const closeModals = () => {
   showEditModal.value = false;
   showDeleteModal.value = false;
   showLessonEditModal.value = false;
-  
+
   // Сброс состояния редактирования урока
   if (showLessonEditModal.value) {
     currentEditingLesson.value = null;
@@ -816,12 +815,12 @@ const showNotification = (message: string, type = "success") => {
 onMounted(() => {
   // Проверка авторизации
   const token = localStorage.getItem("token");
-  
+
   if (!token) {
     router.push("/signin");
     return;
   }
-  
+
   // Загрузка списка курсов
   loadCourses();
 });
@@ -844,6 +843,8 @@ return {
   tabs,
   tabCompleted,
   notification,
+  courseTypes, // Добавлено
+  courseLevels, // Добавлено
   openCreateModal,
   openEditModal,
   openDeleteModal,
@@ -861,4 +862,6 @@ return {
   saveLessonDescription,
   deleteCourse,
 };
+
+})
 </script>
