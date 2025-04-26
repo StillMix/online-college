@@ -23,7 +23,7 @@ export const getAllCourses = async (): Promise<CourseItem[]> => {
     return response.data;
   } catch (error) {
     console.error("Ошибка при получении списка курсов:", error);
-
+    localStorage.removeItem("courseData");
     // Пытаемся получить данные из localStorage, если API недоступен
     const courseDataStr = localStorage.getItem("courseData");
     if (courseDataStr) {

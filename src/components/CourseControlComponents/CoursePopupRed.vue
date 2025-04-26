@@ -113,21 +113,143 @@ export default defineComponent({
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.397);
-  z-index: 101;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(0.208vw);
+  animation: fadeIn 0.3s ease;
+
   &__card {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    max-height: 98%;
-    padding: 20px;
-    width: 72.552vw;
-    background-color: #404640;
-    border-radius: 20px;
+    gap: 1.042vw;
+    max-height: 85vh;
+    width: 60vw;
+    background-color: #2a2a2a;
+    border-radius: 0.833vw;
+    padding: 1.563vw;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 0 0.521vw 2.083vw rgba(0, 0, 0, 0.5);
+    animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 0.052vw solid rgba(255, 255, 255, 0.05);
+    position: relative;
+
+    // Стилизация скроллбара
+    &::-webkit-scrollbar {
+      width: 0.417vw;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 0.521vw;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(8, 220, 207, 0.3);
+      border-radius: 0.521vw;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: rgba(8, 220, 207, 0.5);
+    }
+
+    // Декоративный элемент в верхней части карточки
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 0.208vw;
+      background: linear-gradient(90deg, #08dccf, #0099ff, #39b874);
+      background-size: 200% 100%;
+      animation: gradientMove 3s linear infinite;
+    }
+  }
+}
+
+// Кнопки внутри попапа редактирования
+.course-popup__button {
+  padding: 0.625vw 1.25vw;
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 0.833vw;
+  border-radius: 0.417vw;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.521vw;
+
+  &--primary {
+    background: #39b874;
+    color: #fff;
+
+    &:hover {
+      background: #45cc83;
+      transform: translateY(-0.104vw);
+      box-shadow: 0 0.26vw 0.521vw rgba(57, 184, 116, 0.4);
+    }
+  }
+
+  &--secondary {
+    background: #363636;
+    color: #fff;
+
+    &:hover {
+      background: #424242;
+      transform: translateY(-0.104vw);
+    }
+  }
+
+  &--danger {
+    background: #363636;
+    color: #ff5b5b;
+
+    &:hover {
+      background: #ff5b5b;
+      color: #fff;
+      transform: translateY(-0.104vw);
+      box-shadow: 0 0.26vw 0.521vw rgba(255, 91, 91, 0.4);
+    }
+  }
+
+  &:active {
+    transform: translateY(0.052vw);
+  }
+}
+
+// Анимации для попапа
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-1.042vw) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
   }
 }
 </style>

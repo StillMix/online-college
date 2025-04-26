@@ -71,27 +71,97 @@ export default defineComponent({
 <style lang="scss" scoped>
 .course-RedEl {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 10px;
-  width: 100%;
-  background-color: #3b3b3b;
-  border-radius: 10px;
   align-items: center;
-  padding: 5px;
+  width: 100%;
+  background-color: #2a2a2a;
+  border-radius: 0.625vw;
+  padding: 1.042vw;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0.104vw 0.417vw rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: translateY(-0.104vw);
+    background-color: #333333;
+    box-shadow: 0 0.26vw 0.781vw rgba(0, 0, 0, 0.2);
+
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  // Эффект градиентной подсветки при наведении
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0.156vw;
+    background: linear-gradient(90deg, #08dccf, #0099ff);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
   &__img {
     flex-shrink: 0;
-    width: 50px;
-    height: 50px;
+    width: 3.125vw;
+    height: 3.125vw;
     object-fit: cover;
-    border-radius: 100%;
+    border-radius: 50%;
+    margin-right: 1.042vw;
+    border: 0.104vw solid rgba(255, 255, 255, 0.1);
+    background-color: #363636;
+    transition: all 0.3s ease;
+    box-shadow: 0 0.208vw 0.417vw rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0.313vw 0.625vw rgba(8, 220, 207, 0.3);
+    }
   }
+
   &__con {
-    width: 100%;
+    flex: 1;
+    padding-right: 1.042vw;
+
+    &__title {
+      font-family: var(--font-family);
+      font-weight: 500;
+      font-size: 1.042vw;
+      color: #fff;
+      margin-bottom: 0.313vw;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &__subtitle {
+      font-family: var(--font-family);
+      font-weight: 400;
+      font-size: 0.833vw;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
+
   &__conbtn {
-    flex-shrink: 0;
     display: flex;
-    gap: 10px;
+    gap: 0.781vw;
+    flex-shrink: 0;
+    transition: opacity 0.3s ease;
+    align-items: center;
+
+    // Анимация появления кнопок при наведении
+    opacity: 0.8;
+
+    .course-RedEl:hover & {
+      opacity: 1;
+    }
   }
 }
 </style>
