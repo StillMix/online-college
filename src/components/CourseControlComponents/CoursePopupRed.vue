@@ -117,6 +117,10 @@ export default defineComponent({
         title: "Новый блок информации",
         subtitle: "Описание информационного блока",
       });
+      const addInfoCard = await courseApi.createCourseInfo(
+        props.elemRed.id,
+        courseInfoList.value
+      );
     };
 
     // Обновление информации о курсе
@@ -142,6 +146,10 @@ export default defineComponent({
         name: "Новый раздел",
         content: [],
       });
+      const addSectionCard = await courseApi.createCourseSection(
+        props.elemRed.id,
+        courseSections.value
+      );
     };
 
     // Обновление раздела

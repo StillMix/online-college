@@ -208,23 +208,27 @@ export default defineComponent({
       }
     });
 
-    const onFileChange = (event: Event) => {
+    const onFileChange = async (event: Event) => {
       const target = event.target as HTMLInputElement;
       const file = target.files?.[0];
-      if (file) {
+      if (file && props.elemRed) {
         previewUrl.value = URL.createObjectURL(file);
-        let courses;
-        courses = await courseApi.uploadCourseImage(
-          elemRed.id,
-          previewUrl.value
-        );
-
-        if (courses) {
-          console.log(
-            this.edit ? "Курс успешно создан:" : "Курс успешно обновлен:",
-            courses
+        try {
+          const uploadedImagePath = await courseApi.uploadCourseImage(
+            props.elemRed.id,
+            file
           );
-          await courseApi.getAllCourses();
+
+          if (uploadedImagePath) {
+            console.log(
+              props.edit
+                ? "Изображение успешно загружено"
+                : "Изображение успешно обновлено"
+            );
+            await courseApi.getAllCourses();
+          }
+        } catch (error) {
+          console.error("Ошибка при загрузке изображения:", error);
         }
       }
     };
