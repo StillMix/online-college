@@ -20,6 +20,10 @@
         />
       </div>
     </div>
+    <RichTextEditor
+      v-if="showDescription"
+      :nachalDescription="lesson?.description"
+    />
 
     <div class="course-Lessonsinfo__content">
       <div class="course-Lessonsinfo__controls">
@@ -77,10 +81,11 @@ import {
 } from "vue";
 import { AppInput, AppButton } from "../UI";
 import { CourseItemCourseContent } from "@/types";
+import RichTextEditor from "../RichTextEditor.vue";
 
 export default defineComponent({
   name: "CourseLessons",
-  components: { AppInput, AppButton },
+  components: { AppInput, AppButton, RichTextEditor },
   props: {
     lesson: {
       type: Object as PropType<CourseItemCourseContent>,
@@ -100,7 +105,7 @@ export default defineComponent({
     const lessonName = ref(props.lesson?.name || `Урок ${props.index + 1}`);
     const lessonPassing = ref(props.lesson?.passing || "no");
     const lessonDescription = ref(props.lesson?.description || "");
-    const showDescription = ref(!!props.lesson?.description);
+    const showDescription = ref(!props.lesson?.description);
 
     // Вычисляемое свойство для определения класса статуса
     const statusClass = computed(() => {
