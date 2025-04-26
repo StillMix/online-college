@@ -854,7 +854,7 @@ export default defineComponent({
       lessons: false,
       review: false,
     });
-    const courseData = ref({});
+    const courseData = ref<Record<string, any>>({});
     const currentSectionIndex = ref(null);
     // Курс для редактирования/создания/удаления
     const editingCourse = ref<CourseItem>({
@@ -993,7 +993,7 @@ export default defineComponent({
 
       // Устанавливаем первый раздел как активный для добавления уроков
       if (editingCourse.value.sections.length > 0) {
-        currentSectionIndex.value = 0;
+        currentSectionIndex.value = 0 as number;
       }
 
       showNotification("Разделы курса сохранены!");
@@ -1708,6 +1708,15 @@ export default defineComponent({
       courseIconPreview,
       currentEditingLesson,
       lessonDescription,
+
+      // Добавляем отсутствующие свойства
+      activeTab,
+      tabs,
+      tabCompleted,
+      courseData,
+      currentSectionIndex,
+
+      // Добавляем отсутствующие функции
       clearSearch,
       getIconSrc,
       handleCourseIconUpload,
@@ -1726,6 +1735,14 @@ export default defineComponent({
       addLesson,
       removeLesson,
       toggleLessonPassing,
+
+      // Добавляем отсутствующие функции для работы с табами
+      saveBasicInfo,
+      saveInfoItems,
+      saveSections,
+      saveLessons,
+      finalizeCourse,
+
       saveCourse,
       deleteCourse,
     };
