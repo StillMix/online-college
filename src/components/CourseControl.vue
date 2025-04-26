@@ -685,5 +685,180 @@ export default defineComponent({
       showDeleteModal.value = true;
     };
 
-    // Открытие модального окна редактирования описания урока
-    const openLessonEditModal = (sectionIndex: number, lessonIndex: number) =>
+   // Открытие модального окна редактирования описания урока
+const openLessonEditModal = (sectionIndex: number, lessonIndex: number) => {
+  if (
+    sectionIndex !== null &&
+    lessonIndex !== null &&
+    editingCourse.value.sections[sectionIndex] &&
+    editingCourse.value.sections[sectionIndex].content[lessonIndex]
+  ) {
+    currentEditingLesson.value = editingCourse.value.sections[sectionIndex].content[lessonIndex];
+    currentLessonIndex.value = lessonIndex;
+    currentSectionIndex.value = sectionIndex;
+    lessonDescription.value = currentEditingLesson.value.description || "";
+    showLessonEditModal.value = true;
+  }
+};
+
+// Сохранение описания урока
+const saveLessonDescription = (description: string) => {
+  if (
+    currentSectionIndex.value !== null &&
+    currentLessonIndex.value !== null &&
+    currentEditingLesson.value
+  ) {
+    // Обновляем описание в редактируемом курсе
+    editingCourse.value.sections[currentSectionIndex.value].content[
+      currentLessonIndex.value
+    ].description = description;
+
+    // Обновляем ссылку на текущий урок
+    currentEditingLesson.value.description = description;
+
+    showNotification("Описание урока сохранено!");
+  }
+};
+
+// Удаление курса
+const deleteCourse = async () => {
+  if (!deletingCourse.value) return;
+
+  try {
+    // Отправляем запрос на удаление
+    const response = await fetch(
+      `http://localhost:8000/api/courses/${deletingCourse.value.id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Ошибка при удалении курса: ${response.status}`);
+    }
+
+    // Удаляем курс из списка
+    courses.value = courses.value.filter(
+      (c) => c.id !== deletingCourse.value!.id
+    );
+
+    // Обновляем localStorage
+    localStorage.setItem("courseData", JSON.stringify(courses.value));
+
+    showNotification("Курс успешно удален!");
+    closeModals();
+  } catch (error) {
+    console.error("Ошибка при удалении курса:", error);
+    showNotification(`Ошибка при удалении курса: ${error}`, "error");
+  }
+};
+
+// Загрузка изображения для курса
+const uploadCourseImage = async (courseId: string, file: File): Promise<string | null> => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(
+      `http://localhost:8000/api/courses/${courseId}/upload-image`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Ошибка при загрузке изображения: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.path; // Возвращаем путь к загруженному изображению
+  } catch (error) {
+    console.error("Ошибка при загрузке изображения курса:", error);
+    showNotification(
+      `Ошибка при загрузке изображения курса: ${error}`,
+      "error"
+    );
+    return null;
+  }
+};
+
+// Закрытие всех модальных окон
+const closeModals = () => {
+  showEditModal.value = false;
+  showDeleteModal.value = false;
+  showLessonEditModal.value = false;
+  
+  // Сброс состояния редактирования урока
+  if (showLessonEditModal.value) {
+    currentEditingLesson.value = null;
+    currentLessonIndex.value = null;
+    currentSectionIndex.value = null;
+    lessonDescription.value = "";
+  }
+};
+
+// Показ уведомления
+const showNotification = (message: string, type = "success") => {
+  notification.value = {
+    show: true,
+    message,
+    type,
+  };
+
+  // Автоматически скрываем через 5 секунд
+  setTimeout(() => {
+    notification.value.show = false;
+  }, 5000);
+};
+
+// Инициализация компонента
+onMounted(() => {
+  // Проверка авторизации
+  const token = localStorage.getItem("token");
+  
+  if (!token) {
+    router.push("/signin");
+    return;
+  }
+  
+  // Загрузка списка курсов
+  loadCourses();
+});
+
+return {
+  courses,
+  loading,
+  filteredCourses,
+  searchQuery,
+  clearSearch,
+  showEditModal,
+  showDeleteModal,
+  showLessonEditModal,
+  editMode,
+  editingCourse,
+  deletingCourse,
+  currentEditingLesson,
+  lessonDescription,
+  activeTab,
+  tabs,
+  tabCompleted,
+  notification,
+  openCreateModal,
+  openEditModal,
+  openDeleteModal,
+  openLessonEditModal,
+  closeModals,
+  updateCourseBasicInfo,
+  updateCourseInfo,
+  updateCourseSections,
+  handleIconUpload,
+  saveBasicInfo,
+  saveInfoItems,
+  saveSections,
+  saveLessons,
+  finalizeCourse,
+  saveLessonDescription,
+  deleteCourse,
+};
+</script>
