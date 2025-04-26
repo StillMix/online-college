@@ -90,6 +90,10 @@ export default defineComponent({
       type: Number,
       default: 0,
     },
+    elemID: {
+      type: String,
+      required: false,
+    },
   },
   emits: ["update", "remove"],
   setup(props, { emit }) {

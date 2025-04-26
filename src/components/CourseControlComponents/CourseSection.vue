@@ -87,7 +87,7 @@ export default defineComponent({
     });
 
     // Добавление нового урока
-    const addLesson = () => {
+    const addLesson = async () => {
       const newLessonId = `lesson_${Date.now()}`;
       lessons.value.push({
         id: newLessonId,
@@ -95,11 +95,21 @@ export default defineComponent({
         passing: "no",
         description: "",
       });
-      await courseApi.createCourseLesson(
-        props.elemRed.id,
-        props.section.id,
-        lessons.value
-      );
+
+      // Проверяем наличие props.elemID и props.section
+      if (props.elemID && props.section && props.section.id) {
+        try {
+          // Создаем новый урок для раздела через API
+          await courseApi.createCourseLesson(
+            props.elemID,
+            props.section.id,
+            // Передаем последний добавленный урок
+            lessons.value[lessons.value.length - 1]
+          );
+        } catch (error) {
+          console.error("Ошибка при создании урока:", error);
+        }
+      }
     };
 
     // Обновление урока
@@ -111,6 +121,11 @@ export default defineComponent({
       if (index !== -1) {
         lessons.value[index] = { ...updatedLesson };
       }
+      await courseApi.createCourseLesson(
+        props.elemID,
+        props.lessonId,
+        updatedLesson
+      );
     };
 
     // Удаление урока

@@ -34,6 +34,7 @@
             v-for="section in courseSections"
             :key="section.id"
             :section="section"
+            :elemID="elemRed?.id"
             @save="updateCourseSection"
             @delete="deleteCourseSection"
           />
@@ -45,7 +46,6 @@
             color: 'black',
             marginTop: '0.521vw',
           }"
-          :elemID="elemRed.id"
           @click="addSection"
         >
           Добавить раздел
@@ -177,16 +177,14 @@ export default defineComponent({
     };
 
     // Обновление раздела
-    const updateCourseSection = async (
-      section: CourseItemCourse,
-      idcourseinfo: string
-    ) => {
+    const updateCourseSection = async (section: CourseItemCourse) => {
       const index = courseSections.value.findIndex((s) => s.id === section.id);
       if (index !== -1) {
         courseSections.value[index] = section;
       }
 
-      if (props.elemRed) {
+      // Добавляем проверку на наличие props.elemRed
+      if (props.elemRed && props.elemRed.id) {
         try {
           await courseApi.updateCourseSection(
             props.elemRed.id,
@@ -198,7 +196,6 @@ export default defineComponent({
         }
       }
     };
-
     // Удаление раздела
     const deleteCourseSection = (id: string) => {
       courseSections.value = courseSections.value.filter(
