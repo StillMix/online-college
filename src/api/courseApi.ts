@@ -1,9 +1,18 @@
 // src/api/courseApi.ts
 import axios from "axios";
-import { CourseItem } from "@/types";
+import {
+  CourseItem,
+  CourseInfoItem,
+  CourseItemCourse,
+  CourseItemCourseContent,
+} from "@/types";
 import { API_BASE_URL } from "./index";
 
 const API_URL = `${API_BASE_URL}/api/courses`;
+
+/**
+ * КУРСЫ
+ */
 
 /**
  * Получить список всех курсов
@@ -104,6 +113,237 @@ export const deleteCourse = async (courseId: string): Promise<void> => {
 };
 
 /**
+ * ИНФОРМАЦИЯ О КУРСЕ
+ */
+
+/**
+ * Создать блок информации о курсе
+ */
+export const createCourseInfo = async (
+  courseId: string,
+  infoData: CourseInfoItem
+): Promise<CourseInfoItem> => {
+  try {
+    const response = await axios.post(`${API_URL}/${courseId}/info/`, infoData);
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Ошибка при создании информации для курса ${courseId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+/**
+ * Обновить блок информации о курсе
+ */
+export const updateCourseInfo = async (
+  courseId: string,
+  infoId: string,
+  infoData: Partial<CourseInfoItem>
+): Promise<CourseInfoItem> => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/${courseId}/info/${infoId}`,
+      infoData
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Ошибка при обновлении информации ${infoId} для курса ${courseId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+/**
+ * Удалить блок информации о курсе
+ */
+export const deleteCourseInfo = async (
+  courseId: string,
+  infoId: string
+): Promise<void> => {
+  try {
+    await axios.delete(`${API_URL}/${courseId}/info/${infoId}`);
+  } catch (error) {
+    console.error(
+      `Ошибка при удалении информации ${infoId} для курса ${courseId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+/**
+ * РАЗДЕЛЫ КУРСА
+ */
+
+/**
+ * Создать раздел курса
+ */
+export const createCourseSection = async (
+  courseId: string,
+  sectionData: CourseItemCourse
+): Promise<CourseItemCourse> => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/${courseId}/sections/`,
+      sectionData
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`Ошибка при создании раздела для курса ${courseId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Обновить раздел курса
+ */
+export const updateCourseSection = async (
+  courseId: string,
+  sectionId: string,
+  sectionData: Partial<CourseItemCourse>
+): Promise<CourseItemCourse> => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/${courseId}/sections/${sectionId}`,
+      sectionData
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Ошибка при обновлении раздела ${sectionId} для курса ${courseId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+/**
+ * Удалить раздел курса
+ */
+export const deleteCourseSection = async (
+  courseId: string,
+  sectionId: string
+): Promise<void> => {
+  try {
+    await axios.delete(`${API_URL}/${courseId}/sections/${sectionId}`);
+  } catch (error) {
+    console.error(
+      `Ошибка при удалении раздела ${sectionId} для курса ${courseId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+/**
+ * УРОКИ КУРСА
+ */
+
+/**
+ * Создать урок в разделе курса
+ */
+export const createCourseLesson = async (
+  courseId: string,
+  sectionId: string,
+  lessonData: CourseItemCourseContent
+): Promise<CourseItemCourseContent> => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/${courseId}/sections/${sectionId}/content`,
+      lessonData
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Ошибка при создании урока для раздела ${sectionId} курса ${courseId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+/**
+ * Обновить урок в разделе курса
+ */
+export const updateCourseLesson = async (
+  courseId: string,
+  sectionId: string,
+  lessonId: string,
+  lessonData: Partial<CourseItemCourseContent>
+): Promise<CourseItemCourseContent> => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/${courseId}/sections/${sectionId}/content/${lessonId}`,
+      lessonData
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Ошибка при обновлении урока ${lessonId} в разделе ${sectionId} курса ${courseId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+/**
+ * Удалить урок из раздела курса
+ */
+export const deleteCourseLesson = async (
+  courseId: string,
+  sectionId: string,
+  lessonId: string
+): Promise<void> => {
+  try {
+    await axios.delete(
+      `${API_URL}/${courseId}/sections/${sectionId}/content/${lessonId}`
+    );
+  } catch (error) {
+    console.error(
+      `Ошибка при удалении урока ${lessonId} из раздела ${sectionId} курса ${courseId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+/**
+ * ОПИСАНИЕ УРОКА
+ */
+
+/**
+ * Обновить описание урока
+ */
+export const updateLessonDescription = async (
+  courseId: string,
+  sectionId: string,
+  lessonId: string,
+  description: string
+): Promise<void> => {
+  try {
+    await axios.put(
+      `${API_URL}/${courseId}/sections/${sectionId}/content/${lessonId}`,
+      { description }
+    );
+  } catch (error) {
+    console.error(
+      `Ошибка при обновлении описания урока ${lessonId} в разделе ${sectionId} курса ${courseId}:`,
+      error
+    );
+    throw error;
+  }
+};
+
+/**
+ * ЗАГРУЗКА ИЗОБРАЖЕНИЙ
+ */
+
+/**
  * Загрузить изображение для курса
  */
 export const uploadCourseImage = async (
@@ -134,7 +374,9 @@ export const uploadCourseImage = async (
   }
 };
 
-// Вспомогательные функции для работы с localStorage
+/**
+ * ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+ */
 
 /**
  * Обновить список курсов в localStorage
