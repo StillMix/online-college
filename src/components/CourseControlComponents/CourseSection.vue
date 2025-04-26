@@ -113,7 +113,7 @@ export default defineComponent({
     };
 
     // Обновление урока
-    const updateLesson = (
+    const updateLesson = async (
       lessonId: string,
       updatedLesson: CourseItemCourseContent
     ) => {
@@ -121,11 +121,20 @@ export default defineComponent({
       if (index !== -1) {
         lessons.value[index] = { ...updatedLesson };
       }
-      await courseApi.createCourseLesson(
-        props.elemID,
-        props.lessonId,
-        updatedLesson
-      );
+
+      // Проверяем наличие необходимых ID
+      if (props.elemID && props.section && props.section.id) {
+        try {
+          await courseApi.updateCourseLesson(
+            props.elemID,
+            props.section.id,
+            lessonId,
+            updatedLesson
+          );
+        } catch (error) {
+          console.error("Ошибка при обновлении урока:", error);
+        }
+      }
     };
 
     // Удаление урока
