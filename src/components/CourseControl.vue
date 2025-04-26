@@ -122,112 +122,175 @@
       v-if="showEditModal"
       @click.self="closeModals"
     >
+      <!-- Модифицируем модальное окно создания/редактирования курса -->
       <div class="course-control__modal__content">
         <h2 class="course-control__modal__title">
           {{ editMode ? "Редактирование курса" : "Создание нового курса" }}
         </h2>
 
-        <form class="course-control__modal__form" @submit.prevent="saveCourse">
-          <div class="course-control__modal__form__row">
-            <div class="course-control__modal__form__col">
-              <label class="course-control__modal__form__label">
-                Название курса
-                <input
-                  type="text"
-                  class="course-control__modal__form__input"
-                  v-model="editingCourse.title"
-                  required
-                />
-              </label>
+        <div class="course-control__modal__tabs">
+          <button
+            v-for="tab in tabs"
+            :key="tab.id"
+            class="course-control__modal__tabs__item"
+            :class="{
+              'course-control__modal__tabs__item--active': activeTab === tab.id,
+            }"
+            @click="activeTab = tab.id"
+          >
+            {{ tab.name }}
+            <span
+              v-if="tabCompleted[tab.id]"
+              class="course-control__modal__tabs__item__completed"
+              >✓</span
+            >
+          </button>
+        </div>
 
-              <label class="course-control__modal__form__label">
-                Подзаголовок
-                <input
-                  type="text"
-                  class="course-control__modal__form__input"
-                  v-model="editingCourse.subtitle"
-                  required
-                />
-              </label>
+        <form class="course-control__modal__form">
+          <!-- Шаг 1: Основная информация о курсе -->
+          <div
+            v-if="activeTab === 'basic'"
+            class="course-control__modal__form__section"
+          >
+            <div class="course-control__modal__form__row">
+              <div class="course-control__modal__form__col">
+                <label class="course-control__modal__form__label">
+                  Название курса
+                  <input
+                    type="text"
+                    class="course-control__modal__form__input"
+                    v-model="editingCourse.title"
+                    required
+                  />
+                </label>
 
-              <label class="course-control__modal__form__label">
-                Тип курса
-                <select
-                  class="course-control__modal__form__input course-control__modal__form__select"
-                  v-model="editingCourse.type"
-                  @change="updateIconType(editingCourse.type)"
-                  required
-                >
-                  <option v-for="type in courseTypes" :key="type" :value="type">
-                    {{ type }}
-                  </option>
-                </select>
-              </label>
+                <label class="course-control__modal__form__label">
+                  Подзаголовок
+                  <input
+                    type="text"
+                    class="course-control__modal__form__input"
+                    v-model="editingCourse.subtitle"
+                    required
+                  />
+                </label>
 
-              <label class="course-control__modal__form__label">
-                Уровень курса
-                <select
-                  class="course-control__modal__form__input course-control__modal__form__select"
-                  v-model="editingCourse.timetoendL"
-                  required
-                >
-                  <option
-                    v-for="level in courseLevels"
-                    :key="level"
-                    :value="level"
+                <label class="course-control__modal__form__label">
+                  Тип курса
+                  <select
+                    class="course-control__modal__form__input course-control__modal__form__select"
+                    v-model="editingCourse.type"
+                    @change="updateIconType(editingCourse.type)"
+                    required
                   >
-                    {{ level }}
-                  </option>
-                </select>
-              </label>
+                    <option
+                      v-for="type in courseTypes"
+                      :key="type"
+                      :value="type"
+                    >
+                      {{ type }}
+                    </option>
+                  </select>
+                </label>
+
+                <label class="course-control__modal__form__label">
+                  Уровень курса
+                  <select
+                    class="course-control__modal__form__input course-control__modal__form__select"
+                    v-model="editingCourse.timetoendL"
+                    required
+                  >
+                    <option
+                      v-for="level in courseLevels"
+                      :key="level"
+                      :value="level"
+                    >
+                      {{ level }}
+                    </option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="course-control__modal__form__col">
+                <label class="course-control__modal__form__label">
+                  Название для страницы курса
+                  <input
+                    type="text"
+                    class="course-control__modal__form__input"
+                    v-model="editingCourse.titleForCourse"
+                    required
+                  />
+                </label>
+
+                <label class="course-control__modal__form__label">
+                  Цвет курса
+                  <input
+                    type="color"
+                    class="course-control__modal__form__input course-control__modal__form__color"
+                    v-model="editingCourse.color"
+                  />
+                </label>
+
+                <label
+                  v-if="editMode"
+                  class="course-control__modal__form__label"
+                >
+                  Иконка курса
+                  <div class="course-control__modal__form__file">
+                    <input
+                      type="file"
+                      class="course-control__modal__form__file__input"
+                      @change="handleCourseIconUpload"
+                      accept="image/svg+xml"
+                    />
+                    <span class="course-control__modal__form__file__label">
+                      {{
+                        courseIconFile
+                          ? courseIconFile.name
+                          : "Выберите SVG файл..."
+                      }}
+                    </span>
+                    <button
+                      type="button"
+                      class="course-control__modal__form__file__button"
+                    >
+                      Обзор
+                    </button>
+                  </div>
+
+                  <div
+                    v-if="courseIconPreview"
+                    class="course-control__modal__form__file__preview"
+                  >
+                    <img :src="courseIconPreview" alt="Предпросмотр иконки" />
+                  </div>
+                </label>
+              </div>
             </div>
 
-            <div class="course-control__modal__form__col">
-              <label class="course-control__modal__form__label">
-                Название для страницы курса
-                <input
-                  type="text"
-                  class="course-control__modal__form__input"
-                  v-model="editingCourse.titleForCourse"
-                  required
-                />
-              </label>
-
-              <label v-if="editMode" class="course-control__modal__form__label">
-                Иконка курса
-                <div class="course-control__modal__form__file">
-                  <input
-                    type="file"
-                    class="course-control__modal__form__file__input"
-                    @change="handleCourseIconUpload"
-                    accept="image/svg+xml"
-                  />
-                  <span class="course-control__modal__form__file__label">
-                    {{
-                      courseIconFile
-                        ? courseIconFile.name
-                        : "Выберите SVG файл..."
-                    }}
-                  </span>
-                  <button
-                    type="button"
-                    class="course-control__modal__form__file__button"
-                  >
-                    Обзор
-                  </button>
-                </div>
-
-                <div
-                  v-if="courseIconPreview"
-                  class="course-control__modal__form__file__preview"
-                >
-                  <img :src="courseIconPreview" alt="Предпросмотр иконки" />
-                </div>
-              </label>
+            <div class="course-control__modal__form__buttons">
+              <button
+                type="button"
+                class="course-control__modal__form__button course-control__modal__form__button--secondary"
+                @click="closeModals"
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                class="course-control__modal__form__button course-control__modal__form__button--primary"
+                @click="saveBasicInfo"
+              >
+                Сохранить и продолжить
+              </button>
             </div>
           </div>
 
-          <div class="course-control__modal__form__section">
+          <!-- Шаг 2: Информация о курсе -->
+          <div
+            v-if="activeTab === 'info'"
+            class="course-control__modal__form__section"
+          >
             <h3 class="course-control__modal__form__section__title">
               Информация о курсе
             </h3>
@@ -283,9 +346,30 @@
             >
               Добавить информацию о курсе
             </button>
+
+            <div class="course-control__modal__form__buttons">
+              <button
+                type="button"
+                class="course-control__modal__form__button course-control__modal__form__button--secondary"
+                @click="activeTab = 'basic'"
+              >
+                Назад
+              </button>
+              <button
+                type="button"
+                class="course-control__modal__form__button course-control__modal__form__button--primary"
+                @click="saveInfoItems"
+              >
+                Сохранить и продолжить
+              </button>
+            </div>
           </div>
 
-          <div class="course-control__modal__form__section">
+          <!-- Шаг 3: Разделы курса -->
+          <div
+            v-if="activeTab === 'sections'"
+            class="course-control__modal__form__section"
+          >
             <h3 class="course-control__modal__form__section__title">
               Разделы курса
             </h3>
@@ -332,76 +416,6 @@
                   </label>
                 </div>
               </div>
-
-              <div class="course-control__modal__form__lessons">
-                <h4 class="course-control__modal__form__lessons__title">
-                  Уроки раздела
-                </h4>
-
-                <div
-                  v-for="(lesson, lessonIndex) in section.content"
-                  :key="lessonIndex"
-                  class="course-control__modal__form__lesson"
-                >
-                  <div class="course-control__modal__form__lesson__header">
-                    <span class="course-control__modal__form__lesson__number">
-                      Урок {{ lessonIndex + 1 }}
-                    </span>
-                    <button
-                      type="button"
-                      class="course-control__modal__form__lesson__remove"
-                      @click="removeLesson(sectionIndex, lessonIndex)"
-                    >
-                      Удалить
-                    </button>
-                  </div>
-
-                  <div class="course-control__modal__form__row">
-                    <div class="course-control__modal__form__col">
-                      <label class="course-control__modal__form__label">
-                        ID урока
-                        <input
-                          type="text"
-                          class="course-control__modal__form__input"
-                          v-model="lesson.id"
-                          required
-                        />
-                      </label>
-                    </div>
-                    <div class="course-control__modal__form__col">
-                      <label class="course-control__modal__form__label">
-                        Название урока
-                        <input
-                          type="text"
-                          class="course-control__modal__form__input"
-                          v-model="lesson.name"
-                          required
-                        />
-                      </label>
-                    </div>
-                    <div class="course-control__modal__form__lesson__actions">
-                      <button
-                        type="button"
-                        class="course-control__modal__form__lesson__edit"
-                        @click="openLessonEditModal(sectionIndex, lessonIndex)"
-                      >
-                        Редактировать описание
-                      </button>
-                    </div>
-                    <div
-                      class="course-control__modal__form__col course-control__modal__form__col--passing"
-                    ></div>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  class="course-control__modal__form__add course-control__modal__form__add--lesson"
-                  @click="addLesson(sectionIndex)"
-                >
-                  Добавить урок
-                </button>
-              </div>
             </div>
 
             <button
@@ -411,22 +425,238 @@
             >
               Добавить раздел курса
             </button>
+
+            <div class="course-control__modal__form__buttons">
+              <button
+                type="button"
+                class="course-control__modal__form__button course-control__modal__form__button--secondary"
+                @click="activeTab = 'info'"
+              >
+                Назад
+              </button>
+              <button
+                type="button"
+                class="course-control__modal__form__button course-control__modal__form__button--primary"
+                @click="saveSections"
+              >
+                Сохранить и продолжить
+              </button>
+            </div>
           </div>
 
-          <div class="course-control__modal__actions">
-            <button
-              type="button"
-              class="course-control__modal__actions__button course-control__modal__actions__button--cancel"
-              @click="closeModals"
+          <!-- Шаг 4: Уроки курса -->
+          <div
+            v-if="activeTab === 'lessons'"
+            class="course-control__modal__form__section"
+          >
+            <h3 class="course-control__modal__form__section__title">
+              Уроки курса
+            </h3>
+
+            <div class="course-control__modal__form__section__select">
+              <label class="course-control__modal__form__label">
+                Выберите раздел для добавления уроков:
+                <select
+                  class="course-control__modal__form__input course-control__modal__form__select"
+                  v-model="currentSectionIndex"
+                >
+                  <option
+                    v-for="(section, index) in editingCourse.sections"
+                    :key="section.id"
+                    :value="index"
+                  >
+                    Раздел {{ index + 1 }}: {{ section.name }}
+                  </option>
+                </select>
+              </label>
+            </div>
+
+            <div
+              v-if="currentSectionIndex !== null"
+              class="course-control__modal__form__lessons"
             >
-              Отмена
-            </button>
-            <button
-              type="submit"
-              class="course-control__modal__actions__button course-control__modal__actions__button--save"
-            >
-              {{ editMode ? "Сохранить изменения" : "Создать курс" }}
-            </button>
+              <h4 class="course-control__modal__form__lessons__title">
+                Уроки раздела "{{
+                  editingCourse.sections[currentSectionIndex].name
+                }}"
+              </h4>
+
+              <div
+                v-for="(lesson, lessonIndex) in editingCourse.sections[
+                  currentSectionIndex
+                ].content"
+                :key="lessonIndex"
+                class="course-control__modal__form__lesson"
+              >
+                <div class="course-control__modal__form__lesson__header">
+                  <span class="course-control__modal__form__lesson__number">
+                    Урок {{ lessonIndex + 1 }}
+                  </span>
+                  <button
+                    type="button"
+                    class="course-control__modal__form__lesson__remove"
+                    @click="removeLesson(currentSectionIndex, lessonIndex)"
+                  >
+                    Удалить
+                  </button>
+                </div>
+
+                <div class="course-control__modal__form__row">
+                  <div class="course-control__modal__form__col">
+                    <label class="course-control__modal__form__label">
+                      ID урока
+                      <input
+                        type="text"
+                        class="course-control__modal__form__input"
+                        v-model="lesson.id"
+                        required
+                      />
+                    </label>
+                  </div>
+                  <div class="course-control__modal__form__col">
+                    <label class="course-control__modal__form__label">
+                      Название урока
+                      <input
+                        type="text"
+                        class="course-control__modal__form__input"
+                        v-model="lesson.name"
+                        required
+                      />
+                    </label>
+                  </div>
+                  <div class="course-control__modal__form__lesson__actions">
+                    <button
+                      type="button"
+                      class="course-control__modal__form__lesson__edit"
+                      @click="
+                        openLessonEditModal(currentSectionIndex, lessonIndex)
+                      "
+                    >
+                      Редактировать описание
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="course-control__modal__form__add course-control__modal__form__add--lesson"
+                @click="addLesson(currentSectionIndex)"
+              >
+                Добавить урок
+              </button>
+            </div>
+
+            <div class="course-control__modal__form__buttons">
+              <button
+                type="button"
+                class="course-control__modal__form__button course-control__modal__form__button--secondary"
+                @click="activeTab = 'sections'"
+              >
+                Назад
+              </button>
+              <button
+                type="button"
+                class="course-control__modal__form__button course-control__modal__form__button--primary"
+                @click="saveLessons"
+              >
+                Сохранить уроки
+              </button>
+            </div>
+          </div>
+
+          <!-- Шаг 5: Обзор и финальное сохранение -->
+          <div
+            v-if="activeTab === 'review'"
+            class="course-control__modal__form__section"
+          >
+            <h3 class="course-control__modal__form__section__title">
+              Обзор курса перед сохранением
+            </h3>
+
+            <div class="course-control__modal__form__review">
+              <div class="course-control__modal__form__review__section">
+                <h4 class="course-control__modal__form__review__title">
+                  Основная информация
+                </h4>
+                <div class="course-control__modal__form__review__item">
+                  <span class="course-control__modal__form__review__label"
+                    >Название:</span
+                  >
+                  <span class="course-control__modal__form__review__value">{{
+                    editingCourse.title
+                  }}</span>
+                </div>
+                <div class="course-control__modal__form__review__item">
+                  <span class="course-control__modal__form__review__label"
+                    >Подзаголовок:</span
+                  >
+                  <span class="course-control__modal__form__review__value">{{
+                    editingCourse.subtitle
+                  }}</span>
+                </div>
+                <div class="course-control__modal__form__review__item">
+                  <span class="course-control__modal__form__review__label"
+                    >Тип:</span
+                  >
+                  <span class="course-control__modal__form__review__value">{{
+                    editingCourse.type
+                  }}</span>
+                </div>
+                <div class="course-control__modal__form__review__item">
+                  <span class="course-control__modal__form__review__label"
+                    >Уровень:</span
+                  >
+                  <span class="course-control__modal__form__review__value">{{
+                    editingCourse.timetoendL
+                  }}</span>
+                </div>
+              </div>
+
+              <div class="course-control__modal__form__review__section">
+                <h4 class="course-control__modal__form__review__title">
+                  Разделы и уроки
+                </h4>
+                <div
+                  v-for="(section, sIndex) in editingCourse.sections"
+                  :key="section.id"
+                  class="course-control__modal__form__review__section"
+                >
+                  <h5 class="course-control__modal__form__review__subtitle">
+                    Раздел {{ sIndex + 1 }}: {{ section.name }}
+                  </h5>
+                  <div
+                    v-for="(lesson, lIndex) in section.content"
+                    :key="lesson.id"
+                    class="course-control__modal__form__review__item course-control__modal__form__review__item--indented"
+                  >
+                    <span class="course-control__modal__form__review__label"
+                      >Урок {{ lIndex + 1 }}:</span
+                    >
+                    <span class="course-control__modal__form__review__value">{{
+                      lesson.name
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="course-control__modal__form__buttons">
+              <button
+                type="button"
+                class="course-control__modal__form__button course-control__modal__form__button--secondary"
+                @click="activeTab = 'lessons'"
+              >
+                Назад
+              </button>
+              <button
+                type="button"
+                class="course-control__modal__form__button course-control__modal__form__button--primary"
+                @click="finalizeCourse"
+              >
+                Сохранить курс
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -590,7 +820,6 @@ export default defineComponent({
     // Состояние для модального окна редактирования урока
     const showLessonEditModal = ref(false);
     const currentEditingLesson = ref<CourseItemCourseContent | null>(null);
-    const currentSectionIndex = ref<number | null>(null);
     const currentLessonIndex = ref<number | null>(null);
     const lessonDescription = ref("");
 
@@ -610,6 +839,23 @@ export default defineComponent({
     const courseIconFile = ref<File | null>(null);
     const courseIconPreview = ref<string | null>(null);
 
+    const activeTab = ref("basic");
+    const tabs = ref([
+      { id: "basic", name: "Основная информация" },
+      { id: "info", name: "Информация о курсе" },
+      { id: "sections", name: "Разделы курса" },
+      { id: "lessons", name: "Уроки" },
+      { id: "review", name: "Обзор" },
+    ]);
+    const tabCompleted = ref({
+      basic: false,
+      info: false,
+      sections: false,
+      lessons: false,
+      review: false,
+    });
+    const courseData = ref({});
+    const currentSectionIndex = ref(null);
     // Курс для редактирования/создания/удаления
     const editingCourse = ref<CourseItem>({
       id: "",
@@ -667,7 +913,234 @@ export default defineComponent({
           course.type.toLowerCase().includes(query)
       );
     });
+    const saveBasicInfo = () => {
+      // Валидация основной информации
+      if (
+        !editingCourse.value.title ||
+        !editingCourse.value.subtitle ||
+        !editingCourse.value.type ||
+        !editingCourse.value.timetoendL ||
+        !editingCourse.value.titleForCourse
+      ) {
+        showNotification("Заполните все обязательные поля", "error");
+        return;
+      }
 
+      // Сохраняем базовую информацию
+      courseData.value = {
+        title: editingCourse.value.title,
+        subtitle: editingCourse.value.subtitle,
+        type: editingCourse.value.type,
+        timetoendL: editingCourse.value.timetoendL,
+        color: editingCourse.value.color,
+        icon: editingCourse.value.icon,
+        icontype: editingCourse.value.icontype,
+        titleForCourse: editingCourse.value.titleForCourse,
+      };
+
+      // Если нужно, можно сделать API запрос для сохранения этой части
+
+      // Отмечаем этап как завершенный и переходим к следующему
+      tabCompleted.value.basic = true;
+      activeTab.value = "info";
+
+      showNotification("Основная информация сохранена!");
+    };
+
+    const saveInfoItems = () => {
+      // Валидация информации о курсе
+      if (
+        editingCourse.value.info.some((item) => !item.title || !item.subtitle)
+      ) {
+        showNotification(
+          "Заполните все обязательные поля информации о курсе",
+          "error"
+        );
+        return;
+      }
+
+      // Сохраняем информацию о курсе
+      courseData.value.info = JSON.parse(
+        JSON.stringify(editingCourse.value.info)
+      );
+
+      // Отмечаем этап как завершенный и переходим к следующему
+      tabCompleted.value.info = true;
+      activeTab.value = "sections";
+
+      showNotification("Информация о курсе сохранена!");
+    };
+
+    const saveSections = () => {
+      // Валидация разделов
+      if (
+        editingCourse.value.sections.some(
+          (section) => !section.id || !section.name
+        )
+      ) {
+        showNotification("Заполните все обязательные поля разделов", "error");
+        return;
+      }
+
+      // Сохраняем разделы
+      courseData.value.sections = JSON.parse(
+        JSON.stringify(editingCourse.value.sections)
+      );
+
+      // Отмечаем этап как завершенный и переходим к следующему
+      tabCompleted.value.sections = true;
+      activeTab.value = "lessons";
+
+      // Устанавливаем первый раздел как активный для добавления уроков
+      if (editingCourse.value.sections.length > 0) {
+        currentSectionIndex.value = 0;
+      }
+
+      showNotification("Разделы курса сохранены!");
+    };
+
+    const saveLessons = () => {
+      // Проверяем все разделы на наличие уроков
+      const hasEmptySections = editingCourse.value.sections.some(
+        (section) => !section.content || section.content.length === 0
+      );
+
+      if (hasEmptySections) {
+        showNotification(
+          "У каждого раздела должен быть хотя бы один урок",
+          "error"
+        );
+        return;
+      }
+
+      // Проверяем валидность уроков
+      const hasInvalidLessons = editingCourse.value.sections.some((section) =>
+        section.content.some((lesson) => !lesson.id || !lesson.name)
+      );
+
+      if (hasInvalidLessons) {
+        showNotification("Заполните все обязательные поля уроков", "error");
+        return;
+      }
+
+      // Копируем данные в courseData
+      courseData.value.sections = JSON.parse(
+        JSON.stringify(editingCourse.value.sections)
+      );
+
+      // Переименовываем поле для API
+      courseData.value.course = courseData.value.sections;
+      delete courseData.value.sections;
+
+      // Отмечаем этап как завершенный и переходим к следующему
+      tabCompleted.value.lessons = true;
+      activeTab.value = "review";
+
+      showNotification("Уроки сохранены!");
+    };
+
+    const finalizeCourse = async () => {
+      try {
+        // Создаем финальный объект курса для отправки на API
+        const finalCourseData = {
+          ...courseData.value,
+        };
+
+        // Проверяем, что мы собрали все необходимые данные
+        if (
+          !finalCourseData.title ||
+          !finalCourseData.info ||
+          !finalCourseData.course
+        ) {
+          showNotification("Не все данные курса заполнены", "error");
+          return;
+        }
+
+        if (editMode.value) {
+          // Если редактируем - отправляем на API обновление
+          const response = await fetch(
+            `http://localhost:8000/api/courses/${editingCourse.value.id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                ...finalCourseData,
+                id: editingCourse.value.id,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Ошибка при обновлении курса: ${response.status}`);
+          }
+
+          const result = await response.json();
+
+          // Если есть новое изображение, загружаем его
+          if (courseIconFile.value) {
+            const imagePath = await uploadCourseImage(
+              result.id,
+              courseIconFile.value
+            );
+            if (imagePath) {
+              result.icon = imagePath;
+            }
+          }
+
+          // Обновляем курс в списке
+          const index = courses.value.findIndex((c) => c.id === result.id);
+          if (index !== -1) {
+            courses.value[index] = result;
+          }
+
+          showNotification("Курс успешно обновлен!");
+        } else {
+          // Если создаем новый - отправляем на API создание
+          const response = await fetch("http://localhost:8000/api/courses", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(finalCourseData),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Ошибка API:", errorData);
+            throw new Error(`Ошибка при создании курса: ${response.status}`);
+          }
+
+          const result = await response.json();
+
+          // Если у нас есть загруженный файл иконки, загружаем его
+          if (courseIconFile.value) {
+            const imagePath = await uploadCourseImage(
+              result.id,
+              courseIconFile.value
+            );
+            if (imagePath) {
+              result.icon = imagePath;
+            }
+          }
+
+          // Добавляем созданный курс в список
+          courses.value.push(result);
+
+          showNotification("Курс успешно создан!");
+        }
+
+        // Обновляем localStorage
+        localStorage.setItem("courseData", JSON.stringify(courses.value));
+
+        // Закрываем модальное окно
+        closeModals();
+      } catch (error) {
+        console.error("Ошибка при сохранении курса:", error);
+        showNotification(`Ошибка при сохранении курса: ${error}`, "error");
+      }
+    };
     // Загрузка данных
     const loadCourses = async () => {
       loading.value = true;
