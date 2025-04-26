@@ -12,17 +12,13 @@
         />
       </div>
       <div v-else class="CourseView__empty">
-        <div class="CourseView__empty__con">
-          <img
-            class="CourseView__empty__con-icon"
-            src="../assets/courseNone.svg"
-            alt="Нет курсов"
-          />
-          <p class="CourseView__empty__con-text">Курсы не найдены</p>
-        </div>
-        <router-link to="/" class="CourseView__find-button"
-          >Найти курсы</router-link
-        >
+        <AppEmptyState title="Курсы не найдены" actionText="Найти курсы">
+          <template #action>
+            <router-link to="/" class="CourseView__find-button">
+              Найти курсы
+            </router-link>
+          </template>
+        </AppEmptyState>
       </div>
     </div>
     <CoursePopup

@@ -12,33 +12,24 @@
           Выполните вход или зарегистрируйте новый аккаунт
         </p>
         <form class="signIn__popup__form" @submit.prevent="handleSubmit">
-          <label class="signIn__popup__form__label">
-            <emailIcon
-              class="signIn__popup__form__label__img"
-              color="#484848"
-              width="1.25vw"
-              height="1.25vw"
-            />
-            <input
-              placeholder="Почта/логин"
-              class="signIn__popup__form__label__input"
-              v-model="email"
-            />
-          </label>
-          <label class="signIn__popup__form__label">
-            <img
-              class="signIn__popup__form__label__img"
-              src="../assets/pass.svg"
-              alt="icon"
-            />
-            <input
-              placeholder="Пароль"
-              class="signIn__popup__form__label__input"
-              type="password"
-              v-model="password"
-            />
-          </label>
-          <button type="submit" class="signIn__popup__form__btn">Войти</button>
+          <AppInput v-model="email" placeholder="Почта/логин" required>
+            <template #prefix>
+              <emailIcon color="#484848" width="1.25vw" height="1.25vw" />
+            </template>
+          </AppInput>
+          <AppInput v-model="password" placeholder="Пароль" required>
+            <template #prefix>
+              <PassIccon color="#484848" width="1.25vw" height="1.25vw" />
+            </template>
+          </AppInput>
+          <AppButton
+            type="primary"
+            @click="handleSubmit"
+            :disabled="isSubmitting"
+            full-width
+          >
+            Войти
+          </AppButton>
         </form>
         <div class="signIn__popup__vopr">
           <span class="signIn__popup__vopr__text">нет аккаунта?</span>
@@ -52,15 +43,20 @@
 </template>
 
 <script lang="ts">
+import { AppButton, AppInput } from "@/components/UI";
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
 import AppLoader from "@/components/Loader.vue";
 import emailIcon from "../assets/icons/emailIcon.vue";
+import PassIccon from "@/assets/icons/passIccon.vue";
 export default defineComponent({
   name: "SignInView",
   components: {
     AppLoader,
     emailIcon,
+    AppButton,
+    AppInput,
+    PassIccon,
   },
   setup() {
     const isLoading = ref(true);

@@ -8,7 +8,6 @@ import CourseItem from "./CourseItem.vue";
 import CourseSearchBar from "./CourseSearchBar.vue";
 import DeleteConfirmModal from "./DeleteConfirmModal.vue";
 import LessonEditModal from "./LessonEditModal.vue";
-import NotificationToast from "./NotificationToast.vue";
 
 export {
   CourseBasicInfo,
@@ -20,7 +19,6 @@ export {
   CourseSearchBar,
   DeleteConfirmModal,
   LessonEditModal,
-  NotificationToast,
 };
 
 // src/components/CourseControlComponents/

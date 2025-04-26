@@ -26,21 +26,12 @@
       />
     </div>
     <div v-else class="HomeView__empty">
-      <div class="HomeView__empty__con">
-        <img
-          class="HomeView__empty__con-icon"
-          src="../assets/courseNone.svg"
-          alt="Нет курсов"
-        />
-        <p class="HomeView__empty__con-text">Курсы не найдены</p>
-      </div>
-      <button
+      <AppEmptyState
+        title="Курсы не найдены"
+        actionText="Сбросить поиск"
         v-if="searchQuery"
-        class="HomeView__find-button"
-        @click="clearSearch"
-      >
-        Сбросить поиск
-      </button>
+        @action="clearSearch"
+      />
     </div>
     <CoursePopup
       :courseVib="selectedCourse"

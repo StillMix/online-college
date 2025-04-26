@@ -183,7 +183,10 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+@import "@/assets/styles/variables.scss";
+@import "@/assets/styles/styles.scss";
 .courseElement {
+  @extend .card;
   display: block;
   width: 100%;
   border-radius: 0.521vw;

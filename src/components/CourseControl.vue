@@ -45,87 +45,81 @@
     </div>
 
     <!-- Модальное окно создания/редактирования курса -->
-    <div
-      class="course-control__modal"
-      v-if="showEditModal"
-      @click.self="closeModals"
+    <AppModal
+      :show="showEditModal"
+      title="Редактирование курса"
+      @close="closeModals"
+      width="60vw"
     >
-      <div class="course-control__modal__content">
-        <h2 class="course-control__modal__title">
-          {{ editMode ? "Редактирование курса" : "Создание нового курса" }}
-        </h2>
-
-        <div class="course-control__modal__tabs">
-          <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            class="course-control__modal__tabs__item"
-            :class="{
-              'course-control__modal__tabs__item--active': activeTab === tab.id,
-            }"
-            @click="activeTab = tab.id"
+      <div class="course-control__modal__tabs">
+        <button
+          v-for="tab in tabs"
+          :key="tab.id"
+          class="course-control__modal__tabs__item"
+          :class="{
+            'course-control__modal__tabs__item--active': activeTab === tab.id,
+          }"
+          @click="activeTab = tab.id"
+        >
+          {{ tab.name }}
+          <span
+            v-if="tabCompleted[tab.id]"
+            class="course-control__modal__tabs__item__completed"
+            >✓</span
           >
-            {{ tab.name }}
-            <span
-              v-if="tabCompleted[tab.id]"
-              class="course-control__modal__tabs__item__completed"
-              >✓</span
-            >
-          </button>
-        </div>
-
-        <form class="course-control__modal__form">
-          <!-- Шаг 1: Основная информация о курсе -->
-          <CourseBasicInfo
-            v-if="activeTab === 'basic'"
-            :course="editingCourse"
-            :course-types="courseTypes"
-            :course-levels="courseLevels"
-            :is-edit-mode="editMode"
-            @update:course="updateCourseBasicInfo"
-            @save="saveBasicInfo"
-            @cancel="closeModals"
-            @icon-upload="handleIconUpload"
-          />
-
-          <!-- Шаг 2: Информация о курсе -->
-          <CourseInfoSection
-            v-if="activeTab === 'info'"
-            :info="editingCourse.info"
-            @update:info="updateCourseInfo"
-            @save="saveInfoItems"
-            @back="activeTab = 'basic'"
-          />
-
-          <!-- Шаг 3: Разделы курса -->
-          <CourseSections
-            v-if="activeTab === 'sections'"
-            :sections="editingCourse.sections"
-            @update:sections="updateCourseSections"
-            @save="saveSections"
-            @back="activeTab = 'info'"
-          />
-
-          <!-- Шаг 4: Уроки курса -->
-          <CourseLessons
-            v-if="activeTab === 'lessons'"
-            :sections="editingCourse.sections"
-            @update:sections="updateCourseSections"
-            @save="saveLessons"
-            @back="activeTab = 'sections'"
-            @edit-lesson="openLessonEditModal"
-          />
-
-          <!-- Шаг 5: Обзор и финальное сохранение -->
-          <CourseReview
-            v-if="activeTab === 'review'"
-            :course="editingCourse"
-            @save="finalizeCourse"
-            @back="activeTab = 'lessons'"
-          />
-        </form>
+        </button>
       </div>
-    </div>
+      <form class="course-control__modal__form">
+        <!-- Шаг 1: Основная информация о курсе -->
+        <CourseBasicInfo
+          v-if="activeTab === 'basic'"
+          :course="editingCourse"
+          :course-types="courseTypes"
+          :course-levels="courseLevels"
+          :is-edit-mode="editMode"
+          @update:course="updateCourseBasicInfo"
+          @save="saveBasicInfo"
+          @cancel="closeModals"
+          @icon-upload="handleIconUpload"
+        />
+
+        <!-- Шаг 2: Информация о курсе -->
+        <CourseInfoSection
+          v-if="activeTab === 'info'"
+          :info="editingCourse.info"
+          @update:info="updateCourseInfo"
+          @save="saveInfoItems"
+          @back="activeTab = 'basic'"
+        />
+
+        <!-- Шаг 3: Разделы курса -->
+        <CourseSections
+          v-if="activeTab === 'sections'"
+          :sections="editingCourse.sections"
+          @update:sections="updateCourseSections"
+          @save="saveSections"
+          @back="activeTab = 'info'"
+        />
+
+        <!-- Шаг 4: Уроки курса -->
+        <CourseLessons
+          v-if="activeTab === 'lessons'"
+          :sections="editingCourse.sections"
+          @update:sections="updateCourseSections"
+          @save="saveLessons"
+          @back="activeTab = 'sections'"
+          @edit-lesson="openLessonEditModal"
+        />
+
+        <!-- Шаг 5: Обзор и финальное сохранение -->
+        <CourseReview
+          v-if="activeTab === 'review'"
+          :course="editingCourse"
+          @save="finalizeCourse"
+          @back="activeTab = 'lessons'"
+        />
+      </form>
+    </AppModal>
 
     <!-- Модальное окно подтверждения удаления -->
     <DeleteConfirmModal
@@ -145,7 +139,7 @@
     />
 
     <!-- Уведомление о выполнении действия -->
-    <NotificationToast
+    <AppNotification
       :show="notification.show"
       :message="notification.message"
       :type="notification.type"
@@ -159,50 +153,21 @@ import { defineComponent, ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import AppLoader from "@/components/Loader.vue";
 import {
+  CourseItem,
+  CourseItemCourseContent,
+  CourseItemInfo,
+  CourseItemCourse,
+} from "@/types";
+import {
   CourseBasicInfo,
   CourseInfoSection,
   CourseSections,
   CourseLessons,
   CourseReview,
-  CourseItem,
   CourseSearchBar,
   DeleteConfirmModal,
   LessonEditModal,
-  NotificationToast,
 } from "@/components/CourseControlComponents";
-
-interface CourseItemInfo {
-  id: string;
-  title: string;
-  subtitle: string;
-}
-
-interface CourseItemCourseContent {
-  id: string;
-  name: string;
-  passing: string;
-  description?: string;
-}
-
-interface CourseItemCourse {
-  id: string;
-  name: string;
-  content: CourseItemCourseContent[];
-}
-
-interface CourseItem {
-  id: string;
-  title: string;
-  subtitle: string;
-  type: string;
-  timetoendL: string;
-  color: string;
-  icon: string;
-  icontype: string;
-  titleForCourse: string;
-  info: CourseItemInfo[];
-  sections: CourseItemCourse[];
-}
 
 export default defineComponent({
   name: "CourseControl",
@@ -213,11 +178,9 @@ export default defineComponent({
     CourseSections,
     CourseLessons,
     CourseReview,
-    CourseItem,
     CourseSearchBar,
     DeleteConfirmModal,
     LessonEditModal,
-    NotificationToast,
   },
   props: {
     initialLoading: {
