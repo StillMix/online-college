@@ -2,37 +2,42 @@
   <div class="course-popup">
     <div class="course-popup__card">
       <CourseMainInfo :elemRed="elemRed" :edit="edit" @click="$emit('click')" />
-      <template v-if="!edit">
-        <CourseInfo
-          v-for="info in courseInfoList"
-          :key="info.id"
-          :id="info.id"
-          :title="info.title"
-          :subtitle="info.subtitle"
-        />
-      </template>
+      <div class="course-popup__card__info">
+        <template v-if="!edit">
+          <CourseInfo
+            v-for="info in courseInfoList"
+            :key="info.id"
+            :id="info.id"
+            :title="info.title"
+            :subtitle="info.subtitle"
+          />
+        </template>
 
-      <AppButton
-        :styleOverrides="{
-          width: '11.177vw',
-          backgroundColor: 'white',
-          color: 'black',
-        }"
-        @click="addInfo"
-      >
-        Добавить информации
-      </AppButton>
+        <AppButton
+          :styleOverrides="{
+            width: '11.177vw',
+            backgroundColor: 'white',
+            color: 'black',
+          }"
+          @click="addInfo"
+        >
+          Добавить информации
+        </AppButton>
+      </div>
 
-      <CourseSection v-if="!edit" />
-      <AppButton
-        :styleOverrides="{
-          width: '11.177vw',
-          backgroundColor: 'white',
-          color: 'black',
-        }"
-      >
-        Добавить раздел
-      </AppButton>
+      <div class="course-popup__card__section">
+        <CourseSection v-if="!edit" />
+        <AppButton
+          :styleOverrides="{
+            width: '11.177vw',
+            backgroundColor: 'white',
+            color: 'black',
+          }"
+        >
+          Добавить раздел
+        </AppButton>
+      </div>
+
       <AppButton
         :styleOverrides="{
           width: '11.177vw',
