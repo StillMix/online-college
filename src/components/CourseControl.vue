@@ -863,5 +863,6 @@ return {
   deleteCourse,
 };
 
+};
 })
 </script>
