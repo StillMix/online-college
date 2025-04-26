@@ -19,6 +19,7 @@ const API_URL = `${API_BASE_URL}/api/courses`;
 export const getAllCourses = async (): Promise<CourseItem[]> => {
   try {
     const response = await axios.get(API_URL);
+    localStorage.removeItem("courseData");
     localStorage.setItem("courseData", JSON.stringify(response.data));
     return response.data;
   } catch (error) {
@@ -68,7 +69,7 @@ export const createCourse = async (
     // Обновляем список курсов в localStorage
     const updatedCourse = response.data;
     updateCoursesInLocalStorage(updatedCourse);
-
+    getAllCourses();
     return updatedCourse;
   } catch (error) {
     console.error("Ошибка при создании курса:", error);
@@ -89,7 +90,7 @@ export const updateCourse = async (
     // Обновляем список курсов в localStorage
     const updatedCourse = response.data;
     updateCoursesInLocalStorage(updatedCourse);
-
+    getAllCourses();
     return updatedCourse;
   } catch (error) {
     console.error(`Ошибка при обновлении курса с ID ${courseId}:`, error);
@@ -105,6 +106,7 @@ export const deleteCourse = async (courseId: string): Promise<void> => {
     await axios.delete(`${API_URL}/${courseId}`);
     // Удаляем курс из localStorage
     removeCoursesFromLocalStorage(courseId);
+    getAllCourses();
   } catch (error) {
     console.error(`Ошибка при удалении курса с ID ${courseId}:`, error);
     throw error;
@@ -124,6 +126,7 @@ export const createCourseInfo = async (
 ): Promise<CourseInfoItem> => {
   try {
     const response = await axios.post(`${API_URL}/${courseId}/info/`, infoData);
+    getAllCourses();
     return response.data;
   } catch (error) {
     console.error(
@@ -147,6 +150,7 @@ export const updateCourseInfo = async (
       `${API_URL}/${courseId}/info/${infoId}`,
       infoData
     );
+    getAllCourses();
     return response.data;
   } catch (error) {
     console.error(
@@ -166,6 +170,7 @@ export const deleteCourseInfo = async (
 ): Promise<void> => {
   try {
     await axios.delete(`${API_URL}/${courseId}/info/${infoId}`);
+    getAllCourses();
   } catch (error) {
     console.error(
       `Ошибка при удалении информации ${infoId} для курса ${courseId}:`,
@@ -191,6 +196,7 @@ export const createCourseSection = async (
       `${API_URL}/${courseId}/sections/`,
       sectionData
     );
+    getAllCourses();
     return response.data;
   } catch (error) {
     console.error(`Ошибка при создании раздела для курса ${courseId}:`, error);
@@ -211,6 +217,7 @@ export const updateCourseSection = async (
       `${API_URL}/${courseId}/sections/${sectionId}`,
       sectionData
     );
+    getAllCourses();
     return response.data;
   } catch (error) {
     console.error(
@@ -256,6 +263,11 @@ export const createCourseLesson = async (
       `${API_URL}/${courseId}/sections/${sectionId}/content`,
       lessonData
     );
+
+    // После успешного создания урока, обновляем список всех курсов
+    // чтобы данные были актуальны
+    getAllCourses();
+
     return response.data;
   } catch (error) {
     console.error(
@@ -280,6 +292,7 @@ export const updateCourseLesson = async (
       `${API_URL}/${courseId}/sections/${sectionId}/content/${lessonId}`,
       lessonData
     );
+    getAllCourses();
     return response.data;
   } catch (error) {
     console.error(
@@ -362,7 +375,7 @@ export const uploadCourseImage = async (
         },
       }
     );
-
+    getAllCourses();
     return response.data.path;
   } catch (error) {
     console.error(

@@ -138,8 +138,21 @@ export default defineComponent({
     };
 
     // Удаление урока
-    const removeLesson = (lessonId: string) => {
-      lessons.value = lessons.value.filter((lesson) => lesson.id !== lessonId);
+    const removeLesson = async (lessonId: string) => {
+      if (props.elemID && props.section && props.section.id && lessonId) {
+        try {
+          await courseApi.deleteCourseLesson(
+            props.elemID,
+            props.section.id,
+            lessonId
+          );
+          lessons.value = lessons.value.filter(
+            (lesson) => lesson.id !== lessonId
+          );
+        } catch (error) {
+          console.error("Ошибка при обновлении урока:", error);
+        }
+      }
     };
 
     // Сохранение раздела

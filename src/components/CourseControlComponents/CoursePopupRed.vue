@@ -150,10 +150,15 @@ export default defineComponent({
     };
 
     // Удаление информации о курсе
-    const deleteCourseInfo = (id: string) => {
-      courseInfoList.value = courseInfoList.value.filter(
-        (info) => info.id !== id
-      );
+    const deleteCourseInfo = async (id: string) => {
+      if (props.elemRed) {
+        courseInfoList.value = courseInfoList.value.filter(
+          (info) => info.id !== id
+        );
+        await courseApi.deleteCourseInfo(props.elemRed.id, id);
+      } else {
+        console.error("elemRed is undefined");
+      }
     };
 
     // Добавление нового раздела
