@@ -1,0 +1,45 @@
+// Добавьте в src/assets/styles/variables.scss
+
+// Переменные цветов
+$primary-color: #08dccf;
+$primary-hover: #09e9db;
+$primary-shadow: rgba(8, 220, 207, 0.5);
+
+$success-color: #39b874;
+$success-hover: #45cc83;
+$success-shadow: rgba(57, 184, 116, 0.4);
+
+$error-color: #ff5b5b;
+$error-hover: #ff7272;
+$error-shadow: rgba(255, 91, 91, 0.4);
+
+$bg-dark: #212121;
+$bg-card: #2a2a2a;
+$bg-input: #363636;
+$bg-input-focus: #404040;
+
+// Размеры и отступы
+$border-radius-sm: 0.313vw;
+$border-radius-md: 0.417vw;
+$border-radius-lg: 0.521vw;
+$border-radius-xl: 0.625vw;
+$border-radius-pill: 7.292vw;
+
+// Общие миксины
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin hover-effect {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-0.104vw);
+  }
+
+  &:active {
+    transform: translateY(0.052vw);
+  }
+}
