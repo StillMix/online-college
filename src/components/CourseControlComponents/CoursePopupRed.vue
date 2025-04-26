@@ -10,6 +10,8 @@
             :id="info.id"
             :title="info.title"
             :subtitle="info.subtitle"
+            @save="updateCourseInfo"
+            @delete="deleteCourseInfo"
           />
         </template>
 
@@ -18,47 +20,74 @@
             width: '11.177vw',
             backgroundColor: 'white',
             color: 'black',
+            marginTop: '0.521vw',
           }"
           @click="addInfo"
         >
-          Добавить информации
+          Добавить информацию
         </AppButton>
       </div>
 
       <div class="course-popup__card__section">
-        <CourseSection v-if="!edit" />
+        <template v-if="!edit">
+          <CourseSection
+            v-for="section in courseSections"
+            :key="section.id"
+            :section="section"
+            @save="updateCourseSection"
+            @delete="deleteCourseSection"
+          />
+        </template>
+        <AppButton
+          :styleOverrides="{
+            width: '11.177vw',
+            backgroundColor: 'white',
+            color: 'black',
+            marginTop: '0.521vw',
+          }"
+          @click="addSection"
+        >
+          Добавить раздел
+        </AppButton>
+      </div>
+
+      <div class="course-popup__card__actions">
         <AppButton
           :styleOverrides="{
             width: '11.177vw',
             backgroundColor: 'white',
             color: 'black',
           }"
+          @click="$emit('click')"
         >
-          Добавить раздел
+          Отменить
+        </AppButton>
+
+        <AppButton
+          v-if="!edit"
+          :styleOverrides="{
+            width: '15.177vw',
+            backgroundColor: '#39B874',
+            color: 'white',
+          }"
+          @click="saveCourseChanges"
+        >
+          Сохранить все изменения
         </AppButton>
       </div>
-
-      <AppButton
-        :styleOverrides="{
-          width: '11.177vw',
-          backgroundColor: 'white',
-          color: 'black',
-        }"
-        @click="$emit('click')"
-      >
-        Отменить
-      </AppButton>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, PropType, ref } from "vue";
-import { CourseItem } from "@/types";
+import { defineComponent, onMounted, PropType, ref, watch } from "vue";
+import { CourseItem, CourseItemInfo, CourseItemCourse } from "@/types";
+import { courseApi } from "@/api";
 import CourseMainInfo from "./CourseMainInfo.vue";
 import CourseInfo from "./CourseInfo.vue";
 import CourseSection from "./CourseSection.vue";
 import { AppButton } from "../UI";
+
 export default defineComponent({
   name: "CoursePopupRed",
   props: {
@@ -71,41 +100,134 @@ export default defineComponent({
       required: false,
     },
   },
-  emits: ["click"],
+  emits: ["click", "update"],
   components: { CourseMainInfo, CourseInfo, CourseSection, AppButton },
-  setup(props) {
-    const courseInfoList = ref<
-      { id: number; title?: string; subtitle?: string }[]
-    >([]);
-    const nextId = ref(1);
+  setup(props, { emit }) {
+    const courseInfoList = ref<CourseItemInfo[]>([]);
+    const courseSections = ref<CourseItemCourse[]>([]);
+    const nextInfoId = ref(1);
+    const nextSectionId = ref(1);
+    const isLoading = ref(false);
 
+    // Добавление новой информации о курсе
     const addInfo = () => {
-      courseInfoList.value.push({ id: nextId.value }); // только id
-      nextId.value++;
+      const newInfoId = `info_${Date.now()}`;
+      courseInfoList.value.push({
+        id: newInfoId,
+        title: "Новый блок информации",
+        subtitle: "Описание информационного блока",
+      });
     };
 
-    onMounted(() => {
-      if (
-        props.elemRed &&
-        props.elemRed.info &&
-        props.elemRed.info.length > 0
-      ) {
-        console.log(props.elemRed.info);
-        courseInfoList.value = props.elemRed.info.map((infoItem) => ({
-          id: Number(infoItem.id), // приводим id к числу
-          title: infoItem.title,
-          subtitle: infoItem.subtitle,
-        }));
+    // Обновление информации о курсе
+    const updateCourseInfo = (id: string, title: string, subtitle: string) => {
+      const index = courseInfoList.value.findIndex((info) => info.id === id);
+      if (index !== -1) {
+        courseInfoList.value[index] = { id, title, subtitle };
+      }
+    };
 
-        if (courseInfoList.value.length > 0) {
-          nextId.value = Math.max(...courseInfoList.value.map((i) => i.id)) + 1;
+    // Удаление информации о курсе
+    const deleteCourseInfo = (id: string) => {
+      courseInfoList.value = courseInfoList.value.filter(
+        (info) => info.id !== id
+      );
+    };
+
+    // Добавление нового раздела
+    const addSection = () => {
+      const newSectionId = `section_${Date.now()}`;
+      courseSections.value.push({
+        id: newSectionId,
+        name: "Новый раздел",
+        content: [],
+      });
+    };
+
+    // Обновление раздела
+    const updateCourseSection = (section: CourseItemCourse) => {
+      const index = courseSections.value.findIndex((s) => s.id === section.id);
+      if (index !== -1) {
+        courseSections.value[index] = section;
+      }
+    };
+
+    // Удаление раздела
+    const deleteCourseSection = (id: string) => {
+      courseSections.value = courseSections.value.filter(
+        (section) => section.id !== id
+      );
+    };
+
+    // Сохранение всех изменений курса
+    const saveCourseChanges = async () => {
+      if (!props.elemRed) return;
+
+      isLoading.value = true;
+      try {
+        const updatedCourse = {
+          ...props.elemRed,
+          info: courseInfoList.value,
+          sections: courseSections.value,
+        };
+
+        await courseApi.updateCourse(props.elemRed.id, updatedCourse);
+        await courseApi.getAllCourses();
+        emit("click"); // Закрываем попап
+        emit("update"); // Оповещаем родителя об обновлении
+      } catch (error) {
+        console.error("Ошибка при сохранении изменений курса:", error);
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    // Загрузка данных при монтировании
+    onMounted(() => {
+      if (props.elemRed) {
+        // Загружаем информацию о курсе
+        if (props.elemRed.info && props.elemRed.info.length > 0) {
+          courseInfoList.value = [...props.elemRed.info];
+        }
+
+        // Загружаем разделы курса
+        if (props.elemRed.sections && props.elemRed.sections.length > 0) {
+          courseSections.value = [...props.elemRed.sections];
         }
       }
     });
 
+    // Отслеживаем изменения props.elemRed
+    watch(
+      () => props.elemRed,
+      (newValue) => {
+        if (newValue) {
+          if (newValue.info && newValue.info.length > 0) {
+            courseInfoList.value = [...newValue.info];
+          } else {
+            courseInfoList.value = [];
+          }
+
+          if (newValue.sections && newValue.sections.length > 0) {
+            courseSections.value = [...newValue.sections];
+          } else {
+            courseSections.value = [];
+          }
+        }
+      }
+    );
+
     return {
       courseInfoList,
+      courseSections,
       addInfo,
+      updateCourseInfo,
+      deleteCourseInfo,
+      addSection,
+      updateCourseSection,
+      deleteCourseSection,
+      saveCourseChanges,
+      isLoading,
     };
   },
 });
@@ -172,6 +294,35 @@ export default defineComponent({
       background: linear-gradient(90deg, #08dccf, #0099ff, #39b874);
       background-size: 200% 100%;
       animation: gradientMove 3s linear infinite;
+    }
+
+    &__info,
+    &__section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.042vw;
+      width: 100%;
+      padding: 0.833vw;
+      border-radius: 0.521vw;
+      background-color: rgba(0, 0, 0, 0.1);
+      position: relative;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 0.156vw;
+        background: linear-gradient(to bottom, #08dccf, #39b874);
+        border-radius: 0.521vw 0 0 0.521vw;
+      }
+    }
+
+    &__actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.042vw;
     }
   }
 }
