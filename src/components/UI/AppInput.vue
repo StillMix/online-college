@@ -1,48 +1,60 @@
 <template>
   <div class="app-input-wrapper">
-    <label v-if="label" class="app-input__label">
-      {{ label }}
-      <span v-if="required" class="app-input__label__required">*</span>
-    </label>
+    <label class="app-input__container">
+      <emailIcon
+        v-if="type === 'email' || type === 'emailtext'"
+        customClass="app-input__container__img"
+        color="#484848"
+        width="1.25vw"
+        height="1.25vw"
+      />
+      <PassIccon
+        v-if="type === 'password'"
+        customClass="app-input__container__img"
+        color="#484848"
+        width="1.25vw"
+        height="1.25vw"
+      />
 
-    <div class="app-input__container">
-      <slot name="prefix"></slot>
-
+      <loginIcon
+        v-if="type === 'login'"
+        customClass="app-input__container__img"
+        color="#484848"
+        width="1.25vw"
+        height="1.25vw"
+      />
       <input
         :value="modelValue"
         :type="type"
         :placeholder="placeholder"
         :disabled="disabled"
         :required="required"
-        :class="['app-input', { 'app-input--error': hasError }]"
-        @input="$emit('update:modelValue', $event.target.value)"
+        :class="[
+          'app-input__container__input',
+          { 'app-input--error': hasError },
+        ]"
+        @input="
+          $emit('update:modelValue', ($event.target as HTMLInputElement)?.value)
+        "
         @focus="$emit('focus')"
         @blur="$emit('blur')"
       />
-
-      <slot name="suffix"></slot>
-
-      <button
-        v-if="clearable && modelValue"
-        type="button"
-        class="app-input__clear"
-        @click="$emit('update:modelValue', '')"
-      >
-        ×
-      </button>
-    </div>
-
-    <div v-if="hasError" class="app-input__error">
-      {{ error }}
-    </div>
+    </label>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed } from "vue";
-
+import emailIcon from "@/assets/icons/emailIcon.vue";
+import PassIccon from "@/assets/icons/passIccon.vue";
+import LoginIcon from "@/assets/icons/loginIcon.vue";
 export default defineComponent({
   name: "AppInput",
+  components: {
+    emailIcon,
+    PassIccon,
+    LoginIcon,
+  },
   props: {
     modelValue: {
       type: [String, Number],
@@ -89,109 +101,53 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-.app-input-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0.313vw;
-  width: 100%;
-}
-
-.app-input__label {
-  font-family: var(--font-family);
-  font-weight: 400;
-  font-size: 0.833vw;
-  color: rgba(255, 255, 255, 0.7);
-
-  &__required {
-    color: var(--error-color);
-    margin-left: 0.104vw;
-  }
-}
-
-.app-input__container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-
-  ::v-slotted([name="prefix"]) {
-    position: absolute;
-    left: 1.042vw;
-    pointer-events: none;
-  }
-
-  ::v-slotted([name="suffix"]) {
-    position: absolute;
-    right: 1.042vw;
-    pointer-events: none;
-  }
-}
-
 .app-input {
-  width: 100%;
-  height: 2.083vw;
-  padding: 0 0.781vw;
-  border-radius: var(--border-radius-md);
-  background: var(--bg-input);
-  font-family: var(--font-family);
-  font-weight: 400;
-  font-size: 0.833vw;
-  color: #fff;
-  transition: all 0.3s ease;
+  &__container {
+    margin-top: 1.042vw;
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
 
-  &:focus {
-    background: var(--bg-input-focus);
-    box-shadow: 0 0 0.417vw var(--primary-shadow);
-  }
+    &__img {
+      width: 1.25vw;
+      height: 1.25vw;
+      position: absolute;
+      left: 1.042vw;
+      transition: transform 0.3s ease;
+    }
 
-  &::placeholder {
-    font-family: var(--font-family);
-    font-weight: 400;
-    font-size: 0.833vw;
-    color: #fff;
-    opacity: 0.3;
-  }
+    &__input {
+      border-radius: 7.292vw;
+      width: 100%;
+      height: 2.604vw;
+      background: #363636;
+      padding-left: 2.813vw;
+      font-family: var(--font-family);
+      font-weight: 400;
+      font-size: 0.938vw;
+      color: #fff;
+      transition: all 0.3s ease;
+      border: 0.052vw solid transparent;
 
-  &--error {
-    border: 0.052vw solid var(--error-color);
+      &:focus {
+        outline: none;
+        border-color: #39b874;
+        box-shadow: 0 0 0.417vw rgba(57, 184, 116, 0.5);
+      }
 
-    &:focus {
-      box-shadow: 0 0 0.417vw var(--error-shadow);
+      &:focus + .signUp__popup__form__label__img {
+        transform: scale(1.1);
+      }
+    }
+
+    &__input::placeholder {
+      font-family: var(--font-family);
+      font-weight: 400;
+      font-size: 0.938vw;
+      color: #fff;
+      opacity: 0.3;
     }
   }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.app-input__clear {
-  position: absolute;
-  right: 0.781vw;
-  width: 1.042vw;
-  height: 1.042vw;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.833vw;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
-  }
-}
-
-.app-input__error {
-  font-family: var(--font-family);
-  font-weight: 400;
-  font-size: 0.729vw;
-  color: var(--error-color);
-  margin-top: 0.208vw;
 }
 </style>

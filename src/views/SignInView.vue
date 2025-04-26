@@ -12,19 +12,25 @@
           Выполните вход или зарегистрируйте новый аккаунт
         </p>
         <form class="signIn__popup__form" @submit.prevent="handleSubmit">
-          <AppInput v-model="email" placeholder="Почта/логин" required>
-            <template #prefix>
-              <emailIcon color="#484848" width="1.25vw" height="1.25vw" />
-            </template>
+          <AppInput
+            v-model="email"
+            type="email"
+            placeholder="Почта/логин"
+            required
+          >
           </AppInput>
-          <AppInput v-model="password" placeholder="Пароль" required>
-            <template #prefix>
-              <PassIccon color="#484848" width="1.25vw" height="1.25vw" />
-            </template>
+          <AppInput
+            v-model="password"
+            type="password"
+            placeholder="Пароль"
+            required
+          >
           </AppInput>
           <AppButton
-            type="primary"
-            @click="handleSubmit"
+            :styleOverrides="{
+              marginTop: '1.042vw',
+            }"
+            type="submit"
             :disabled="isSubmitting"
             full-width
           >
@@ -47,16 +53,12 @@ import { AppButton, AppInput } from "@/components/UI";
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
 import AppLoader from "@/components/Loader.vue";
-import emailIcon from "../assets/icons/emailIcon.vue";
-import PassIccon from "@/assets/icons/passIccon.vue";
 export default defineComponent({
   name: "SignInView",
   components: {
     AppLoader,
-    emailIcon,
     AppButton,
     AppInput,
-    PassIccon,
   },
   setup() {
     const isLoading = ref(true);
@@ -89,7 +91,6 @@ export default defineComponent({
       isSubmitting,
       email,
       password,
-      emailIcon,
       handleSubmit,
     };
   },
@@ -211,115 +212,6 @@ export default defineComponent({
       width: 100%;
       display: flex;
       flex-direction: column;
-
-      &__label {
-        margin-top: 1.042vw;
-        position: relative;
-        width: 100%;
-        display: flex;
-        align-items: center;
-
-        &__img {
-          width: 1.25vw;
-          height: 1.25vw;
-          position: absolute;
-          left: 1.042vw;
-          transition: transform 0.3s ease;
-        }
-
-        &__input {
-          border-radius: 7.292vw;
-          width: 100%;
-          height: 2.604vw;
-          background: #363636;
-          padding-left: 2.813vw;
-          font-family: var(--font-family);
-          font-weight: 400;
-          font-size: 0.938vw;
-          color: #fff;
-          transition: all 0.3s ease;
-          border: 0.052vw solid transparent;
-
-          &:focus {
-            outline: none;
-            border-color: #39b874;
-            box-shadow: 0 0 0.417vw rgba(57, 184, 116, 0.5);
-          }
-
-          &:focus + .signIn__popup__form__label__img {
-            transform: scale(1.1);
-          }
-        }
-
-        &__input::placeholder {
-          font-family: var(--font-family);
-          font-weight: 400;
-          font-size: 0.938vw;
-          color: #fff;
-          opacity: 0.3;
-        }
-      }
-
-      &__btn {
-        border-radius: 7.292vw;
-        width: 100%;
-        height: 2.604vw;
-        background: #39b874;
-        font-family: var(--font-family);
-        font-weight: 400;
-        font-size: 0.938vw;
-        text-align: center;
-        color: #fff;
-        margin-top: 4.531vw;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        border: none;
-
-        &:hover {
-          background: #45cc83;
-          transform: translateY(-0.104vw);
-          box-shadow: 0 0.26vw 0.781vw rgba(57, 184, 116, 0.4);
-        }
-
-        &:active {
-          transform: translateY(0.052vw);
-        }
-
-        &::after {
-          content: "";
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 0.26vw;
-          height: 0.26vw;
-          background: rgba(255, 255, 255, 0.5);
-          opacity: 0;
-          border-radius: 100%;
-          transform: scale(1, 1) translate(-50%);
-          transform-origin: 50% 50%;
-        }
-
-        &:focus:not(:active)::after {
-          animation: ripple 1s ease-out;
-        }
-
-        @keyframes ripple {
-          0% {
-            transform: scale(0, 0);
-            opacity: 0.5;
-          }
-          20% {
-            transform: scale(25, 25);
-            opacity: 0.3;
-          }
-          100% {
-            opacity: 0;
-            transform: scale(40, 40);
-          }
-        }
-      }
     }
 
     &__title {

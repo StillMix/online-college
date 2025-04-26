@@ -3,8 +3,11 @@
     :class="[
       'app-button',
       `app-button--${type}`,
+      { 'pulse-animation': pulse },
       { 'app-button--full-width': fullWidth },
     ]"
+    :style="styleOverrides"
+    :type="type"
     :disabled="disabled"
     @click="$emit('click')"
   >
@@ -13,18 +16,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType, StyleValue } from "vue";
 
 export default defineComponent({
   name: "AppButton",
   props: {
     type: {
-      type: String,
-      default: "primary",
-      validator: (val: string) =>
-        ["primary", "secondary", "success", "error", "warning"].includes(val),
+      type: String as PropType<"button" | "submit" | "reset">,
+      default: "button",
+    },
+    styleOverrides: {
+      type: [Object, String, Array] as PropType<StyleValue>,
+      default: () => ({}),
     },
     fullWidth: {
+      type: Boolean,
+      default: false,
+    },
+    pulse: {
       type: Boolean,
       default: false,
     },
@@ -39,77 +48,67 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .app-button {
+  border-radius: 7.292vw;
+  width: 100%;
+  height: 2.604vw;
+  background: #39b874;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.521vw 1.042vw;
-  border-radius: var(--border-radius-lg);
   font-family: var(--font-family);
   font-weight: 400;
-  font-size: 0.833vw;
-  color: #fff;
+  font-size: 0.938vw;
+  text-align: center;
+  color: var(--colors-default-static-static-100);
   cursor: pointer;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 
-  &:hover:not(:disabled) {
+  &.pulse-animation {
+    animation: buttonPulse 2s infinite;
+  }
+
+  @keyframes buttonPulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(57, 184, 116, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 0.521vw rgba(57, 184, 116, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(57, 184, 116, 0);
+    }
+  }
+
+  /* Эффект волны при нажатии */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.521vw;
+    height: 0.521vw;
+    background: rgba(255, 255, 255, 0.7);
+    opacity: 0;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    transition: all 0.5s ease;
+  }
+
+  &:active::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(20);
+    transition: all 0s;
+  }
+
+  &:hover {
+    background: #45cc83;
     transform: translateY(-0.104vw);
   }
 
-  &:active:not(:disabled) {
+  &:active {
     transform: translateY(0.052vw);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  &--full-width {
-    width: 100%;
-  }
-
-  &--primary {
-    background: var(--primary-color);
-
-    &:hover:not(:disabled) {
-      background: var(--primary-hover);
-      box-shadow: 0 0.26vw 0.781vw var(--primary-shadow);
-    }
-  }
-
-  &--success {
-    background: var(--success-color);
-
-    &:hover:not(:disabled) {
-      background: var(--success-hover);
-      box-shadow: 0 0.26vw 0.781vw var(--success-shadow);
-    }
-  }
-
-  &--error {
-    background: var(--error-color);
-
-    &:hover:not(:disabled) {
-      background: var(--error-hover);
-      box-shadow: 0 0.26vw 0.781vw var(--error-shadow);
-    }
-  }
-
-  &--secondary {
-    background: var(--bg-input);
-
-    &:hover:not(:disabled) {
-      background: var(--bg-input-focus);
-    }
-  }
-
-  &--warning {
-    background: var(--warning-color);
-
-    &:hover:not(:disabled) {
-      background: var(--warning-hover);
-      box-shadow: 0 0.26vw 0.781vw var(--warning-shadow);
-    }
   }
 }
 </style>

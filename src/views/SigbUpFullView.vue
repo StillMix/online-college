@@ -15,38 +15,30 @@
           <p class="signUpFull__popup__form__left__subtitle">
             Выполните последние шаги перед созданием аккаунта!
           </p>
-          <label class="signUpFull__popup__form__left__label animate-field">
-            <loginIcon
-              class="signUpFull__popup__form__left__label__img"
-              color="#484848"
-              width="1.25vw"
-              height="1.25vw"
-            />
-            <input
-              class="signUpFull__popup__form__left__label__input"
-              type="login"
-              placeholder="Имя"
-            />
-          </label>
-          <label class="signUpFull__popup__form__left__label animate-field">
-            <emailIcon
-              class="signUpFull__popup__form__left__label__img"
-              color="#484848"
-              width="1.25vw"
-              height="1.25vw"
-            />
-            <input
-              class="signUpFull__popup__form__left__label__input"
-              type="login"
-              placeholder="Введите код из письма"
-            />
-          </label>
-          <button
-            class="signUpFull__popup__form__left__btn pulse-animation"
-            type="submit"
+          <AppInput
+            v-model="login"
+            type="login"
+            placeholder="Имя"
+            required
+          ></AppInput>
+          <AppInput
+            v-model="email"
+            type="emailtext"
+            placeholder="Введите код из письма"
+            required
           >
-            Сохранить и продолжить
-          </button>
+          </AppInput>
+          <AppButton
+            :styleOverrides="{
+              marginTop: '3.177vw',
+            }"
+            pulse
+            type="submit"
+            :disabled="isSubmitting"
+            full-width
+          >
+            Зарегистрироваться
+          </AppButton>
         </div>
         <label class="signUpFull__popup__form__label image-upload-animation">
           <transition name="fade-scale">
@@ -108,17 +100,14 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { AppButton, AppInput } from "@/components/UI";
 import AppLoader from "@/components/Loader.vue";
-import inputImg from "../assets/icons/inputImg.vue";
-import loginIcon from "../assets/icons/loginIcon.vue";
-import emailIcon from "../assets/icons/emailIcon.vue";
 export default defineComponent({
   name: "signUpFullView",
   components: {
     AppLoader,
-    inputImg,
-    loginIcon,
-    emailIcon,
+    AppButton,
+    AppInput,
   },
   setup() {
     const isLoading = ref(true);
@@ -190,10 +179,7 @@ export default defineComponent({
       email,
       login,
       password,
-      emailIcon,
-      inputImg,
       handleSubmit,
-      loginIcon,
       previewImage,
       handleImageSelect,
       isRefreshing,
