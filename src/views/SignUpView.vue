@@ -43,7 +43,7 @@
             </div>
             <AppInput
               v-model="login"
-              type="text"
+              type="login"
               placeholder="Логин"
               required
             ></AppInput>
@@ -236,7 +236,7 @@ export default defineComponent({
           localStorage.setItem("token", "вошли");
 
           // Перенаправляем на страницу с дополнительными данными
-          router.push("/signupfull");
+          router.push("/");
         }
       } catch (error: any) {
         console.error("Ошибка:", error);

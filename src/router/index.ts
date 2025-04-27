@@ -34,13 +34,6 @@ const routes: Array<RouteRecordRaw> = [
       import(/* webpackChunkName: "about" */ "../views/SignUpView.vue"),
   },
   {
-    path: "/signupfull",
-    name: "signupfull",
-    meta: { transition: "slide" },
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/SigbUpFullView.vue"),
-  },
-  {
     path: "/settings",
     name: "settings",
     meta: { transition: "slide" },
