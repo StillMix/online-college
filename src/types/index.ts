@@ -1,12 +1,13 @@
 // Общие интерфейсы для всего приложения
 export interface UserData {
-  name: string;
+  id: string;
   login: string;
   email: string;
-  avatar: string | null;
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
+  password: string;
+  img: string;
+  name: string;
+  role: string;
+  courses: CourseItem[];
 }
 
 export interface ImageItem {

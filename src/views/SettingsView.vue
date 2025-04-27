@@ -339,7 +339,7 @@ export default defineComponent({
 
       // Сбрасываем предпросмотр изображения
       previewImage.value = null;
-      userData.value.avatar = initialUserData.avatar;
+      userData.value.img = initialUserData.img;
 
       showNotification.value = false;
     };
