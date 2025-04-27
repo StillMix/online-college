@@ -22,39 +22,29 @@ export const createUser = async (
 /**
  * Подтверждение email пользователя
  */
-export const confirmEmail = async (
-  email: string,
-  verificationCode: string,
-  login: string,
-  password: string
-): Promise<UserData> => {
-  try {
-    const response = await axios.post(`${API_URL}/confirm_email/`, {
-      email,
-      verification_code: verificationCode,
-      login,
-      password,
-    });
-    return response.data.user;
-  } catch (error) {
-    console.error("Ошибка при подтверждении email:", error);
-    throw error;
-  }
-};
-
-/**
- * Отправка кода подтверждения на email
- */
-export const sendVerificationCode = async (
-  email: string
-): Promise<{ message: string }> => {
+export const sendVerificationCode = async (email: string): Promise<any> => {
   try {
     const response = await axios.post(`${API_URL}/send_verification_code/`, {
-      email,
+      email: email,
     });
     return response.data;
   } catch (error) {
     console.error("Ошибка при отправке кода подтверждения:", error);
+    throw error;
+  }
+};
+
+export const confirmEmail = async (userData: {
+  email: string;
+  verification_code: string;
+  login: string;
+  password: string;
+}): Promise<any> => {
+  try {
+    const response = await axios.post(`${API_URL}/confirm_email/`, userData);
+    return response.data;
+  } catch (error) {
+    console.error("Ошибка при подтверждении email:", error);
     throw error;
   }
 };

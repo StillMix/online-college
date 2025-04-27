@@ -21,13 +21,6 @@
             placeholder="Имя"
             required
           ></AppInput>
-          <AppInput
-            v-model="email"
-            type="emailtext"
-            placeholder="Введите код из письма"
-            required
-          >
-          </AppInput>
           <AppButton
             :styleOverrides="{
               marginTop: '3.177vw',
@@ -53,6 +46,9 @@
                 width="2.083vw"
                 height="2.083vw"
                 class="floating-icon"
+                type="file"
+                accept="image/*"
+                @change="onFileChange"
               />
               <p class="signUpFull__popup__form__label__title">
                 Загрузите изображение (необязательно)
@@ -76,6 +72,7 @@ import { defineComponent, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { AppButton, AppInput } from "@/components/UI";
 import AppLoader from "@/components/Loader.vue";
+import { userApi } from "@/api";
 export default defineComponent({
   name: "signUpFullView",
   components: {
@@ -97,6 +94,30 @@ export default defineComponent({
     setTimeout(() => {
       isLoading.value = false;
     }, 10);
+    const onFileChange = async (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      const file = target.files?.[0];
+      if (file && props.elemRed) {
+        previewUrl.value = URL.createObjectURL(file);
+        try {
+          const uploadedImagePath = await courseApi.uploadCourseImage(
+            props.elemRed.id,
+            file
+          );
+
+          if (uploadedImagePath) {
+            console.log(
+              props.edit
+                ? "Изображение успешно загружено"
+                : "Изображение успешно обновлено"
+            );
+            await courseApi.getAllCourses();
+          }
+        } catch (error) {
+          console.error("Ошибка при загрузке изображения:", error);
+        }
+      }
+    };
 
     // Обработчик выбора изображения
     const handleImageSelect = (event: Event) => {
