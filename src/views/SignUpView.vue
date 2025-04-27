@@ -21,6 +21,13 @@
           <AppInput v-model="email" type="email" placeholder="Почта" required>
           </AppInput>
           <AppInput
+            v-model="verificateemail"
+            type="emailtext"
+            placeholder="Введите код из письма"
+            required
+          >
+          </AppInput>
+          <AppInput
             v-model="password"
             type="password"
             placeholder="Пароль"
@@ -67,6 +74,7 @@ export default defineComponent({
   setup() {
     const isLoading = ref(true);
     const isSubmitting = ref(false);
+    const verificateemail = ref("");
     const login = ref("");
     const email = ref("");
     const password = ref("");
@@ -94,6 +102,7 @@ export default defineComponent({
       email,
       login,
       password,
+      verificateemail,
       handleSubmit,
     };
   },
@@ -113,7 +122,7 @@ export default defineComponent({
     position: relative;
     border-radius: 0.521vw;
     width: 25vw;
-    height: 30.208vw;
+    height: 31.208vw;
     background: #2a2a2a;
     padding: 2.083vw;
     box-shadow: 0 0.521vw 1.302vw rgba(0, 0, 0, 0.5);
@@ -190,7 +199,7 @@ export default defineComponent({
       align-items: center;
       justify-content: center;
       border-radius: 7.292vw;
-      margin-top: 3.438vw;
+      margin-top: 1.438vw;
       width: 21.302vw;
       height: 2.604vw;
       background: #363636;

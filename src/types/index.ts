@@ -1,15 +1,57 @@
-// Общие интерфейсы для всего приложения
 export interface UserData {
-  id: string;
+  id?: string | number;
+  name?: string;
   login: string;
   email: string;
-  password: string;
-  img: string;
-  name: string;
-  role: string;
-  courses: CourseItem[];
+  password?: string;
+  img?: string;
+  avatar?: string | null;
+  role?: string;
+  courses?: CourseItem[];
+  currentPassword?: string;
+  newPassword?: string;
+  confirmPassword?: string;
 }
 
+// Интерфейс для верификации email
+export interface EmailVerification {
+  email: string;
+  verification_code?: string;
+}
+
+// Интерфейс для связи пользователя с курсом
+export interface UserCourse {
+  user_id: number;
+  course_id: string;
+}
+
+// Интерфейс для завершения урока
+export interface LessonCompletion {
+  user_id: number;
+  lesson_id: string;
+}
+
+// Интерфейс для входа пользователя
+export interface UserLogin {
+  login: string;
+  password: string;
+}
+
+// Интерфейс для обновления пользователя
+export interface UserUpdate {
+  login?: string;
+  email?: string;
+  password?: string;
+  name?: string;
+  img?: string;
+  role?: string;
+}
+
+// Интерфейс для ответа от API
+export interface ApiResponse {
+  message: string;
+  [key: string]: any;
+}
 export interface ImageItem {
   group: number;
   number: number;

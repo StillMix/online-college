@@ -68,32 +68,6 @@
         </label>
       </form>
     </div>
-    <div class="signUpFull__emailsucc slide-in-animation">
-      <div class="signUpFull__emailsucc__textcon">
-        <p class="signUpFull__emailsucc__textcon__title">
-          <emailIcon
-            class="signUpFull__emailsucc__textcon__title__img rotate-icon"
-            color="white"
-            width="1.25vw"
-            height="1.25vw"
-          />
-          На вашу почту отправлено письмо с подтверждением
-        </p>
-        <p class="signUpFull__emailsucc__textcon__subtitle">
-          Проверьте свою почту на наличие заявки на подтверждение аккаунта.
-          Убедитесь что заявка не находится в папке «Спам». После подтверждения,
-          нажмите кнопку обновить, что находится справа
-        </p>
-      </div>
-      <button
-        class="signUpFull__emailsucc__btn"
-        @click="handleRefresh"
-        :class="{ refreshing: isRefreshing, 'shine-button': !isRefreshing }"
-        :disabled="isRefreshing"
-      >
-        {{ isRefreshing ? "Обновление..." : "Обновить" }}
-      </button>
-    </div>
   </div>
 </template>
 
