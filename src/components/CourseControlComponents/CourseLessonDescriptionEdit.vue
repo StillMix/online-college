@@ -85,7 +85,13 @@ export default defineComponent({
     const imageUrl = ref("");
     const isDragging = ref(false);
     //const fileInput = ref<HTMLInputElement | null>(null);
-
+    // Добавляем отсутствующие свойства и методы
+    const uploadedImages = ref<Array<{ url: string; name: string }>>([]);
+    // Добавить метод selectUploadedImage
+    const selectUploadedImage = (url: string) => {
+      imageUrl.value = url;
+      imagePreview.value = url;
+    };
     // Отслеживание изменений в свойстве modelValue
     watch(
       () => editorContent.value,
@@ -130,7 +136,17 @@ export default defineComponent({
         ".course-lesson-editor__content"
       ) as HTMLElement;
       if (editor) {
+        // Убедимся, что редактор имеет фокус
         editor.focus();
+        // Сохраним текущее выделение
+        const selection = document.getSelection();
+        let range = null;
+
+        if (selection && selection.rangeCount > 0) {
+          range = selection.getRangeAt(0);
+        }
+        console.log(align);
+        // Применяем команду выравнивания
         if (align === "left") {
           document.execCommand("justifyLeft", false, undefined);
         } else if (align === "center") {
@@ -138,7 +154,15 @@ export default defineComponent({
         } else if (align === "right") {
           document.execCommand("justifyRight", false, undefined);
         }
+
+        // Обновляем состояние
         currentTextAlign.value = align;
+
+        // Восстанавливаем выделение, если оно было
+        if (selection && range) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
       }
     };
 
@@ -305,6 +329,8 @@ export default defineComponent({
       handleFileDrop,
       removeImagePreview,
       insertImage,
+      uploadedImages,
+      selectUploadedImage,
     };
   },
 });

@@ -170,6 +170,7 @@ export default defineComponent({
     "dragover",
     "dragleave",
     "drop",
+    "selectUploadedImage",
   ],
   setup(props) {
     const canInsertImage = computed(() => {
@@ -297,108 +298,6 @@ export default defineComponent({
     }
   }
 
-  &__browse {
-    background-color: #08dccf;
-    color: #fff;
-    border: none;
-    border-radius: 0.313vw;
-    padding: 0.417vw 0.833vw;
-    font-family: var(--font-family);
-    font-size: 0.729vw;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background-color: #09e9db;
-      transform: translateY(-0.052vw);
-    }
-  }
-
-  &__preview {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &-img {
-      max-width: 90%;
-      max-height: 90%;
-      object-fit: contain;
-      border-radius: 0.313vw;
-    }
-  }
-
-  &__remove {
-    position: absolute;
-    top: 0.417vw;
-    right: 0.417vw;
-    width: 1.563vw;
-    height: 1.563vw;
-    border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.5);
-    border: none;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background-color: #ff5b5b;
-      transform: rotate(90deg);
-    }
-  }
-
-  &__url {
-    display: flex;
-    flex-direction: column;
-    gap: 0.833vw;
-  }
-
-  &__label {
-    font-family: var(--font-family);
-    font-size: 0.833vw;
-    color: rgba(255, 255, 255, 0.7);
-    display: flex;
-    flex-direction: column;
-    gap: 0.417vw;
-  }
-
-  &__input {
-    padding: 0.521vw;
-    border-radius: 0.313vw;
-    background-color: #363636;
-    border: 0.052vw solid rgba(255, 255, 255, 0.1);
-    color: #fff;
-    font-family: var(--font-family);
-    font-size: 0.833vw;
-
-    &:focus {
-      outline: none;
-      border-color: #08dccf;
-    }
-  }
-
-  &__url-preview {
-    width: 100%;
-    height: 10.417vw;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 0.417vw;
-    overflow: hidden;
-
-    img {
-      max-width: 90%;
-      max-height: 90%;
-      object-fit: contain;
-    }
-  }
-
   &__actions {
     display: flex;
     justify-content: flex-end;
@@ -442,7 +341,7 @@ export default defineComponent({
     }
   }
 }
-/* Добавляем стили для сетки изображений в CourseDesAddImg.vue */
+
 .course-lesson-editor__image-uploads {
   &__grid {
     display: grid;
@@ -459,7 +358,7 @@ export default defineComponent({
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
-    padding-bottom: 70%; /* Поддерживает соотношение сторон */
+    padding-bottom: 70%;
     height: 0;
 
     &:hover {
@@ -477,20 +376,6 @@ export default defineComponent({
     object-fit: cover;
   }
 
-  &__name {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 0.417vw;
-    font-size: 0.625vw;
-    color: #fff;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-
   &__empty {
     grid-column: 1 / -1;
     display: flex;
@@ -502,7 +387,7 @@ export default defineComponent({
     text-align: center;
   }
 }
-// Анимации
+
 @keyframes fadeIn {
   from {
     opacity: 0;
