@@ -26,6 +26,7 @@
       :imagePreview="imagePreview"
       :imageUrl="imageUrl"
       :isDragging="isDragging"
+      :uploadedImages="uploadedImages"
       @close="closeImageModal"
       @changeTab="imageModalTab = $event"
       @fileSelect="handleFileSelect"
@@ -33,6 +34,7 @@
       @removePreview="removeImagePreview"
       @urlInput="imageUrl = $event"
       @insert="insertImage"
+      @selectUploadedImage="selectUploadedImage"
       @dragover="isDragging = true"
       @dragleave="isDragging = false"
       @drop="handleFileDrop"
@@ -82,7 +84,7 @@ export default defineComponent({
     const imagePreview = ref("");
     const imageUrl = ref("");
     const isDragging = ref(false);
-    const fileInput = ref<HTMLInputElement | null>(null);
+    //const fileInput = ref<HTMLInputElement | null>(null);
 
     // Отслеживание изменений в свойстве modelValue
     watch(
@@ -110,28 +112,47 @@ export default defineComponent({
 
     // Применение форматирования
     const applyFormat = (command: string) => {
-      document.execCommand(command, false, undefined);
-      checkFormatState();
+      // Сначала фокусируем редактор
+      const editor = document.querySelector(
+        ".course-lesson-editor__content"
+      ) as HTMLElement;
+      if (editor) {
+        editor.focus();
+        // Затем выполняем команду
+        document.execCommand(command, false, undefined);
+        checkFormatState();
+      }
     };
 
     // Применение выравнивания текста
     const applyTextAlign = (align: string) => {
-      if (align === "left") {
-        document.execCommand("justifyLeft", false, undefined);
-      } else if (align === "center") {
-        document.execCommand("justifyCenter", false, undefined);
-      } else if (align === "right") {
-        document.execCommand("justifyRight", false, undefined);
+      const editor = document.querySelector(
+        ".course-lesson-editor__content"
+      ) as HTMLElement;
+      if (editor) {
+        editor.focus();
+        if (align === "left") {
+          document.execCommand("justifyLeft", false, undefined);
+        } else if (align === "center") {
+          document.execCommand("justifyCenter", false, undefined);
+        } else if (align === "right") {
+          document.execCommand("justifyRight", false, undefined);
+        }
+        currentTextAlign.value = align;
       }
-      currentTextAlign.value = align;
     };
 
-    // Применение заголовка
     const applyHeading = (heading: string) => {
-      if (heading) {
-        document.execCommand("formatBlock", false, `<${heading}>`);
-      } else {
-        document.execCommand("formatBlock", false, "<p>");
+      const editor = document.querySelector(
+        ".course-lesson-editor__content"
+      ) as HTMLElement;
+      if (editor) {
+        editor.focus();
+        if (heading) {
+          document.execCommand("formatBlock", false, `<${heading}>`);
+        } else {
+          document.execCommand("formatBlock", false, "<p>");
+        }
       }
     };
 
@@ -214,11 +235,32 @@ export default defineComponent({
       }
 
       if (imageSource) {
-        document.execCommand(
-          "insertHTML",
-          false,
-          `<img src="${imageSource}" style="max-width:100%;">`
-        );
+        // Сфокусируем редактор перед вставкой
+        const editor = document.querySelector(
+          ".course-lesson-editor__content"
+        ) as HTMLElement;
+        if (editor) {
+          editor.focus();
+
+          // Восстанавливаем выделение, если оно было потеряно
+          try {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(editor);
+            range.collapse(false); // Перемещаем курсор в конец, если нет выделения
+            selection?.removeAllRanges();
+            selection?.addRange(range);
+          } catch (e) {
+            console.error("Ошибка при восстановлении выделения:", e);
+          }
+
+          // Вставляем изображение
+          document.execCommand(
+            "insertHTML",
+            false,
+            `<img src="${imageSource}" style="max-width:100%; display:block; margin:10px auto;">`
+          );
+        }
         closeImageModal();
       }
     };

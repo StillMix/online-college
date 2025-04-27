@@ -75,20 +75,36 @@
           </div>
         </div>
 
-        <!-- Вкладка ссылки на изображение -->
+        // Добавляем в CourseDesAddImg.vue
         <div
           v-if="activeTab === 'url'"
           class="course-lesson-editor__image-uploads"
         >
-          <div
-            v-if="imageUrl"
-            class="course-lesson-editor__image-modal__url-preview"
-          >
-            <img
-              :src="imageUrl"
-              alt="Preview"
-              class="course-lesson-editor__image-modal__preview-img"
-            />
+          <div class="course-lesson-editor__image-uploads__grid">
+            <!-- Добавляем сетку с загруженными изображениями -->
+            <div
+              v-for="(image, index) in uploadedImages"
+              :key="index"
+              class="course-lesson-editor__image-uploads__item"
+              @click="$emit('selectUploadedImage', image.url)"
+            >
+              <img
+                :src="image.url"
+                :alt="image.name"
+                class="course-lesson-editor__image-uploads__img"
+              />
+              <div class="course-lesson-editor__image-uploads__name">
+                {{ image.name }}
+              </div>
+            </div>
+
+            <!-- Сообщение, если нет загруженных изображений -->
+            <div
+              v-if="uploadedImages.length === 0"
+              class="course-lesson-editor__image-uploads__empty"
+            >
+              <p>У вас пока нет загруженных изображений</p>
+            </div>
           </div>
         </div>
       </div>
@@ -113,7 +129,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "vue";
+import { defineComponent, computed, PropType } from "vue";
 
 export default defineComponent({
   name: "CourseDesAddImg",
@@ -137,6 +153,10 @@ export default defineComponent({
     isDragging: {
       type: Boolean,
       default: false,
+    },
+    uploadedImages: {
+      type: Array as PropType<Array<{ url: string; name: string }>>,
+      default: () => [],
     },
   },
   emits: [
@@ -422,7 +442,66 @@ export default defineComponent({
     }
   }
 }
+/* Добавляем стили для сетки изображений в CourseDesAddImg.vue */
+.course-lesson-editor__image-uploads {
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.833vw;
+    max-height: 10.417vw;
+    overflow-y: auto;
+  }
 
+  &__item {
+    border-radius: 0.313vw;
+    overflow: hidden;
+    background-color: #363636;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    padding-bottom: 70%; /* Поддерживает соотношение сторон */
+    height: 0;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0.104vw 0.417vw rgba(8, 220, 207, 0.5);
+    }
+  }
+
+  &__img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 0.417vw;
+    font-size: 0.625vw;
+    color: #fff;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  &__empty {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 10.417vw;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+    text-align: center;
+  }
+}
 // Анимации
 @keyframes fadeIn {
   from {

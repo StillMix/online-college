@@ -57,7 +57,7 @@
     <div class="course-lesson-editor__toolbar__group">
       <select
         class="course-lesson-editor__toolbar__select"
-        @change="$emit('heading', $event.target.value)"
+        @change="$emit('heading', ($event.target as HTMLSelectElement).value)"
       >
         <option value="">Обычный текст</option>
         <option value="h1">Заголовок 1</option>
