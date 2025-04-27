@@ -101,18 +101,55 @@ export default defineComponent({
     );
 
     // Проверка состояния форматирования
+    // Изменяем метод checkFormatState для корректного определения выравнивания
     const checkFormatState = () => {
       isBold.value = document.queryCommandState("bold");
       isItalic.value = document.queryCommandState("italic");
       isUnderline.value = document.queryCommandState("underline");
 
-      // Проверка выравнивания
-      if (document.queryCommandState("justifyLeft")) {
-        currentTextAlign.value = "left";
-      } else if (document.queryCommandState("justifyCenter")) {
-        currentTextAlign.value = "center";
-      } else if (document.queryCommandState("justifyRight")) {
-        currentTextAlign.value = "right";
+      // Проверка выравнивания путем анализа текущего элемента
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        let currentNode = range.commonAncestorContainer;
+
+        // Если это текстовый узел, берем его родителя
+        if (currentNode.nodeType === 3 && currentNode.parentNode) {
+          currentNode = currentNode.parentNode;
+        }
+
+        // Найдем ближайший элемент с установленным text-align
+        if (currentNode instanceof HTMLElement) {
+          let currentElement = currentNode;
+          let align = "";
+
+          while (currentElement) {
+            if (currentElement.style && currentElement.style.textAlign) {
+              align = currentElement.style.textAlign;
+              break;
+            } else if (window.getComputedStyle(currentElement).textAlign) {
+              align = window.getComputedStyle(currentElement).textAlign;
+              if (align !== "start" && align !== "left") {
+                break;
+              }
+            }
+
+            if (currentElement.parentElement) {
+              currentElement = currentElement.parentElement;
+            } else {
+              break;
+            }
+          }
+
+          // Устанавливаем состояние в зависимости от найденного выравнивания
+          if (align === "center") {
+            currentTextAlign.value = "center";
+          } else if (align === "right") {
+            currentTextAlign.value = "right";
+          } else {
+            currentTextAlign.value = "left";
+          }
+        }
       }
     };
 
@@ -135,34 +172,64 @@ export default defineComponent({
       const editor = document.querySelector(
         ".course-lesson-editor__content"
       ) as HTMLElement;
+
       if (editor) {
-        // Убедимся, что редактор имеет фокус
         editor.focus();
-        // Сохраним текущее выделение
-        const selection = document.getSelection();
-        let range = null;
+
+        // Получаем текущее выделение
+        const selection = window.getSelection();
+        let targetNode;
 
         if (selection && selection.rangeCount > 0) {
-          range = selection.getRangeAt(0);
-        }
-        console.log(align);
-        // Применяем команду выравнивания
-        if (align === "left") {
-          document.execCommand("justifyLeft", false, undefined);
-        } else if (align === "center") {
-          document.execCommand("justifyCenter", false, undefined);
-        } else if (align === "right") {
-          document.execCommand("justifyRight", false, undefined);
+          const range = selection.getRangeAt(0);
+          // Получаем родительский элемент блока, который нужно выровнять
+          targetNode = range.commonAncestorContainer;
+
+          // Если targetNode является текстовым узлом, берем его родителя
+          if (targetNode.nodeType === 3) {
+            // TEXT_NODE
+            targetNode = targetNode.parentNode;
+          }
+        } else {
+          // Если нет выделения, работаем с активным элементом
+          targetNode = document.activeElement;
         }
 
-        // Обновляем состояние
+        // Применяем выравнивание через CSS вместо устаревших команд
+        if (targetNode && targetNode instanceof HTMLElement) {
+          // Находим ближайший блочный элемент
+          let blockElement = targetNode;
+          while (
+            blockElement &&
+            getComputedStyle(blockElement).display !== "block" &&
+            blockElement.tagName !== "P" &&
+            blockElement.tagName !== "DIV" &&
+            blockElement.tagName !== "H1" &&
+            blockElement.tagName !== "H2" &&
+            blockElement.tagName !== "H3"
+          ) {
+            if (blockElement.parentElement) {
+              blockElement = blockElement.parentElement;
+            } else {
+              break;
+            }
+          }
+
+          // Применяем стиль выравнивания
+          if (blockElement) {
+            blockElement.style.textAlign = align;
+          } else {
+            // Если не нашли блочный элемент, создаем его
+            document.execCommand("formatBlock", false, "<p>");
+            const newP = selection?.anchorNode?.parentElement;
+            if (newP) {
+              newP.style.textAlign = align;
+            }
+          }
+        }
+
+        // Принудительно устанавливаем текущее выравнивание
         currentTextAlign.value = align;
-
-        // Восстанавливаем выделение, если оно было
-        if (selection && range) {
-          selection.removeAllRanges();
-          selection.addRange(range);
-        }
       }
     };
 

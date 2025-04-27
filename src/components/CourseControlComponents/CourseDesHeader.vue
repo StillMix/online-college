@@ -1,5 +1,6 @@
 <template>
   <div class="course-lesson-editor__toolbar">
+    <!-- В шаблоне CourseDesHeader.vue модифицируем кнопки выравнивания -->
     <div class="course-lesson-editor__toolbar__group">
       <button
         class="course-lesson-editor__toolbar__button"

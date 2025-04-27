@@ -74,8 +74,6 @@
             </div>
           </div>
         </div>
-
-        // Добавляем в CourseDesAddImg.vue
         <div
           v-if="activeTab === 'url'"
           class="course-lesson-editor__image-uploads"
