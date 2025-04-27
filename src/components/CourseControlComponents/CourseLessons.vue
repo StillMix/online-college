@@ -40,22 +40,22 @@
         >
           Добавить описание
         </AppButton>
-
-        <AppButton
-          :styleOverrides="{
-            width: 'auto',
-            padding: '0.417vw 0.833vw',
-            backgroundColor: '#FF5B5B',
-            color: 'white',
-          }"
-          @click="removeLesson"
-        >
-          Удалить
-        </AppButton>
       </div>
     </div>
 
     <div class="course-Lessonsinfo__actions">
+      <AppButton
+        :styleOverrides="{
+          width: 'auto',
+          padding: '0.417vw 0.833vw',
+          backgroundColor: '#FF5B5B',
+          color: 'white',
+          marginRight: '10px',
+        }"
+        @click="removeLesson"
+      >
+        Удалить
+      </AppButton>
       <AppButton
         :styleOverrides="{
           width: 'auto',
@@ -83,6 +83,7 @@ import {
 import { AppInput, AppButton } from "../UI";
 import { CourseItemCourseContent } from "@/types";
 import CourseLessonDescriptionEdit from "./CourseLessonDescriptionEdit.vue";
+import { courseApi } from "@/api";
 
 export default defineComponent({
   name: "CourseLessons",
@@ -140,8 +141,17 @@ export default defineComponent({
     });
 
     // Переключение отображения поля описания
-    const toggleDescription = () => {
-      showDescription.value = !showDescription.value;
+    const toggleDescription = async () => {
+      showDescription.value = true;
+      try {
+        await courseApi.createCourseLesson(
+          props.elemID,
+          props.lesson.id,
+          lessonDescription
+        );
+      } catch (error) {
+        console.error("Ошибка при создании описания курса:", error);
+      }
     };
 
     // Удаление урока
