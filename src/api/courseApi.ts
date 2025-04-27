@@ -16,16 +16,19 @@ const API_URL = `${API_BASE_URL}/api/courses`;
 /**
  * Получить список всех курсов
  */
-export const getAllCourses = async (): Promise<CourseItem[]> => {
+export const getAllCourses = async (
+  StopLoader?: () => void
+): Promise<CourseItem[]> => {
   try {
-    const response = await axios.get(API_URL);
     localStorage.removeItem("courseData");
+    const response = await axios.get(API_URL);
     localStorage.setItem("courseData", JSON.stringify(response.data));
+    StopLoader?.();
     return response.data;
   } catch (error) {
     console.error("Ошибка при получении списка курсов:", error);
     localStorage.removeItem("courseData");
-    // Пытаемся получить данные из localStorage, если API недоступен
+
     const courseDataStr = localStorage.getItem("courseData");
     if (courseDataStr) {
       return JSON.parse(courseDataStr);

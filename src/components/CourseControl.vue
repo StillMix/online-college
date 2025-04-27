@@ -21,8 +21,8 @@
       </div>
       <CoursePopupRed
         v-if="redCourseOpen"
-        :elemRed="itemRed"
         :edit="edit"
+        :elemRed="itemRed"
         @click="toggleCourse"
       />
     </div>

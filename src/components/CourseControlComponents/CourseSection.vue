@@ -19,6 +19,8 @@
         :key="lesson.id"
         :lesson="lesson"
         :index="index"
+        :elemID="elemID"
+        :sectionID="section?.id"
         @remove="removeLesson"
         @update="updateLesson"
       />

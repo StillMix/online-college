@@ -10,6 +10,7 @@
       @format="applyFormat"
       @heading="applyHeading"
       @openImageModal="openImageModal"
+      @font="applyFont"
     />
 
     <!-- Область редактирования контента -->
@@ -233,6 +234,34 @@ export default defineComponent({
       }
     };
 
+    const applyFont = (fontSize: string) => {
+      const editor = document.querySelector(
+        ".course-lesson-editor__content"
+      ) as HTMLElement;
+      if (editor) {
+        editor.focus();
+        console.log(fontSize);
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+
+          // Создаём span с нужным размером
+          const span = document.createElement("span");
+          span.style.fontSize = fontSize; // например "16px", "24px" и т.д.
+
+          // Вставляем выделенный текст внутрь спана
+          span.appendChild(range.extractContents());
+          range.insertNode(span);
+
+          // Перемещаем курсор после вставленного элемента
+          range.setStartAfter(span);
+          range.setEndAfter(span);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }
+    };
+
     const applyHeading = (heading: string) => {
       const editor = document.querySelector(
         ".course-lesson-editor__content"
@@ -398,6 +427,7 @@ export default defineComponent({
       insertImage,
       uploadedImages,
       selectUploadedImage,
+      applyFont,
     };
   },
 });

@@ -63,18 +63,6 @@
         >
           Отменить
         </AppButton>
-
-        <AppButton
-          v-if="!edit"
-          :styleOverrides="{
-            width: '15.177vw',
-            backgroundColor: '#39B874',
-            color: 'white',
-          }"
-          @click="saveCourseChanges"
-        >
-          Сохранить все изменения
-        </AppButton>
       </div>
     </div>
   </div>

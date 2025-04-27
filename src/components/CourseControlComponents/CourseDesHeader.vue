@@ -27,7 +27,23 @@
         <i class="fas fa-align-right"></i>
       </button>
     </div>
-
+    <div class="course-lesson-editor__toolbar__group">
+      <AppInput
+        v-model="fontInput"
+        :styleLabel="{ margin: '0', height: '100%' }"
+        :styleInput="{
+          width: '100%',
+          height: '100%',
+          paddingLeft: '5px',
+          background: 'transparent',
+          borderRadius: '0',
+        }"
+        type="text"
+        placeholder="Размер шрифта"
+        @change="$emit('font', fontInput)"
+        required
+      />
+    </div>
     <div class="course-lesson-editor__toolbar__group">
       <button
         class="course-lesson-editor__toolbar__button"
@@ -80,10 +96,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-
+import { defineComponent, ref } from "vue";
+import { AppInput } from "../UI";
 export default defineComponent({
   name: "CourseDesHeader",
+  components: { AppInput },
   props: {
     isBold: {
       type: Boolean,
@@ -102,7 +119,11 @@ export default defineComponent({
       default: "left",
     },
   },
-  emits: ["align", "format", "heading", "openImageModal"],
+  emits: ["align", "format", "heading", "font", "openImageModal"],
+  setup() {
+    const fontInput = ref("");
+    return { fontInput };
+  },
 });
 </script>
 

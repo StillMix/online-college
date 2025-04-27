@@ -1,6 +1,7 @@
 <template>
   <div class="app">
-    <router-view v-slot="{ Component, route }">
+    <Loader v-if="LoaderSlide" />
+    <router-view v-if="!LoaderSlide" v-slot="{ Component, route }">
       <transition
         :name="route.meta.transition as string || 'fade'"
         mode="out-in"
@@ -12,16 +13,26 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 import { courseApi } from "./api/index";
+import Loader from "./components/Loader.vue";
 
 export default defineComponent({
   name: "App",
+  components: { Loader },
   setup() {
-    // Загрузка данных курсов при монтировании компонента
+    const LoaderSlide = ref(true);
+
+    const StopLoader = () => {
+      LoaderSlide.value = false;
+    };
+
     onMounted(async () => {
-      await courseApi.getAllCourses();
+      await courseApi.getAllCourses(StopLoader);
     });
+
+    // 🔥 Возвращаем LoaderSlide, чтобы использовать его в шаблоне
+    return { LoaderSlide };
   },
 });
 </script>
