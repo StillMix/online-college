@@ -22,6 +22,7 @@
     </div>
     <RichTextEditor
       v-if="showDescription"
+      v-model="lessonDescription"
       :nachalDescription="lesson?.description"
     />
 
@@ -105,7 +106,7 @@ export default defineComponent({
     const lessonName = ref(props.lesson?.name || `Урок ${props.index + 1}`);
     const lessonPassing = ref(props.lesson?.passing || "no");
     const lessonDescription = ref(props.lesson?.description || "");
-    const showDescription = ref(!props.lesson?.description);
+    const showDescription = ref(!!props.lesson?.description);
 
     // Вычисляемое свойство для определения класса статуса
     const statusClass = computed(() => {

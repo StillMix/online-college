@@ -178,6 +178,10 @@ export default defineComponent({
       type: String,
       default: "Начните вводить текст...",
     },
+    nachalDescription: {
+      type: String,
+      default: "",
+    },
   },
   emits: ["update:modelValue"],
   setup(props, { emit }) {
@@ -469,11 +473,12 @@ export default defineComponent({
     // Инициализация редактора
     onMounted(() => {
       if (editorContent.value) {
-        // Устанавливаем начальное содержимое
-        editorContent.value.innerHTML = props.modelValue;
+        // Устанавливаем начальное содержимое - сначала проверяем nachalDescription, потом modelValue
+        editorContent.value.innerHTML =
+          props.nachalDescription || props.modelValue || "";
 
         // Если нет содержимого, показываем плейсхолдер
-        if (!props.modelValue) {
+        if (!props.nachalDescription && !props.modelValue) {
           editorContent.value.dataset.placeholder = props.placeholder;
         }
 
@@ -497,15 +502,22 @@ export default defineComponent({
             }
           }
         });
+
+        // Сразу эмитим событие обновления для синхронизации с родителем
+        updateContent();
       }
     });
 
-    // Следим за изменениями в props.modelValue
+    // Следим за изменениями в props.modelValue или props.nachalDescription
     watch(
-      () => props.modelValue,
-      (newValue) => {
-        if (editorContent.value && editorContent.value.innerHTML !== newValue) {
-          editorContent.value.innerHTML = newValue;
+      [() => props.modelValue, () => props.nachalDescription],
+      ([newValue, newNachalDescription]) => {
+        if (editorContent.value) {
+          const contentToSet = newNachalDescription || newValue || "";
+          if (editorContent.value.innerHTML !== contentToSet) {
+            editorContent.value.innerHTML = contentToSet;
+            updateContent(); // Синхронизируем с родителем
+          }
         }
       }
     );
