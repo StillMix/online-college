@@ -135,7 +135,7 @@ export const completeLesson = async (
  * Загрузка аватара пользователя
  */
 export const uploadAvatar = async (
-  userId: number,
+  userId: string | number | undefined,
   file: File
 ): Promise<{ message: string; img_path: string }> => {
   try {

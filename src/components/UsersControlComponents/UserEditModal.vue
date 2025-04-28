@@ -154,6 +154,7 @@
 <script lang="ts">
 import { defineComponent, PropType, computed, ref, watch } from "vue";
 import { UserData } from "@/types";
+import { userApi } from "@/api";
 
 export default defineComponent({
   name: "UserEditModal",
@@ -188,7 +189,7 @@ export default defineComponent({
     const user = ref<UserData>({ ...props.userData });
     const passwordConfirm = ref("");
     const isAdmin = ref(props.userData.role === "admin");
-
+    console.log(props.userData);
     // Обновляем локальную копию данных при изменении props
     watch(
       () => props.userData,
@@ -227,9 +228,10 @@ export default defineComponent({
     };
 
     // Обработка изменения аватара
-    const onAvatarChange = (event: Event) => {
+    const onAvatarChange = async (event: Event) => {
       const input = event.target as HTMLInputElement;
       if (input.files && input.files.length > 0) {
+        await userApi.uploadAvatar(props.userData.id, input.files[0]);
         emit("avatar-change", input.files[0]);
       }
     };
