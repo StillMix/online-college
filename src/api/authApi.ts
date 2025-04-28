@@ -48,6 +48,11 @@ export const getCurrentUser = async (): Promise<UserData> => {
     localStorage.removeItem("user");
     const response = await apiClient.get(`${API_URL}/me`);
     localStorage.setItem("user", JSON.stringify(response.data));
+    if (response.data.role === "admin") {
+      localStorage.setItem("isAdmin", "true");
+    } else {
+      localStorage.removeItem("isAdmin");
+    }
     return response.data;
   } catch (error) {
     console.error("Ошибка при получении данных пользователя:", error);

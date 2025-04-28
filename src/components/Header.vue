@@ -63,7 +63,7 @@
       </router-link>
       <router-link
         @click="courseDelClick()"
-        v-if="token"
+        v-if="isAdmin"
         to="/admin"
         class="header__navs__link"
         active-class="header__navs__link__active"
@@ -287,6 +287,13 @@ export default defineComponent({
         } catch (e) {
           console.error("Ошибка при парсинге данных пользователя:", e);
         }
+      }
+
+      const token = localStorage.getItem("token");
+      const isAdmin = localStorage.getItem("isAdmin");
+
+      if (!token || isAdmin !== "true") {
+        return;
       }
     });
 

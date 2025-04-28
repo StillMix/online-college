@@ -1,14 +1,6 @@
 <template>
   <div class="users-control">
     <div class="users-control__actions">
-      <button
-        class="users-control__actions__button users-control__actions__button--create"
-        @click="openCreateModal"
-      >
-        <span class="users-control__actions__button__icon">+</span>
-        Добавить пользователя
-      </button>
-
       <div class="users-control__actions__search">
         <img
           alt="icon"
@@ -64,14 +56,14 @@
         :key="user.id"
         class="users-control__user"
         :class="{
-          'users-control__user--admin': user.isAdmin,
+          'users-control__user--admin': user.role === 'admin',
         }"
       >
         <div class="users-control__user__content">
           <div class="users-control__user__avatar">
             <img
-              v-if="user.avatar"
-              :src="user.avatar"
+              v-if="user.img"
+              :src="API_BASE_URL + '/' + user.img"
               alt="Аватар пользователя"
               class="users-control__user__avatar__img"
             />
@@ -82,8 +74,10 @@
 
           <div class="users-control__user__info">
             <h3 class="users-control__user__info__name">
-              {{ user.name }}
-              <span v-if="user.isAdmin" class="users-control__user__info__badge"
+              {{ user.name || user.login }}
+              <span
+                v-if="user.role === 'admin'"
+                class="users-control__user__info__badge"
                 >Администратор</span
               >
             </h3>
@@ -98,7 +92,7 @@
 
         <div class="users-control__user__actions">
           <button
-            v-if="!user.isAdmin"
+            v-if="user.role !== 'admin'"
             class="users-control__user__actions__button users-control__user__actions__button--admin"
             @click="makeAdmin(user)"
           >
@@ -167,11 +161,13 @@
               :style="{
                 backgroundImage: userAvatarPreview
                   ? `url(${userAvatarPreview})`
+                  : editingUser.img
+                  ? `url(${API_BASE_URL}/${editingUser.img})`
                   : 'none',
               }"
             >
               <div
-                v-if="!userAvatarPreview"
+                v-if="!userAvatarPreview && !editingUser.img"
                 class="users-control__modal__form__avatar__placeholder"
               >
                 {{ getUserInitials(editingUser) }}
@@ -182,13 +178,13 @@
                 <input
                   type="file"
                   accept="image/*"
-                  @change="handleAvatarUpload"
+                  @change="handleAvatarUpload(user, event)"
                   class="users-control__modal__form__avatar__input"
                 />
                 <span>Загрузить аватар</span>
               </label>
               <button
-                v-if="userAvatarPreview || editingUser.avatar"
+                v-if="userAvatarPreview || editingUser.img"
                 type="button"
                 class="users-control__modal__form__avatar__remove"
                 @click="removeAvatar"
@@ -206,7 +202,7 @@
                   type="text"
                   class="users-control__modal__form__input"
                   v-model="editingUser.name"
-                  required
+                  placeholder="Имя пользователя"
                 />
               </label>
 
@@ -217,6 +213,7 @@
                   class="users-control__modal__form__input"
                   v-model="editingUser.login"
                   required
+                  placeholder="Логин"
                 />
               </label>
 
@@ -227,6 +224,7 @@
                   class="users-control__modal__form__input"
                   v-model="editingUser.email"
                   required
+                  placeholder="Email"
                 />
               </label>
             </div>
@@ -240,6 +238,7 @@
                   class="users-control__modal__form__input"
                   v-model="editingUser.password"
                   :required="!editMode"
+                  placeholder="Пароль"
                 />
               </label>
 
@@ -250,6 +249,7 @@
                   class="users-control__modal__form__input"
                   v-model="passwordConfirm"
                   :required="!editMode || editingUser.password !== ''"
+                  placeholder="Повторите пароль"
                 />
               </label>
 
@@ -259,7 +259,7 @@
                 <input
                   type="checkbox"
                   class="users-control__modal__form__checkbox"
-                  v-model="editingUser.isAdmin"
+                  v-model="isAdmin"
                 />
                 Администратор
               </label>
@@ -277,8 +277,15 @@
             <button
               type="submit"
               class="users-control__modal__actions__button users-control__modal__actions__button--save"
+              :disabled="isSubmitting"
             >
-              {{ editMode ? "Сохранить изменения" : "Создать пользователя" }}
+              {{
+                isSubmitting
+                  ? "Сохранение..."
+                  : editMode
+                  ? "Сохранить изменения"
+                  : "Создать пользователя"
+              }}
             </button>
           </div>
         </form>
@@ -296,7 +303,7 @@
 
         <p class="users-control__confirm__text">
           Вы действительно хотите удалить пользователя "{{
-            deletingUser?.name
+            deletingUser?.name || deletingUser?.login
           }}"?
           <br />
           Это действие нельзя будет отменить.
@@ -312,8 +319,9 @@
           <button
             class="users-control__confirm__actions__button users-control__confirm__actions__button--confirm"
             @click="deleteUser"
+            :disabled="isSubmitting"
           >
-            Удалить
+            {{ isSubmitting ? "Удаление..." : "Удалить" }}
           </button>
         </div>
       </div>
@@ -342,9 +350,11 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import AppLoader from "@/components/Loader.vue";
 import { UserData } from "@/types";
 import { userApi } from "@/api";
+import apiClient from "@/api/config";
 
 export default defineComponent({
   name: "UsersControl",
@@ -352,30 +362,34 @@ export default defineComponent({
     AppLoader,
   },
   setup() {
+    const router = useRouter();
+    const API_BASE_URL = apiClient.defaults.baseURL;
+
     // Состояние
     const users = ref<UserData[]>([]);
     const loading = ref(true);
     const searchQuery = ref("");
     const userType = ref("all"); // all, admin, user
+    const isSubmitting = ref(false);
 
     // Модальные окна
     const showEditModal = ref(false);
     const showDeleteModal = ref(false);
     const editMode = ref(false);
+    const isAdmin = ref(false);
 
     // Редактируемый пользователь
     const editingUser = ref<UserData>({
-      id: "",
-      name: "",
       login: "",
       email: "",
       password: "",
-      avatar: null,
-      isAdmin: false,
-      createdAt: new Date().toISOString(),
+      img: undefined,
+      name: "",
+      role: "student",
     });
 
     const passwordConfirm = ref("");
+    const userAvatarFile = ref<File | null>(null);
     const userAvatarPreview = ref<string | null>(null);
     const deletingUser = ref<UserData | null>(null);
 
@@ -383,7 +397,7 @@ export default defineComponent({
     const notification = ref({
       show: false,
       message: "",
-      type: "success",
+      type: "success" as "success" | "error",
     });
 
     // Отфильтрованные пользователи
@@ -392,9 +406,9 @@ export default defineComponent({
 
       // Фильтрация по типу пользователя
       if (userType.value === "admin") {
-        filtered = filtered.filter((user) => user.isAdmin);
+        filtered = filtered.filter((user) => user.role === "admin");
       } else if (userType.value === "user") {
-        filtered = filtered.filter((user) => !user.isAdmin);
+        filtered = filtered.filter((user) => user.role !== "admin");
       }
 
       // Фильтрация по запросу поиска
@@ -402,7 +416,7 @@ export default defineComponent({
         const query = searchQuery.value.toLowerCase().trim();
         filtered = filtered.filter(
           (user) =>
-            user.name.toLowerCase().includes(query) ||
+            (user.name && user.name.toLowerCase().includes(query)) ||
             user.login.toLowerCase().includes(query) ||
             user.email.toLowerCase().includes(query)
         );
@@ -412,88 +426,50 @@ export default defineComponent({
     });
 
     // Получение инициалов пользователя
-    const getUserInitials = (user: User) => {
-      if (!user || !user.name) return "";
+    const getUserInitials = (user: UserData): string => {
+      if (!user) return "";
 
-      const parts = user.name.split(" ");
-      if (parts.length > 1) {
-        return (parts[0][0] + parts[1][0]).toUpperCase();
+      if (user.name) {
+        const parts = user.name.split(" ");
+        if (parts.length > 1) {
+          return (parts[0][0] + parts[1][0]).toUpperCase();
+        }
+        return parts[0].slice(0, 2).toUpperCase();
       }
 
-      return parts[0].slice(0, 2).toUpperCase();
+      if (user.login) {
+        return user.login.substring(0, 2).toUpperCase();
+      }
+
+      return "??";
     };
 
     // Загрузка данных пользователей
     const loadUsers = async () => {
       loading.value = true;
 
-      // Проверяем, есть ли пользователи в localStorage
-      const usersData = await userApi.getAllUsers();
-
-      if (usersData) {
-        try {
+      try {
+        const usersData = await userApi.getAllUsers();
+        if (usersData) {
           users.value = usersData;
-        } catch (e) {
-          console.error("Ошибка при парсинге данных пользователей:", e);
-
-          // Создаем тестовые данные, если произошла ошибка
-          createTestUsers();
         }
-      } else {
-        // Создаем тестовые данные, если пользователей нет
-        createTestUsers();
+      } catch (error) {
+        console.error("Ошибка при загрузке пользователей:", error);
+        showNotification("Не удалось загрузить пользователей", "error");
+      } finally {
+        loading.value = false;
       }
-
-      loading.value = false;
-    };
-
-    // Создание тестовых пользователей
-    const createTestUsers = () => {
-      users.value = [
-        {
-          id: "1",
-          name: "Администратор Системы",
-          login: "admin",
-          email: "admin@example.com",
-          password: "admin123",
-          avatar: null,
-          isAdmin: true,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "2",
-          name: "Иван Петров",
-          login: "ivanpetrov",
-          email: "ivan@example.com",
-          password: "password123",
-          avatar: null,
-          isAdmin: false,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "3",
-          name: "Мария Иванова",
-          login: "mariaivanova",
-          email: "maria@example.com",
-          password: "password123",
-          avatar: null,
-          isAdmin: false,
-          createdAt: new Date().toISOString(),
-        },
-      ];
-
-      // Сохраняем тестовых пользователей в localStorage
-      localStorage.setItem("userData", JSON.stringify(users.value));
     };
 
     // Обработка загрузки аватара
-    const handleAvatarUpload = (event: Event) => {
+    const handleAvatarUpload = async (user: UserData, event: Event) => {
       const input = event.target as HTMLInputElement;
 
       if (input.files && input.files.length > 0) {
         const file = input.files[0];
+        userAvatarFile.value = file;
+        await userApi.uploadAvatar(user.id, userAvatarFile.value);
         const reader = new FileReader();
-
         reader.onload = (e) => {
           if (e.target) {
             userAvatarPreview.value = e.target.result as string;
@@ -507,7 +483,8 @@ export default defineComponent({
     // Удаление аватара
     const removeAvatar = () => {
       userAvatarPreview.value = null;
-      editingUser.value.avatar = null;
+      userAvatarFile.value = null;
+      editingUser.value.img = undefined;
     };
 
     // Очистка поискового запроса
@@ -518,46 +495,43 @@ export default defineComponent({
     // Открытие модального окна создания пользователя
     const openCreateModal = () => {
       editMode.value = false;
-
-      // Генерация нового ID
-      const newId = (
-        Math.max(0, ...users.value.map((u) => parseInt(u.id))) + 1
-      ).toString();
+      isAdmin.value = false;
 
       // Очистка формы
       editingUser.value = {
-        id: newId,
-        name: "",
         login: "",
         email: "",
         password: "",
-        avatar: null,
-        isAdmin: false,
-        createdAt: new Date().toISOString(),
+        img: undefined,
+        name: "",
+        role: "student",
       };
 
       passwordConfirm.value = "";
       userAvatarPreview.value = null;
+      userAvatarFile.value = null;
 
       showEditModal.value = true;
     };
 
     // Открытие модального окна редактирования пользователя
-    const openEditModal = (user: User) => {
+    const openEditModal = (user: UserData) => {
       editMode.value = true;
 
       // Копируем пользователя для редактирования
       editingUser.value = { ...user, password: "" };
+      isAdmin.value = user.role === "admin";
       passwordConfirm.value = "";
 
-      // Устанавливаем аватар, если он есть
-      userAvatarPreview.value = user.avatar;
+      // Сбрасываем превью аватара
+      userAvatarPreview.value = null;
+      userAvatarFile.value = null;
 
       showEditModal.value = true;
     };
 
     // Открытие модального окна удаления пользователя
-    const openDeleteModal = (user: User) => {
+    const openDeleteModal = (user: UserData) => {
       deletingUser.value = user;
       showDeleteModal.value = true;
     };
@@ -569,39 +543,61 @@ export default defineComponent({
     };
 
     // Назначение пользователя администратором
-    const makeAdmin = (user: User) => {
-      const index = users.value.findIndex((u) => u.id === user.id);
+    const makeAdmin = async (user: UserData) => {
+      try {
+        isSubmitting.value = true;
+        const updatedUser = await userApi.updateUser(user.id as number, {
+          ...user,
+          role: "admin",
+        });
 
-      if (index !== -1) {
-        users.value[index].isAdmin = true;
-
-        // Сохраняем изменения
-        localStorage.setItem("userData", JSON.stringify(users.value));
+        // Обновляем пользователя в списке
+        const index = users.value.findIndex((u) => u.id === user.id);
+        if (index !== -1) {
+          users.value[index] = updatedUser;
+        }
 
         showNotification(
-          `Пользователь "${user.name}" назначен администратором`
+          `Пользователь "${user.name || user.login}" назначен администратором`
         );
+      } catch (error) {
+        console.error("Ошибка при назначении администратором:", error);
+        showNotification("Не удалось назначить администратором", "error");
+      } finally {
+        isSubmitting.value = false;
       }
     };
 
     // Снятие прав администратора
-    const removeAdmin = (user: User) => {
-      const index = users.value.findIndex((u) => u.id === user.id);
+    const removeAdmin = async (user: UserData) => {
+      try {
+        isSubmitting.value = true;
+        const updatedUser = await userApi.updateUser(user.id as number, {
+          ...user,
+          role: "student",
+        });
 
-      if (index !== -1) {
-        users.value[index].isAdmin = false;
-
-        // Сохраняем изменения
-        localStorage.setItem("userData", JSON.stringify(users.value));
+        // Обновляем пользователя в списке
+        const index = users.value.findIndex((u) => u.id === user.id);
+        if (index !== -1) {
+          users.value[index] = updatedUser;
+        }
 
         showNotification(
-          `У пользователя "${user.name}" удалены права администратора`
+          `У пользователя "${
+            user.name || user.login
+          }" удалены права администратора`
         );
+      } catch (error) {
+        console.error("Ошибка при удалении прав администратора:", error);
+        showNotification("Не удалось удалить права администратора", "error");
+      } finally {
+        isSubmitting.value = false;
       }
     };
 
     // Сохранение пользователя
-    const saveUser = () => {
+    const saveUser = async () => {
       // Проверка паролей
       if (
         editingUser.value.password &&
@@ -611,69 +607,96 @@ export default defineComponent({
         return;
       }
 
-      if (editMode.value) {
-        // Редактирование существующего пользователя
-        const index = users.value.findIndex(
-          (u) => u.id === editingUser.value.id
-        );
+      try {
+        isSubmitting.value = true;
 
-        if (index !== -1) {
-          // Сохраняем старый пароль, если новый не указан
-          if (!editingUser.value.password) {
-            editingUser.value.password = users.value[index].password;
+        // Устанавливаем роль в зависимости от чекбокса
+        editingUser.value.role = isAdmin.value ? "admin" : "student";
+
+        if (editMode.value) {
+          // Редактирование существующего пользователя
+          const userData = {
+            ...editingUser.value,
+            // Не отправляем пароль, если он пустой
+            password: editingUser.value.password || undefined,
+          };
+
+          const updatedUser = await userApi.updateUser(
+            editingUser.value.id as number,
+            userData
+          );
+
+          // Если есть новый аватар, загружаем его
+          if (userAvatarFile.value) {
+            const result = await userApi.uploadAvatar(
+              editingUser.value.id as number,
+              userAvatarFile.value
+            );
+
+            // Обновляем путь к аватару
+            if (result && result.img_path) {
+              updatedUser.img = result.img_path;
+            }
           }
 
-          // Обновляем аватар
-          if (userAvatarPreview.value) {
-            editingUser.value.avatar = userAvatarPreview.value;
+          // Обновляем пользователя в списке
+          const index = users.value.findIndex((u) => u.id === updatedUser.id);
+          if (index !== -1) {
+            users.value[index] = updatedUser;
           }
-
-          users.value[index] = { ...editingUser.value };
 
           showNotification(
-            `Пользователь "${editingUser.value.name}" успешно обновлен`
+            `Пользователь "${
+              updatedUser.name || updatedUser.login
+            }" успешно обновлен`
           );
         }
-      } else {
-        // Создание нового пользователя
-        const newUser: User = {
-          ...editingUser.value,
-          avatar: userAvatarPreview.value,
-        };
 
-        users.value.push(newUser);
-
-        showNotification(`Пользователь "${newUser.name}" успешно создан`);
+        // Закрываем модальное окно
+        closeModals();
+      } catch (error) {
+        console.error("Ошибка при сохранении пользователя:", error);
+        showNotification("Не удалось сохранить пользователя", "error");
+      } finally {
+        isSubmitting.value = false;
       }
-
-      // Сохраняем изменения в localStorage
-      localStorage.setItem("userData", JSON.stringify(users.value));
-
-      // Закрываем модальное окно
-      closeModals();
     };
 
     // Удаление пользователя
-    const deleteUser = () => {
-      if (deletingUser.value) {
-        const index = users.value.findIndex(
-          (u) => u.id === deletingUser.value?.id
+    const deleteUser = async () => {
+      if (!deletingUser.value || !deletingUser.value.id) {
+        showNotification(
+          "Не удалось удалить пользователя: ID не указан",
+          "error"
         );
-
-        if (index !== -1) {
-          users.value.splice(index, 1);
-
-          // Сохраняем изменения
-          localStorage.setItem("userData", JSON.stringify(users.value));
-
-          showNotification(
-            `Пользователь "${deletingUser.value.name}" успешно удален`
-          );
-        }
+        return;
       }
 
-      // Закрываем модальное окно
-      closeModals();
+      try {
+        isSubmitting.value = true;
+
+        // Удаляем пользователя через API
+        await userApi.deleteUser(deletingUser.value.id as number);
+
+        // Удаляем пользователя из списка
+        users.value = users.value.filter(
+          (u) => u.id !== deletingUser.value?.id
+        );
+
+        showNotification(
+          `Пользователь "${
+            deletingUser.value.name || deletingUser.value.login
+          }" успешно удален`
+        );
+
+        // Закрываем модальное окно
+        closeModals();
+      } catch (error) {
+        console.error("Ошибка при удалении пользователя:", error);
+        showNotification("Не удалось удалить пользователя", "error");
+      } finally {
+        isSubmitting.value = false;
+      }
     };
 
     // Показ уведомления
@@ -681,7 +704,7 @@ export default defineComponent({
       notification.value = {
         show: true,
         message,
-        type,
+        type: type as "success" | "error",
       };
 
       // Автоматически скрываем через 5 секунд
@@ -692,11 +715,13 @@ export default defineComponent({
 
     // Инициализация компонента
     onMounted(() => {
-      // Проверка авторизации
+      // Проверка авторизации и прав администратора
       const token = localStorage.getItem("token");
+      const isAdmin = localStorage.getItem("isAdmin");
 
-      if (!token) {
-        window.location.href = "/signin";
+      if (!token || isAdmin !== "true") {
+        // Если пользователь не авторизован или не админ, перенаправляем на страницу входа
+        router.push("/signin");
         return;
       }
 
@@ -705,6 +730,7 @@ export default defineComponent({
     });
 
     return {
+      API_BASE_URL,
       users,
       loading,
       searchQuery,
@@ -718,6 +744,8 @@ export default defineComponent({
       showDeleteModal,
       editMode,
       userAvatarPreview,
+      isAdmin,
+      isSubmitting,
       clearSearch,
       getUserInitials,
       handleAvatarUpload,
