@@ -6,7 +6,7 @@ import {
   CourseItemCourse,
   CourseItemCourseContent,
 } from "@/types";
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "https://stillmix-online-college-fastapi-e9c2.twc1.net";
 const API_URL = `${API_BASE_URL}/api/courses`;
 
 /**
