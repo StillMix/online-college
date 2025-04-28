@@ -1,8 +1,9 @@
 // Затем импортируем модули, которые используют API_BASE_URL
 import * as courseApi from "./courseApi";
 import * as userApi from "./userApi";
+import * as authApi from "./authApi";
 
-export { courseApi, userApi };
+export { courseApi, userApi, authApi };
 
 // GET /api/courses/ получить все курсы
 // GET /api/courses/{id} получить конкретный

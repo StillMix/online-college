@@ -53,6 +53,8 @@ import { AppButton, AppInput } from "@/components/UI";
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
 import AppLoader from "@/components/Loader.vue";
+import { authApi } from "@/api";
+
 export default defineComponent({
   name: "SignInView",
   components: {
@@ -73,17 +75,26 @@ export default defineComponent({
     }, 10);
 
     // Обработчик формы входа
-    const handleSubmit = () => {
-      isSubmitting.value = true;
+    // В методе handleSubmit обновляем этот код
+    const handleSubmit = async () => {
+      try {
+        isSubmitting.value = true;
 
-      // Имитация процесса входа с задержкой в 1000 секунд
-      setTimeout(() => {
-        // Сохраняем токен в localStorage
-        localStorage.setItem("token", "вошли");
+        const result = await authApi.login(email.value, password.value);
+
+        // Если авторизация успешна, получаем информацию о пользователе
+        const userData = await authApi.getCurrentUser();
+
+        // Если пользователь админ, сохраняем это в localStorage
+        if (userData.role === "admin") {
+          localStorage.setItem("isAdmin", "true");
+        }
 
         // Перенаправляем на главную страницу
         router.push("/");
-      }, 4000);
+      } finally {
+        isSubmitting.value = false;
+      }
     };
 
     return {
