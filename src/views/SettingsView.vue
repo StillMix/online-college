@@ -16,47 +16,49 @@
               tag="div"
               class="settingsView__form__fields"
             >
-              <label class="settingsView__form__label" key="name">
-                <loginIcon
-                  class="settingsView__form__label__img"
-                  color="#484848"
-                  width="1.25vw"
-                  height="1.25vw"
-                />
-                <input
-                  class="settingsView__form__label__input"
-                  placeholder="Имя"
-                  v-model="userData.name"
-                />
-              </label>
-
-              <label class="settingsView__form__label" key="login">
-                <loginIcon
-                  class="settingsView__form__label__img"
-                  color="#484848"
-                  width="1.25vw"
-                  height="1.25vw"
-                />
-                <input
-                  class="settingsView__form__label__input"
-                  placeholder="Логин"
-                  v-model="userData.login"
-                />
-              </label>
-
-              <label class="settingsView__form__label" key="email">
-                <emailIcon
-                  class="settingsView__form__label__img"
-                  color="#484848"
-                  width="1.25vw"
-                  height="1.25vw"
-                />
-                <input
-                  class="settingsView__form__label__input"
-                  placeholder="Почта"
-                  v-model="userData.email"
-                />
-              </label>
+              <AppInput
+                v-model="userData.name"
+                type="text"
+                placeholder="Имя"
+                :styleLabel="{
+                  marginTop: '10px',
+                }"
+                :styleInput="{
+                  width: '100%',
+                  paddingLeft: '10px',
+                  opacity: '0.7',
+                  backgroundColor: '#2a2a2a',
+                }"
+              ></AppInput>
+              <AppInput
+                v-model="userData.login"
+                type="login"
+                placeholder="Логин"
+                :styleLabel="{
+                  marginTop: '10px',
+                }"
+                :styleInput="{
+                  width: '100%',
+                  paddingLeft: '10px',
+                  opacity: '0.7',
+                  backgroundColor: '#2a2a2a',
+                }"
+              ></AppInput>
+              <AppInput
+                v-model="userData.email"
+                type="email"
+                disabled
+                placeholder="Почта"
+                :styleLabel="{
+                  marginTop: '10px',
+                }"
+                :styleInput="{
+                  width: '100%',
+                  paddingLeft: '10px',
+                  opacity: '0.7',
+                  backgroundColor: '#2a2a2a',
+                }"
+              ></AppInput>
             </transition-group>
 
             <p class="settingsView__form__subtitle settings-section-animation">
@@ -131,8 +133,12 @@
               <div class="settingsView__form__image__container scale-animation">
                 <transition name="fade-scale">
                   <img
-                    v-if="previewImage || userData.avatar"
-                    :src="previewImage ?? userData.avatar ?? undefined"
+                    v-if="previewImage || userData.img"
+                    :src="
+                      previewImage ??
+                      `http://127.0.0.1:8000/${userData.img}` ??
+                      undefined
+                    "
                     class="settingsView__form__image__preview"
                     alt="Аватар пользователя"
                   />
@@ -161,14 +167,6 @@
                   >Изменить изображение</span
                 >
               </label>
-
-              <button
-                v-if="previewImage || userData.avatar"
-                class="settingsView__form__image__remove"
-                @click="removeImage"
-              >
-                Удалить изображение
-              </button>
             </div>
 
             <div class="settingsView__form__info slide-up-animation">
@@ -217,17 +215,15 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from "vue";
 import Header from "@/components/Header.vue";
-import loginIcon from "../assets/icons/loginIcon.vue";
-import emailIcon from "../assets/icons/emailIcon.vue";
 import inputImg from "../assets/icons/inputImg.vue";
-import { UserData } from "@/types";
+import { AppInput } from "@/components/UI";
+import { userApi } from "@/api";
 
 export default defineComponent({
   name: "SettingsView",
   components: {
     Header,
-    loginIcon,
-    emailIcon,
+    AppInput,
     inputImg,
   },
   setup() {
@@ -236,18 +232,16 @@ export default defineComponent({
     const showNotification = ref(false);
     const notificationMessage = ref("");
     const notificationType = ref("success");
-
+    const userData = ref<any>(null);
     // Имитация данных пользователя
-    const userData = ref<UserData>({
-      name: "Тестовый Пользователь",
-      login: "testusernickname",
-      email: "test@example.com",
-      avatar: null,
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-
+    const userDataStr = localStorage.getItem("user");
+    if (userDataStr) {
+      try {
+        userData.value = JSON.parse(userDataStr);
+      } catch (e) {
+        console.error("Ошибка при парсинге данных пользователя:", e);
+      }
+    }
     // Сохраняем начальные данные для возможности сброса формы
     const initialUserData = { ...userData.value };
 
@@ -262,10 +256,11 @@ export default defineComponent({
     });
 
     // Обработчик выбора изображения
-    const handleImageSelect = (event: Event) => {
+    const handleImageSelect = async (event: Event) => {
       const input = event.target as HTMLInputElement;
       if (input.files && input.files.length > 0) {
         const file = input.files[0];
+        await userApi.uploadAvatar(userData.value.id, file);
         const reader = new FileReader();
         reader.onload = (e) => {
           if (e.target) {
@@ -274,21 +269,6 @@ export default defineComponent({
         };
         reader.readAsDataURL(file);
       }
-    };
-
-    // Удаление изображения
-    const removeImage = () => {
-      previewImage.value = null;
-      userData.value.avatar = null;
-      // Сбрасываем value у input file, чтобы можно было выбрать то же изображение снова
-      const fileInput = document.querySelector(
-        ".settingsView__form__image__input"
-      ) as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = "";
-      }
-
-      showSuccessNotification("Изображение успешно удалено");
     };
 
     // Сохранение настроек
@@ -400,7 +380,6 @@ export default defineComponent({
       notificationMessage,
       notificationType,
       handleImageSelect,
-      removeImage,
       saveSettings,
       resetForm,
       closeNotification,
