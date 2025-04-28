@@ -6,7 +6,11 @@ import {
   CourseItemCourse,
   CourseItemCourseContent,
 } from "@/types";
-const API_BASE_URL = "https://stillmix-online-college-fastapi-e9c2.twc1.net";
+const API_BASE_URL =
+  window.location.protocol === "https:"
+    ? "https://109.73.194.69"
+    : "https://109.73.194.69"; // fallback на https
+
 const API_URL = `${API_BASE_URL}/api/courses`;
 
 /**
@@ -21,6 +25,7 @@ export const getAllCourses = async (
 ): Promise<CourseItem[]> => {
   try {
     localStorage.removeItem("courseData");
+    console.log("Куда отправляется запрос:", API_URL);
     const response = await axios.get(API_URL);
     localStorage.setItem("courseData", JSON.stringify(response.data));
     StopLoader?.();

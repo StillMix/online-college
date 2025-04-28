@@ -203,7 +203,7 @@ export default defineComponent({
           previewUrl.value = props.elemRed.icon;
         } else {
           // Иначе добавляем базовый URL
-          previewUrl.value = `https://stillmix-online-college-fastapi-e9c2.twc1.net/${props.elemRed.icon}`;
+          previewUrl.value = `https://109.73.194.69/api/${props.elemRed.icon}`;
         }
       }
     });

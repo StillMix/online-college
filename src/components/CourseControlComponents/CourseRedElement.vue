@@ -3,7 +3,7 @@
     <img
       v-if="course.icon"
       class="course-RedEl__img"
-      :src="`https://stillmix-online-college-fastapi-e9c2.twc1.net/${course.icon}`"
+      :src="`https://109.73.194.69/api/${course.icon}`"
       alt="Course icon"
     />
     <div class="course-RedEl__con">
