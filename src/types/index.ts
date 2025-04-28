@@ -11,6 +11,8 @@ export interface UserData {
   currentPassword?: string;
   newPassword?: string;
   confirmPassword?: string;
+  isAdmin?: boolean;
+  createdAt?: string;
 }
 
 // Интерфейс для верификации email

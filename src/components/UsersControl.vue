@@ -343,7 +343,8 @@
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted } from "vue";
 import AppLoader from "@/components/Loader.vue";
-import { User } from "@/types";
+import { UserData } from "@/types";
+import { userApi } from "@/api";
 
 export default defineComponent({
   name: "UsersControl",
@@ -352,7 +353,7 @@ export default defineComponent({
   },
   setup() {
     // Состояние
-    const users = ref<User[]>([]);
+    const users = ref<UserData[]>([]);
     const loading = ref(true);
     const searchQuery = ref("");
     const userType = ref("all"); // all, admin, user
@@ -363,7 +364,7 @@ export default defineComponent({
     const editMode = ref(false);
 
     // Редактируемый пользователь
-    const editingUser = ref<User>({
+    const editingUser = ref<UserData>({
       id: "",
       name: "",
       login: "",
@@ -376,7 +377,7 @@ export default defineComponent({
 
     const passwordConfirm = ref("");
     const userAvatarPreview = ref<string | null>(null);
-    const deletingUser = ref<User | null>(null);
+    const deletingUser = ref<UserData | null>(null);
 
     // Уведомление
     const notification = ref({
@@ -423,15 +424,15 @@ export default defineComponent({
     };
 
     // Загрузка данных пользователей
-    const loadUsers = () => {
+    const loadUsers = async () => {
       loading.value = true;
 
       // Проверяем, есть ли пользователи в localStorage
-      const usersData = localStorage.getItem("userData");
+      const usersData = await userApi.getAllUsers();
 
       if (usersData) {
         try {
-          users.value = JSON.parse(usersData);
+          users.value = usersData;
         } catch (e) {
           console.error("Ошибка при парсинге данных пользователей:", e);
 

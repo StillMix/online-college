@@ -80,12 +80,22 @@
       </router-link>
     </div>
     <div class="header__acc__sign" v-if="token" @click.stop="toggleDropdown">
-      <p class="header__acc__sign__title">TESTUSERNICKNAME</p>
+      <p class="header__acc__sign__title">
+        {{ userData ? userData.login : "ПОЛЬЗОВАТЕЛЬ" }}
+      </p>
       <img
+        v-if="userData && userData.img"
         alt="accImg"
         class="header__acc__sign__img"
-        src="../assets/testimg.png"
+        :src="userData.img"
       />
+      <div v-else class="header__acc__sign__placeholder">
+        {{
+          userData && userData.login
+            ? userData.login.substring(0, 2).toUpperCase()
+            : "U"
+        }}
+      </div>
       <!-- Выпадающее меню -->
       <transition name="fade">
         <div class="header__acc__dropdown" v-show="isDropdownVisible">
@@ -162,6 +172,7 @@ export default defineComponent({
     const indicatorPosition = ref({ left: 0, width: 0 });
     const token = ref<string | null>(localStorage.getItem("token"));
     const isDropdownVisible = ref(false);
+    const userData = ref<any>(null);
 
     const updateIndicatorPosition = (linkName: string) => {
       const linkElement = document.querySelector(
@@ -268,6 +279,15 @@ export default defineComponent({
       setCurrentLink();
       // Добавляем обработчик клика для закрытия выпадающего меню
       document.addEventListener("click", handleClickOutside);
+
+      const userDataStr = localStorage.getItem("user");
+      if (userDataStr) {
+        try {
+          userData.value = JSON.parse(userDataStr);
+        } catch (e) {
+          console.error("Ошибка при парсинге данных пользователя:", e);
+        }
+      }
     });
 
     onBeforeUnmount(() => {
@@ -281,6 +301,7 @@ export default defineComponent({
       onHoverLink,
       onLeaveLink,
       isDropdownVisible,
+      userData,
       toggleDropdown,
       logout,
       isAdmin,
@@ -458,6 +479,7 @@ export default defineComponent({
         }
       }
       &__title {
+        text-transform: uppercase;
         font-family: var(--font-family);
         font-weight: 500;
         font-size: 0.729vw;
@@ -620,5 +642,18 @@ export default defineComponent({
   100% {
     left: 100%;
   }
+}
+
+.header__acc__sign__placeholder {
+  width: 1.25vw;
+  height: 1.25vw;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #08dccf, #0099ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6vw;
+  color: white;
+  font-weight: bold;
 }
 </style>
