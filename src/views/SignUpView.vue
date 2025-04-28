@@ -132,6 +132,7 @@ import { defineComponent, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import AppLoader from "@/components/Loader.vue";
 import { userApi } from "@/api";
+import { authApi } from "@/api";
 
 export default defineComponent({
   name: "signUpView",
@@ -231,9 +232,7 @@ export default defineComponent({
 
           // Отправка запроса на регистрацию
           await userApi.confirmEmail(userData);
-
-          // Сохраняем токен в localStorage для имитации входа
-          localStorage.setItem("token", "вошли");
+          await authApi.login(email.value, password.value);
 
           // Перенаправляем на страницу с дополнительными данными
           router.push("/");

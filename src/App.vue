@@ -15,6 +15,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
 import { courseApi } from "./api/index";
+import { authApi } from "./api/index";
 import Loader from "./components/Loader.vue";
 
 export default defineComponent({
@@ -29,6 +30,9 @@ export default defineComponent({
 
     onMounted(async () => {
       await courseApi.getAllCourses(StopLoader);
+      if (localStorage.getItem("token")) {
+        await authApi.getCurrentUser();
+      }
     });
 
     // 🔥 Возвращаем LoaderSlide, чтобы использовать его в шаблоне

@@ -45,7 +45,9 @@ export const login = async (
  */
 export const getCurrentUser = async (): Promise<UserData> => {
   try {
+    localStorage.removeItem("user");
     const response = await apiClient.get(`${API_URL}/me`);
+    localStorage.setItem("user", JSON.stringify(response.data));
     return response.data;
   } catch (error) {
     console.error("Ошибка при получении данных пользователя:", error);

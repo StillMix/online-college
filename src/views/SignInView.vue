@@ -14,7 +14,7 @@
         <form class="signIn__popup__form" @submit.prevent="handleSubmit">
           <AppInput
             v-model="email"
-            type="email"
+            type="emailtext"
             placeholder="Почта/логин"
             required
           >
@@ -84,7 +84,6 @@ export default defineComponent({
 
         // Если авторизация успешна, получаем информацию о пользователе
         const userData = await authApi.getCurrentUser();
-
         // Если пользователь админ, сохраняем это в localStorage
         if (userData.role === "admin") {
           localStorage.setItem("isAdmin", "true");
