@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Конфигурация базового URL
 export const API_BASE_URL =
-  process.env.VUE_APP_API_URL || "https://109.73.194.69";
+  process.env.VUE_APP_API_URL || "http://127.0.0.1:8000";
 
 // Настройка глобального экземпляра axios
 const apiClient = axios.create({

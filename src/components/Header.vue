@@ -87,7 +87,7 @@
         v-if="userData && userData.img"
         alt="accImg"
         class="header__acc__sign__img"
-        :src="`https://109.73.194.69/api/${userData.img}`"
+        :src="`http://127.0.0.1:8000/${userData.img}`"
       />
       <div v-else class="header__acc__sign__placeholder">
         {{

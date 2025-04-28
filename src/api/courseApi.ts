@@ -8,8 +8,8 @@ import {
 } from "@/types";
 const API_BASE_URL =
   window.location.protocol === "https:"
-    ? "https://109.73.194.69"
-    : "https://109.73.194.69"; // fallback на https
+    ? "http://127.0.0.1:8000"
+    : "http://127.0.0.1:8000"; // fallback на https
 
 const API_URL = `${API_BASE_URL}/api/courses`;
 

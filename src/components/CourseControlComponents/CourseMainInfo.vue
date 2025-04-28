@@ -203,7 +203,7 @@ export default defineComponent({
           previewUrl.value = props.elemRed.icon;
         } else {
           // Иначе добавляем базовый URL
-          previewUrl.value = `https://109.73.194.69/api/${props.elemRed.icon}`;
+          previewUrl.value = `http://127.0.0.1:8000/${props.elemRed.icon}`;
         }
       }
     });

@@ -3,7 +3,7 @@
     <img
       v-if="course.icon"
       class="course-RedEl__img"
-      :src="`https://109.73.194.69/api/${course.icon}`"
+      :src="`http://127.0.0.1:8000/${course.icon}`"
       alt="Course icon"
     />
     <div class="course-RedEl__con">

@@ -19,7 +19,7 @@
     </div>
     <img
       class="courseCardes__img"
-      :src="`https://109.73.194.69/api/${course.icon}`"
+      :src="`http://127.0.0.1:8000/${course.icon}`"
       alt="Course icon"
     />
     <div class="courseCardes__info">
@@ -52,7 +52,7 @@ export default defineComponent({
     },
     getIconSrc() {
       try {
-        return require(`https://109.73.194.69/api/${this.course.icon}`);
+        return require(`http://127.0.0.1:8000/${this.course.icon}`);
       } catch (error) {
         console.error(`Иконка ${this.course.icon} не найдена:`, error);
         return "";

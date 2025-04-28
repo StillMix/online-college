@@ -7,7 +7,7 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       "/api": {
-        target: "https://109.73.194.69", // Прокси на https
+        target: "http://127.0.0.1:8000", // Прокси на https
         secure: true, // Убедитесь, что прокси использует HTTPS
         changeOrigin: true, // Переписывает origin, чтобы он соответствовал целевому серверу
         logLevel: "debug", // Это поможет отладить проблемы с прокси

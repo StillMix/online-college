@@ -136,7 +136,7 @@
                     v-if="previewImage || userData.img"
                     :src="
                       previewImage ??
-                      `https://109.73.194.69/api/${userData.img}` ??
+                      `http://127.0.0.1:8000/${userData.img}` ??
                       undefined
                     "
                     class="settingsView__form__image__preview"

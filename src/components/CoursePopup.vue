@@ -125,7 +125,7 @@
             >
               <img
                 class="courseVib__content__type__img"
-                :src="`https://109.73.194.69/api/${courseVib.icon}`"
+                :src="`http://127.0.0.1:8000/${courseVib.icon}`"
                 alt="Course type icon"
               />
             </div>
