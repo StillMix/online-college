@@ -125,7 +125,7 @@
             >
               <img
                 class="courseVib__content__type__img"
-                :src="`http://127.0.0.1:8000/${courseVib.icon}`"
+                :src="`https://stillmix-online-college-fastapi-e9c2.twc1.net/${courseVib.icon}`"
                 alt="Course type icon"
               />
             </div>

@@ -19,7 +19,7 @@
     </div>
     <img
       class="courseCardes__img"
-      :src="`http://127.0.0.1:8000/${course.icon}`"
+      :src="`https://stillmix-online-college-fastapi-e9c2.twc1.net/${course.icon}`"
       alt="Course icon"
     />
     <div class="courseCardes__info">
@@ -52,7 +52,7 @@ export default defineComponent({
     },
     getIconSrc() {
       try {
-        return require(`http://127.0.0.1:8000/${this.course.icon}`);
+        return require(`https://stillmix-online-college-fastapi-e9c2.twc1.net/${this.course.icon}`);
       } catch (error) {
         console.error(`Иконка ${this.course.icon} не найдена:`, error);
         return "";

@@ -6,12 +6,6 @@ import {
   CourseItemCourse,
   CourseItemCourseContent,
 } from "@/types";
-const API_BASE_URL =
-  window.location.protocol === "https:"
-    ? "https://stillmix-online-college-fastapi-e9c2.twc1.net"
-    : "https://stillmix-online-college-fastapi-e9c2.twc1.net";
-
-const API_URL = `${API_BASE_URL}/api/courses`;
 
 /**
  * КУРСЫ
@@ -25,8 +19,9 @@ export const getAllCourses = async (
 ): Promise<CourseItem[]> => {
   try {
     localStorage.removeItem("courseData");
-    console.log("Куда отправляется запрос:", API_URL);
-    const response = await axios.get(API_URL);
+    const response = await axios.get(
+      "https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/"
+    );
     localStorage.setItem("courseData", JSON.stringify(response.data));
     StopLoader?.();
     return response.data;
@@ -48,7 +43,9 @@ export const getAllCourses = async (
  */
 export const getCourseById = async (courseId: string): Promise<CourseItem> => {
   try {
-    const response = await axios.get(`${API_URL}/${courseId}`);
+    const response = await axios.get(
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/`
+    );
     return response.data;
   } catch (error) {
     console.error(`Ошибка при получении курса с ID ${courseId}:`, error);
@@ -72,7 +69,10 @@ export const createCourse = async (
   courseData: Partial<CourseItem>
 ): Promise<CourseItem> => {
   try {
-    const response = await axios.post(API_URL, courseData);
+    const response = await axios.post(
+      "https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/",
+      courseData
+    );
 
     // Обновляем список курсов в localStorage
     const updatedCourse = response.data;
@@ -93,7 +93,10 @@ export const updateCourse = async (
   courseData: Partial<CourseItem>
 ): Promise<CourseItem> => {
   try {
-    const response = await axios.put(`${API_URL}/${courseId}`, courseData);
+    const response = await axios.put(
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/`,
+      courseData
+    );
 
     // Обновляем список курсов в localStorage
     const updatedCourse = response.data;
@@ -111,7 +114,9 @@ export const updateCourse = async (
  */
 export const deleteCourse = async (courseId: string): Promise<void> => {
   try {
-    await axios.delete(`${API_URL}/${courseId}`);
+    await axios.delete(
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/`
+    );
     // Удаляем курс из localStorage
     removeCoursesFromLocalStorage(courseId);
     getAllCourses();
@@ -133,7 +138,10 @@ export const createCourseInfo = async (
   infoData: CourseInfoItem
 ): Promise<CourseInfoItem> => {
   try {
-    const response = await axios.post(`${API_URL}/${courseId}/info/`, infoData);
+    const response = await axios.post(
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/info/`,
+      infoData
+    );
     getAllCourses();
     return response.data;
   } catch (error) {
@@ -155,7 +163,7 @@ export const updateCourseInfo = async (
 ): Promise<CourseInfoItem> => {
   try {
     const response = await axios.put(
-      `${API_URL}/${courseId}/info/${infoId}`,
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/info/${infoId}`,
       infoData
     );
     getAllCourses();
@@ -177,7 +185,9 @@ export const deleteCourseInfo = async (
   infoId: string
 ): Promise<void> => {
   try {
-    await axios.delete(`${API_URL}/${courseId}/info/${infoId}`);
+    await axios.delete(
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/info/${infoId}`
+    );
     getAllCourses();
   } catch (error) {
     console.error(
@@ -201,7 +211,7 @@ export const createCourseSection = async (
 ): Promise<CourseItemCourse> => {
   try {
     const response = await axios.post(
-      `${API_URL}/${courseId}/sections/`,
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/`,
       sectionData
     );
     getAllCourses();
@@ -222,7 +232,7 @@ export const updateCourseSection = async (
 ): Promise<CourseItemCourse> => {
   try {
     const response = await axios.put(
-      `${API_URL}/${courseId}/sections/${sectionId}`,
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}`,
       sectionData
     );
     getAllCourses();
@@ -244,7 +254,9 @@ export const deleteCourseSection = async (
   sectionId: string
 ): Promise<void> => {
   try {
-    await axios.delete(`${API_URL}/${courseId}/sections/${sectionId}`);
+    await axios.delete(
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}`
+    );
   } catch (error) {
     console.error(
       `Ошибка при удалении раздела ${sectionId} для курса ${courseId}:`,
@@ -268,7 +280,7 @@ export const createCourseLesson = async (
 ): Promise<CourseItemCourseContent> => {
   try {
     const response = await axios.post(
-      `${API_URL}/${courseId}/sections/${sectionId}/content`,
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}/content`,
       lessonData
     );
 
@@ -297,7 +309,7 @@ export const updateCourseLesson = async (
 ): Promise<CourseItemCourseContent> => {
   try {
     const response = await axios.put(
-      `${API_URL}/${courseId}/sections/${sectionId}/content/${lessonId}`,
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}/content/${lessonId}`,
       lessonData
     );
     getAllCourses();
@@ -321,7 +333,7 @@ export const deleteCourseLesson = async (
 ): Promise<void> => {
   try {
     await axios.delete(
-      `${API_URL}/${courseId}/sections/${sectionId}/content/${lessonId}`
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}/content/${lessonId}`
     );
   } catch (error) {
     console.error(
@@ -347,7 +359,7 @@ export const updateLessonDescription = async (
 ): Promise<void> => {
   try {
     await axios.put(
-      `${API_URL}/${courseId}/sections/${sectionId}/content/${lessonId}`,
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}/content/${lessonId}/`,
       { description }
     );
   } catch (error) {
@@ -375,7 +387,7 @@ export const uploadCourseImage = async (
     formData.append("file", file);
 
     const response = await axios.post(
-      `${API_URL}/${courseId}/upload-image`,
+      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/upload-image`,
       formData,
       {
         headers: {
