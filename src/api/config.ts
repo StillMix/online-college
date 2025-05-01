@@ -3,7 +3,8 @@ import axios from "axios";
 
 // Конфигурация базового URL
 export const API_BASE_URL =
-  process.env.VUE_APP_API_URL || "http://127.0.0.1:8000";
+  process.env.VUE_APP_API_URL ||
+  "https://stillmix-online-college-fastapi-e9c2.twc1.net/";
 
 // Настройка глобального экземпляра axios
 const apiClient = axios.create({

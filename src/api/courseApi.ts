@@ -8,8 +8,8 @@ import {
 } from "@/types";
 const API_BASE_URL =
   window.location.protocol === "https:"
-    ? "http://127.0.0.1:8000"
-    : "http://127.0.0.1:8000"; // fallback на https
+    ? "https://stillmix-online-college-fastapi-e9c2.twc1.net"
+    : "https://stillmix-online-college-fastapi-e9c2.twc1.net";
 
 const API_URL = `${API_BASE_URL}/api/courses`;
 
