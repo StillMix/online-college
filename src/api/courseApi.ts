@@ -19,9 +19,7 @@ export const getAllCourses = async (
 ): Promise<CourseItem[]> => {
   try {
     localStorage.removeItem("courseData");
-    const response = await axios.get(
-      "https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/"
-    );
+    const response = await axios.get("http://195.133.50.207/api/courses/");
     localStorage.setItem("courseData", JSON.stringify(response.data));
     StopLoader?.();
     return response.data;
@@ -44,7 +42,7 @@ export const getAllCourses = async (
 export const getCourseById = async (courseId: string): Promise<CourseItem> => {
   try {
     const response = await axios.get(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/`
+      `http://195.133.50.207/api/courses/${courseId}/`
     );
     return response.data;
   } catch (error) {
@@ -70,7 +68,7 @@ export const createCourse = async (
 ): Promise<CourseItem> => {
   try {
     const response = await axios.post(
-      "https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/",
+      "http://195.133.50.207/api/courses/",
       courseData
     );
 
@@ -94,7 +92,7 @@ export const updateCourse = async (
 ): Promise<CourseItem> => {
   try {
     const response = await axios.put(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/`,
+      `http://195.133.50.207/api/courses/${courseId}/`,
       courseData
     );
 
@@ -114,9 +112,7 @@ export const updateCourse = async (
  */
 export const deleteCourse = async (courseId: string): Promise<void> => {
   try {
-    await axios.delete(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/`
-    );
+    await axios.delete(`http://195.133.50.207/api/courses/${courseId}/`);
     // Удаляем курс из localStorage
     removeCoursesFromLocalStorage(courseId);
     getAllCourses();
@@ -139,7 +135,7 @@ export const createCourseInfo = async (
 ): Promise<CourseInfoItem> => {
   try {
     const response = await axios.post(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/info/`,
+      `http://195.133.50.207/api/courses/${courseId}/info/`,
       infoData
     );
     getAllCourses();
@@ -163,7 +159,7 @@ export const updateCourseInfo = async (
 ): Promise<CourseInfoItem> => {
   try {
     const response = await axios.put(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/info/${infoId}`,
+      `http://195.133.50.207/api/courses/${courseId}/info/${infoId}`,
       infoData
     );
     getAllCourses();
@@ -186,7 +182,7 @@ export const deleteCourseInfo = async (
 ): Promise<void> => {
   try {
     await axios.delete(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/info/${infoId}`
+      `http://195.133.50.207/api/courses/${courseId}/info/${infoId}`
     );
     getAllCourses();
   } catch (error) {
@@ -211,7 +207,7 @@ export const createCourseSection = async (
 ): Promise<CourseItemCourse> => {
   try {
     const response = await axios.post(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/`,
+      `http://195.133.50.207/api/courses/${courseId}/sections/`,
       sectionData
     );
     getAllCourses();
@@ -232,7 +228,7 @@ export const updateCourseSection = async (
 ): Promise<CourseItemCourse> => {
   try {
     const response = await axios.put(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}`,
+      `http://195.133.50.207/api/courses/${courseId}/sections/${sectionId}`,
       sectionData
     );
     getAllCourses();
@@ -255,7 +251,7 @@ export const deleteCourseSection = async (
 ): Promise<void> => {
   try {
     await axios.delete(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}`
+      `http://195.133.50.207/api/courses/${courseId}/sections/${sectionId}`
     );
   } catch (error) {
     console.error(
@@ -280,7 +276,7 @@ export const createCourseLesson = async (
 ): Promise<CourseItemCourseContent> => {
   try {
     const response = await axios.post(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}/content`,
+      `http://195.133.50.207/api/courses/${courseId}/sections/${sectionId}/content`,
       lessonData
     );
 
@@ -309,7 +305,7 @@ export const updateCourseLesson = async (
 ): Promise<CourseItemCourseContent> => {
   try {
     const response = await axios.put(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}/content/${lessonId}`,
+      `http://195.133.50.207/api/courses/${courseId}/sections/${sectionId}/content/${lessonId}`,
       lessonData
     );
     getAllCourses();
@@ -333,7 +329,7 @@ export const deleteCourseLesson = async (
 ): Promise<void> => {
   try {
     await axios.delete(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}/content/${lessonId}`
+      `http://195.133.50.207/api/courses/${courseId}/sections/${sectionId}/content/${lessonId}`
     );
   } catch (error) {
     console.error(
@@ -359,7 +355,7 @@ export const updateLessonDescription = async (
 ): Promise<void> => {
   try {
     await axios.put(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/sections/${sectionId}/content/${lessonId}/`,
+      `http://195.133.50.207/api/courses/${courseId}/sections/${sectionId}/content/${lessonId}/`,
       { description }
     );
   } catch (error) {
@@ -387,7 +383,7 @@ export const uploadCourseImage = async (
     formData.append("file", file);
 
     const response = await axios.post(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/courses/${courseId}/upload-image`,
+      `http://195.133.50.207/api/courses/${courseId}/upload-image`,
       formData,
       {
         headers: {

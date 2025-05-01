@@ -9,7 +9,7 @@ export const createUser = async (
 ): Promise<UserData> => {
   try {
     const response = await axios.post(
-      "https://stillmix-online-college-fastapi-e9c2.twc1.net/api/users/",
+      "http://195.133.50.207/api/users/",
       userData
     );
     return response.data;
@@ -25,14 +25,26 @@ export const createUser = async (
 export const sendVerificationCode = async (email: string): Promise<any> => {
   try {
     const response = await axios.post(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/users/send_verification_code/`,
+      `http://localhost:8000/api/users/send_verification_code/`,
       {
         email: email,
       }
     );
+    // Для локальной разработки: автоматическое заполнение кода
+    if (response.data && response.data.code) {
+      console.log("Код верификации для разработки:", response.data.code);
+    }
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
+    // Указываем тип 'any' для ошибки
+    // При ошибке сервера, возвращаем тестовый код (только для разработки!)
     console.error("Ошибка при отправке кода подтверждения:", error);
+    if (error.response && error.response.status === 502) {
+      console.log(
+        "Используем тестовый код для разработки из-за ошибки сервера"
+      );
+      return { message: "Тестовый код для разработки", code: "1234" };
+    }
     throw error;
   }
 };
@@ -45,7 +57,7 @@ export const confirmEmail = async (userData: {
 }): Promise<any> => {
   try {
     const response = await axios.post(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/users/confirm_email/`,
+      `http://195.133.50.207/api/users/confirm_email/`,
       userData
     );
     return response.data;
@@ -64,7 +76,7 @@ export const updateUser = async (
 ): Promise<UserData> => {
   try {
     const response = await axios.put(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/users/${userId}`,
+      `http://195.133.50.207/api/users/${userId}`,
       userData
     );
     return response.data;
@@ -79,9 +91,7 @@ export const updateUser = async (
  */
 export const getAllUsers = async (): Promise<UserData[]> => {
   try {
-    const response = await axios.get(
-      "https://stillmix-online-college-fastapi-e9c2.twc1.net/api/users/"
-    );
+    const response = await axios.get("http://195.133.50.207/api/users/");
     return response.data;
   } catch (error) {
     console.error("Ошибка при получении списка пользователей:", error);
@@ -97,7 +107,7 @@ export const deleteUser = async (
 ): Promise<{ message: string }> => {
   try {
     const response = await axios.delete(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/users/${userId}/`
+      `http://195.133.50.207/api/users/${userId}/`
     );
     return response.data;
   } catch (error) {
@@ -115,7 +125,7 @@ export const addUserCourse = async (
 ): Promise<{ message: string }> => {
   try {
     const response = await axios.post(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/users/course`,
+      `http://195.133.50.207/api/users/course`,
       {
         user_id: userId,
         course_id: courseId,
@@ -137,7 +147,7 @@ export const completeLesson = async (
 ): Promise<{ message: string }> => {
   try {
     const response = await axios.post(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/users/lesson/complete/`,
+      `http://195.133.50.207/api/users/lesson/complete/`,
       {
         user_id: userId,
         lesson_id: lessonId,
@@ -162,7 +172,7 @@ export const uploadAvatar = async (
     formData.append("avatar", file);
 
     const response = await axios.post(
-      `https://stillmix-online-college-fastapi-e9c2.twc1.net/api/users/${userId}/avatar`,
+      `http://195.133.50.207/api/users/${userId}/avatar`,
       formData,
       {
         headers: {
