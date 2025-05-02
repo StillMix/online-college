@@ -7,7 +7,7 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       "/api": {
-        target: "https://stillmix-online-college-fastapi-e9c2.twc1.net", // Прокси на https
+        target: "http://195.133.50.207", // Прокси на https
         secure: true, // Убедитесь, что прокси использует HTTPS
         changeOrigin: true, // Переписывает origin, чтобы он соответствовал целевому серверу
         logLevel: "debug", // Это поможет отладить проблемы с прокси

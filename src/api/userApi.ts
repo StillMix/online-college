@@ -25,7 +25,7 @@ export const createUser = async (
 export const sendVerificationCode = async (email: string): Promise<any> => {
   try {
     const response = await axios.post(
-      `http://localhost:8000/api/users/send_verification_code/`,
+      `http://195.133.50.207/api/users/send_verification_code/`,
       {
         email: email,
       }

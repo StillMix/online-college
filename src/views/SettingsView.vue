@@ -136,7 +136,7 @@
                     v-if="previewImage || userData.img"
                     :src="
                       previewImage ??
-                      `https://stillmix-online-college-fastapi-e9c2.twc1.net/${userData.img}` ??
+                      `http://195.133.50.207/${userData.img}` ??
                       undefined
                     "
                     class="settingsView__form__image__preview"

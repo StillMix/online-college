@@ -87,7 +87,7 @@
         v-if="userData && userData.img"
         alt="accImg"
         class="header__acc__sign__img"
-        :src="`https://stillmix-online-college-fastapi-e9c2.twc1.net/${userData.img}`"
+        :src="`http://195.133.50.207/${userData.img}`"
       />
       <div v-else class="header__acc__sign__placeholder">
         {{
@@ -245,7 +245,11 @@ export default defineComponent({
       console.log("Logging out...");
       // Удаляем токен из localStorage
       localStorage.removeItem("token");
+      localStorage.removeItem("courseData");
       localStorage.removeItem("isAdmin");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userCourses");
+      localStorage.removeItem("userData");
       // Обновляем состояние
       token.value = null;
       // Закрываем выпадающее меню
