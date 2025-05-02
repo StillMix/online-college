@@ -203,7 +203,7 @@ export default defineComponent({
           previewUrl.value = props.elemRed.icon;
         } else {
           // Иначе добавляем базовый URL
-          previewUrl.value = `http://195.133.50.207/${props.elemRed.icon}`;
+          previewUrl.value = `https://back.kktsback.tw1.ru/${props.elemRed.icon}`;
         }
       }
     });

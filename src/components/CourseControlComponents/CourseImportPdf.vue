@@ -187,7 +187,7 @@
 import { defineComponent, ref } from "vue";
 import { AppSpinner } from "../UI";
 import axios from "axios";
-
+import { CourseItem, CourseItemCourse } from "@/types";
 export default defineComponent({
   name: "CourseImportPdf",
   components: { AppSpinner },
@@ -257,6 +257,7 @@ export default defineComponent({
     };
 
     // Обработка PDF
+    // Обработка PDF
     const processPdf = async () => {
       if (!selectedFile.value) return;
 
@@ -279,8 +280,9 @@ export default defineComponent({
           options.value.extractContent.toString()
         );
 
-        const response = await axios.post(
-          "http://localhost:8000/api/pdf/extract_course",
+        // Получаем предварительный просмотр структуры
+        const previewResponse = await axios.post<CourseItem>(
+          "https://back.kktsback.tw1.ru/api/pdf/preview",
           formData,
           {
             headers: {
@@ -289,34 +291,58 @@ export default defineComponent({
           }
         );
 
+        // Показываем предпросмотр пользователю
+        previewData.value = previewResponse.data;
+        processingStatus.value = "Создание курса на основе структуры...";
+
+        // Теперь создаем курс с полученной структурой
+        const response = await axios.post<CourseItem>(
+          "https://back.kktsback.tw1.ru/api/courses/",
+          previewData.value,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        // Правильно типизированный подсчет уроков
+        const lessonsCount = previewData.value.sections.reduce(
+          (total: number, section: CourseItemCourse) =>
+            total + section.content.length,
+          0
+        );
+
         processingResult.value = {
           error: false,
           message: "Курс успешно импортирован из PDF!",
-          courseId: response.data.course_id,
-          sectionsCount: response.data.sections_count,
-          lessonsCount: response.data.lessons_count,
+          courseId: response.data.id,
+          sectionsCount: previewData.value.sections.length,
+          lessonsCount: lessonsCount,
         };
 
         // Обновляем список курсов через API
-        await axios.get("http://localhost:8000/api/courses/");
+        await axios.get("https://back.kktsback.tw1.ru/api/courses/");
 
         // Оповещаем родительский компонент о завершении импорта
-        emit("import-complete", response.data.course_id);
-      } catch (error: any) {
+        emit("import-complete", response.data.id);
+      } catch (error: unknown) {
         console.error("Ошибка при импорте PDF:", error);
+
+        // Правильная обработка ошибки с типизацией
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : (error as any)?.response?.data?.detail ?? "Неизвестная ошибка";
+
         processingResult.value = {
           error: true,
-          message: `Ошибка при импорте: ${
-            error.response?.data?.detail ||
-            error.message ||
-            "Неизвестная ошибка"
-          }`,
+          message: `Ошибка при импорте: ${errorMessage}`,
         };
       } finally {
         isProcessing.value = false;
       }
     };
-
     return {
       fileInput,
       selectedFile,

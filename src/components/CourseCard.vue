@@ -19,7 +19,7 @@
     </div>
     <img
       class="courseCardes__img"
-      :src="`http://195.133.50.207/${course.icon}`"
+      :src="`https://back.kktsback.tw1.ru/${course.icon}`"
       alt="Course icon"
     />
     <div class="courseCardes__info">
@@ -52,7 +52,7 @@ export default defineComponent({
     },
     getIconSrc() {
       try {
-        return require(`http://195.133.50.207/${this.course.icon}`);
+        return require(`https://back.kktsback.tw1.ru/${this.course.icon}`);
       } catch (error) {
         console.error(`Иконка ${this.course.icon} не найдена:`, error);
         return "";

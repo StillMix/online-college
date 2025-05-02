@@ -125,7 +125,7 @@
             >
               <img
                 class="courseVib__content__type__img"
-                :src="`http://195.133.50.207/${courseVib.icon}`"
+                :src="`https://back.kktsback.tw1.ru/${courseVib.icon}`"
                 alt="Course type icon"
               />
             </div>

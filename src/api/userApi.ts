@@ -9,7 +9,7 @@ export const createUser = async (
 ): Promise<UserData> => {
   try {
     const response = await axios.post(
-      "http://195.133.50.207/api/users/",
+      "https://back.kktsback.tw1.ru/api/users/",
       userData
     );
     return response.data;
@@ -25,7 +25,7 @@ export const createUser = async (
 export const sendVerificationCode = async (email: string): Promise<any> => {
   try {
     const response = await axios.post(
-      `http://195.133.50.207/api/users/send_verification_code/`,
+      `https://back.kktsback.tw1.ru/api/users/send_verification_code/`,
       {
         email: email,
       }
@@ -57,7 +57,7 @@ export const confirmEmail = async (userData: {
 }): Promise<any> => {
   try {
     const response = await axios.post(
-      `http://195.133.50.207/api/users/confirm_email/`,
+      `https://back.kktsback.tw1.ru/api/users/confirm_email/`,
       userData
     );
     return response.data;
@@ -76,7 +76,7 @@ export const updateUser = async (
 ): Promise<UserData> => {
   try {
     const response = await axios.put(
-      `http://195.133.50.207/api/users/${userId}`,
+      `https://back.kktsback.tw1.ru/api/users/${userId}`,
       userData
     );
     return response.data;
@@ -91,7 +91,7 @@ export const updateUser = async (
  */
 export const getAllUsers = async (): Promise<UserData[]> => {
   try {
-    const response = await axios.get("http://195.133.50.207/api/users/");
+    const response = await axios.get("https://back.kktsback.tw1.ru/api/users/");
     return response.data;
   } catch (error) {
     console.error("Ошибка при получении списка пользователей:", error);
@@ -107,7 +107,7 @@ export const deleteUser = async (
 ): Promise<{ message: string }> => {
   try {
     const response = await axios.delete(
-      `http://195.133.50.207/api/users/${userId}/`
+      `https://back.kktsback.tw1.ru/api/users/${userId}/`
     );
     return response.data;
   } catch (error) {
@@ -125,7 +125,7 @@ export const addUserCourse = async (
 ): Promise<{ message: string }> => {
   try {
     const response = await axios.post(
-      `http://195.133.50.207/api/users/course`,
+      `https://back.kktsback.tw1.ru/api/users/course`,
       {
         user_id: userId,
         course_id: courseId,
@@ -147,7 +147,7 @@ export const completeLesson = async (
 ): Promise<{ message: string }> => {
   try {
     const response = await axios.post(
-      `http://195.133.50.207/api/users/lesson/complete/`,
+      `https://back.kktsback.tw1.ru/api/users/lesson/complete/`,
       {
         user_id: userId,
         lesson_id: lessonId,
@@ -172,7 +172,7 @@ export const uploadAvatar = async (
     formData.append("avatar", file);
 
     const response = await axios.post(
-      `http://195.133.50.207/api/users/${userId}/avatar`,
+      `https://back.kktsback.tw1.ru/api/users/${userId}/avatar`,
       formData,
       {
         headers: {
