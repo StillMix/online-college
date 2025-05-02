@@ -1,16 +1,32 @@
+<!-- Обновленная часть в src/components/CourseControl.vue -->
 <template>
   <div class="course-control">
     <div class="course-control__actions">
-      <AppButton
-        :styleOverrides="{
-          width: '11.177vw',
-          backgroundColor: 'white',
-          color: 'black',
-        }"
-        @click="toggleCourse(true)"
-      >
-        Создать новый курс
-      </AppButton>
+      <div class="course-control__buttons">
+        <AppButton
+          :styleOverrides="{
+            width: '11.177vw',
+            backgroundColor: 'white',
+            color: 'black',
+          }"
+          @click="toggleCourse(true)"
+        >
+          Создать новый курс
+        </AppButton>
+
+        <AppButton
+          :styleOverrides="{
+            width: '11.177vw',
+            backgroundColor: '#08dccf',
+            color: 'black',
+            marginLeft: '10px',
+          }"
+          @click="toggleImportPdf"
+        >
+          Импорт из PDF
+        </AppButton>
+      </div>
+
       <div class="course-control__actions__cards">
         <CourseRedElement
           @click="toggleCourse(false, item)"
@@ -19,11 +35,18 @@
           :course="item"
         />
       </div>
+
       <CoursePopupRed
         v-if="redCourseOpen"
         :edit="edit"
         :elemRed="itemRed"
         @click="toggleCourse"
+      />
+
+      <CourseImportPdf
+        v-if="showImportPdf"
+        @close="showImportPdf = false"
+        @import-complete="handleImportComplete"
       />
     </div>
   </div>
@@ -35,6 +58,7 @@ import { AppButton } from "./UI";
 import { CourseItem } from "@/types";
 import CoursePopupRed from "./CourseControlComponents/CoursePopupRed.vue";
 import CourseRedElement from "./CourseControlComponents/CourseRedElement.vue";
+import CourseImportPdf from "./CourseControlComponents/CourseImportPdf.vue";
 
 export default defineComponent({
   name: "CourseControl",
@@ -42,22 +66,36 @@ export default defineComponent({
     AppButton,
     CoursePopupRed,
     CourseRedElement,
+    CourseImportPdf,
   },
   setup() {
     const redCourseOpen = ref(false);
     const edit = ref(false);
-    const itemRed = ref<CourseItem | undefined>(undefined); // Изменен тип на CourseItem | undefined
+    const itemRed = ref<CourseItem | undefined>(undefined);
     const parsedCourseData = ref<CourseItem[]>([]);
+    const showImportPdf = ref(false);
+
     const toggleCourse = (isEdit = false, item?: CourseItem) => {
       redCourseOpen.value = !redCourseOpen.value;
       edit.value = isEdit;
 
       if (!isEdit) {
-        itemRed.value = item; // Если item нет, оставляем undefined
+        itemRed.value = item;
       }
     };
 
-    onMounted(() => {
+    const toggleImportPdf = () => {
+      showImportPdf.value = !showImportPdf.value;
+      redCourseOpen.value = false;
+    };
+
+    const handleImportComplete = async (courseId: string) => {
+      // Обновляем список курсов при успешном импорте
+      await loadCourses();
+      showImportPdf.value = false;
+    };
+
+    const loadCourses = async () => {
       const courseDataStr = localStorage.getItem("courseData");
       if (courseDataStr) {
         try {
@@ -68,15 +106,22 @@ export default defineComponent({
         }
       } else {
         console.warn("Данные курсов не найдены в localStorage");
-        // Можно добавить тестовые данные, если нужно
       }
+    };
+
+    onMounted(() => {
+      loadCourses();
     });
+
     return {
       redCourseOpen,
       edit,
       itemRed,
       toggleCourse,
       parsedCourseData,
+      showImportPdf,
+      toggleImportPdf,
+      handleImportComplete,
     };
   },
 });
@@ -88,5 +133,11 @@ export default defineComponent({
   flex-direction: column;
   margin-top: 10px;
   gap: 10px;
+}
+
+.course-control__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.521vw;
 }
 </style>
